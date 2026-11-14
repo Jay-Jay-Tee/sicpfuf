@@ -334,9 +334,10 @@ class Interpreter:
     def make_closure(self, node, env, name, is_lambda):
         """A function VALUE = the code + the environment it was created in."""
         params = node.params
+        library = self.loading_library or node.lib
         closure = Closure(node, env, name, [p.name for p in params.args], params.vararg,
-                          is_lambda, node.scope, self.loading_library)
-        if not self.loading_library:
+                          is_lambda, node.scope, library)
+        if not library:
             self.closure_count += 1
             closure.serial = self.closure_count
         return closure

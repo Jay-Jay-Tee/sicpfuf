@@ -38,14 +38,15 @@ class Closure:
 
 class Builtin:
     """A library function implemented in Python (pair, head, print, math_sqrt, ...)."""
-    __slots__ = ("name", "fn", "min_args", "max_args", "needs_interp")
+    __slots__ = ("name", "fn", "min_args", "max_args", "needs_interp", "label")
 
-    def __init__(self, name, fn, min_args=0, max_args=None, needs_interp=False):
+    def __init__(self, name, fn, min_args=0, max_args=None, needs_interp=False, label=None):
         self.name, self.fn, self.min_args, self.max_args = name, fn, min_args, max_args
         self.needs_interp = needs_interp        # fn(interp, node, *args) instead of fn(*args)
+        self.label = label                      # (the stepper uses this to stand in for your functions)
 
     def __repr__(self):
-        return f"<built-in function {self.name}>"
+        return self.label or f"<built-in function {self.name}>"
 
 
 class TailCall:

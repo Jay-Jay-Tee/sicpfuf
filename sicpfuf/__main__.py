@@ -7,6 +7,7 @@ sicpfuf/__main__.py — the command line.
 
     x-ray flags
       --subst          show the SUBSTITUTION MODEL, step by step        (§1 and §2)
+      --estep          show the ENVIRONMENT MODEL, step by step         (the "e-stepper")
       --trace NAMES    draw the call tree of these functions            (--trace fib,helper)
       --env            draw the ENVIRONMENT DIAGRAM when the program ends
       --steps          report time (steps, calls) and space (calls waiting at once)
@@ -83,7 +84,11 @@ def format_error(interp, e, filename):
 
 def run_program(source, filename, args):
     chapter = chapter_of(source, args.chapter)
-    interp = Interpreter(chapter, typed=args.typed)
+    if args.estep:
+        from .xray.estepper import EnvStepper
+        interp = EnvStepper(chapter, typed=args.typed)
+    else:
+        interp = Interpreter(chapter, typed=args.typed)
     interp.out_dir = args.out
     code = 0
     try:
@@ -125,6 +130,7 @@ def main(argv=None):
                     help="which Python § to run (default: 4, or the file's `# chapter N` line)")
     ap.add_argument("--subst", action="store_true", help="show the substitution model step by step")
     ap.add_argument("--max-steps", type=int, default=400, help="--subst: stop after this many steps")
+    ap.add_argument("--estep", action="store_true", help="show the environment model step by step")
     ap.add_argument("--trace", metavar="NAMES", help="draw the call tree of these functions (comma separated)")
     ap.add_argument("--env", action="store_true", help="draw the environment diagram at the end")
     ap.add_argument("--steps", action="store_true", help="report steps, calls and space used")
