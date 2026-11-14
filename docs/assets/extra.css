@@ -1,0 +1,25 @@
+/* Output blocks: a left bar, so "what the program printed" stands apart from the program */
+.md-typeset .highlight:has(> .filename) { border-left: 3px solid var(--md-accent-fg-color); }
+.md-typeset h1 { font-weight: 700; }
+.md-typeset .chapter-goal { font-size: 1.05em; opacity: .9; }
+
+/* Diagrams are drawn on white; give them a frame so they also work in dark mode */
+.md-typeset img[src$=".svg"] { background: #fff; border: 1px solid var(--md-default-fg-color--lightest);
+                                border-radius: 6px; padding: 4px; max-width: 100%; height: auto; }
+
+/* Exam papers */
+.md-typeset .marks { float: right; font-size: .8em; font-weight: 700; color: var(--md-accent-fg-color); }
+.md-typeset .exam-info { border: 1px solid var(--md-default-fg-color--lighter); border-radius: 6px; padding: .6em 1em; }
+
+/* The exam timer (exam mode page and mock papers) */
+#exam-timer { position: sticky; top: 3.2rem; z-index: 3; display: flex; gap: .6em; align-items: center;
+              flex-wrap: wrap; background: var(--md-default-bg-color);
+              border: 1px solid var(--md-default-fg-color--lighter); border-radius: 6px;
+              padding: .45em .8em; margin: .5em 0 1em; font-size: .8rem; }
+#exam-timer .time { font-family: var(--md-code-font-family); font-size: 1.25rem; font-weight: 700; min-width: 5.5ch; }
+#exam-timer.late .time { color: #d32f2f; }
+#exam-timer button { cursor: pointer; border: 1px solid var(--md-default-fg-color--lighter); border-radius: 4px;
+                     padding: .2em .7em; background: transparent; color: inherit; font: inherit; }
+#exam-timer button:hover { border-color: var(--md-accent-fg-color); }
+body.exam-running .md-typeset details.solution { display: none; }
+@media print { #exam-timer { display: none; } }

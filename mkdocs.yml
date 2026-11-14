@@ -1,0 +1,73 @@
+site_name: sicpfuf
+site_url: https://jay-jay-tee.github.io/sicpfuf/
+site_description: SICP in Python, with x-ray vision. A finals kit, drills, an easy textbook and a tiny interpreter for Python §1–§4 that shows you the substitution model and the environment model step by step.
+site_author: Jay-Jay-Tee
+repo_url: https://github.com/Jay-Jay-Tee/sicpfuf
+repo_name: Jay-Jay-Tee/sicpfuf
+edit_uri: edit/main/docs/
+copyright: sicpfuf is an unofficial study companion, MIT licensed. Not affiliated with the SICPy authors, Source Academy or any university.
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - navigation.tabs
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/magnify-scan
+  favicon: assets/favicon.svg
+
+extra_css:
+  - assets/extra.css
+extra_javascript:
+  - assets/exam-timer.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - def_list
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md

@@ -1,0 +1,14 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # sicpfuf is written for Python 3.9 and later; test on the oldest one.
+    container: python:3.9-slim
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/run_tests.py

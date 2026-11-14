@@ -146,7 +146,8 @@ def make(interp):
         if getattr(interp_, "out_dir", None):
             samples = [s.wave(i / RATE) for i in range(int(math.ceil(RATE * s.duration)))]
             path = save_figure(interp_, "sound", "wav", to_wav_bytes(samples), binary=True)
-            interp_.write(f"[saved {path}]\n")
+            if not getattr(interp_, "out_stem", None):
+                interp_.write(f"[saved {path}]\n")
         return s
 
     def play_wave(interp_, node, w, duration):

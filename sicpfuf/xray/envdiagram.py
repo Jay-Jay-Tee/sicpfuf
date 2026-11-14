@@ -175,4 +175,11 @@ class Snapshot:
 
 
 def show(interp, node=None, label=None):
-    interp.write(Snapshot(interp).render(label) + "\n")
+    snapshot = Snapshot(interp)
+    interp.write(snapshot.render(label) + "\n")
+    if getattr(interp, "out_dir", None):             # with --out FOLDER: also save a picture
+        from . import svg
+        from ..modules.rune_module import save_figure
+        name = save_figure(interp, "env", "svg", svg.environment(snapshot, label))
+        if not getattr(interp, "out_stem", None):
+            interp.write(f"[saved {name}]\n")

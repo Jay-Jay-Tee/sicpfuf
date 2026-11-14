@@ -13,6 +13,8 @@ sicpfuf test runner.
   tests/xray/*.py        programs that use sicpfuf-only tools (first line: # args: ...).
                          Output must match the .expected file next to them.
 
+  examples/*.py          must run without an error (with --oracle: and print what py-slang prints).
+
   docs/**/*.md           every code block in the book and the finals kit is run
                          (tests/check_docs.py).
 
@@ -169,6 +171,25 @@ def main():
                 print(f"FAIL  {name}")
                 print("".join(difflib.unified_diff(open(exp_path, encoding="utf-8").read().splitlines(True),
                                                    got.splitlines(True), "expected", "got")))
+        for path in sorted(glob.glob(os.path.join(ROOT, "examples", "*.py"))):
+            name = os.path.relpath(path, ROOT)
+            code, out, err = run(SICPFUF + [name])          # (each file says `# chapter N` on line 1)
+            text = open(path, encoding="utf-8").read()
+            if code != 0:
+                failed += 1
+                print(f"FAIL  {name}\n{err}")
+            elif live and "# sicpfuf-only" not in text:
+                chapter = re.match(r"#\s*chapter\s*([1-4])", text)
+                _, want, _ = run(["node", ORACLE, path, "-v", chapter.group(1) if chapter else "4"])
+                if want == out:
+                    passed += 1
+                else:
+                    failed += 1
+                    print(f"FAIL  {name}: output differs from py-slang\n"
+                          + "".join(difflib.unified_diff(want.splitlines(True), out.splitlines(True),
+                                                         "py-slang", "sicpfuf")))
+            else:
+                passed += 1
         checker = os.path.join(ROOT, "tests", "check_docs.py")
         if os.path.exists(checker):
             code, out, err = run([sys.executable, checker], timeout=1800)

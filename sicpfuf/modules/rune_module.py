@@ -330,7 +330,7 @@ def make(interp):
         need_rune("show", rune)
         interp_.write(to_text(rune) + "\n")
         path = save_figure(interp_, "rune", "svg", to_svg(rune))
-        if path:
+        if path and not getattr(interp_, "out_stem", None):
             interp_.write(f"[saved {path}]\n")
         return rune
 

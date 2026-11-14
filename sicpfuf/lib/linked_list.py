@@ -59,6 +59,12 @@ def make(interp):
         from ..xray import boxpointer
         for x in xs:
             interp_.write(boxpointer.draw(x) + "\n")
+            if getattr(interp_, "out_dir", None):    # with --out FOLDER: also save a picture
+                from ..xray import svg
+                from ..modules.rune_module import save_figure
+                name = save_figure(interp_, "data", "svg", svg.box_pointer(x))
+                if not getattr(interp_, "out_stem", None):
+                    interp_.write(f"[saved {name}]\n")
         return xs[0]
 
     return {

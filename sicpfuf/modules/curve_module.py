@@ -240,7 +240,7 @@ def make(interp):
                 placed = place(flat, mode)
                 interp_.write(to_text(placed, lines) + "\n")
                 path = save_figure(interp_, "curve", "svg", to_svg(placed, [p.colour for p in points], lines))
-                if path:
+                if path and not getattr(interp_, "out_stem", None):
                     interp_.write(f"[saved {path}]\n")
                 return None
             return builtin("renderer", render, 1, -1, True)

@@ -15,6 +15,7 @@ sicpfuf/__main__.py — the command line.
       --ast            show the parser's tree and stop
       --typed          check the type annotations first                 (Python §4 Typed)
       --out FOLDER     save the pictures and sounds the program makes   (rune, curve, sound)
+      --with FILE      run FILE first, then the program                 (--with examples/mce.py)
 
 A program can also choose its own chapter with a first line like   # chapter 2
 
@@ -83,6 +84,22 @@ def format_error(interp, e, filename):
     return f"{type(e).__name__}: {e}"
 
 
+def load_prelude(interp, path):
+    """--with FILE: run FILE first (up to its `# DEMO` line), so the program can build on it.
+    Used for "here is the evaluator; now change one function" exercises."""
+    from .interpreter import mark_library
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if line.startswith("# DEMO"):
+            lines = lines[:i]
+            break
+    tree = interp.load_source("\n".join(lines) + "\n", path)
+    mark_library(tree)                      # errors are reported at the line of YOUR program
+    interp.run_tree(tree)
+
+
 def run_program(source, filename, args):
     chapter = chapter_of(source, args.chapter)
     if args.estep:
@@ -94,6 +111,8 @@ def run_program(source, filename, args):
     interp.out_stem = args.stem
     code = 0
     try:
+        if args.prelude:
+            load_prelude(interp, args.prelude)
         tree = interp.load_source(source, filename)
         if args.typed:
             from .xray import typecheck
@@ -141,6 +160,8 @@ def main(argv=None):
     ap.add_argument("--typed", action="store_true", help="check type annotations first (Python §4 Typed)")
     ap.add_argument("--out", default=None, metavar="FOLDER",
                     help="save pictures (SVG) and sounds (WAV) made by show / draw_connected / play here")
+    ap.add_argument("--with", dest="prelude", metavar="FILE", default=None,
+                    help="run FILE first (up to its `# DEMO` line), then the program")
     ap.add_argument("--stem", default=None, help=argparse.SUPPRESS)     # file name prefix for --out
     args = ap.parse_args(argv)
 

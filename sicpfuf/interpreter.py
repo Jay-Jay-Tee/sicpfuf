@@ -147,7 +147,8 @@ class Interpreter:
         """text → checked tree. Raises SicpSyntaxError if it is not a valid program."""
         self.sources[filename] = source.replace("\r\n", "\n").split("\n")
         tree = parse(source, filename)
-        check_program(tree, self.chapter, self.lib.names(self), self.lib.module_exports(),
+        known = self.lib.names(self) | set(self.program_env.vars)      # (names from --with FILE count too)
+        check_program(tree, self.chapter, known, self.lib.module_exports(),
                       filename, self.typed, self.lib.later_names(self.chapter))
         return tree
 
