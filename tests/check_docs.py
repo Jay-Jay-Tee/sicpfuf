@@ -201,6 +201,8 @@ def main():
             full = 'title="Output"' in info
             shown = body(lines, job["expect"])
             got = expected_text(out, err, full)
+            got = got.rstrip("\n") + "\n" if got.strip("\n") else ""     # (trailing blank lines don't count)
+            shown = shown.rstrip("\n") + "\n" if shown.strip("\n") else ""
             if got != shown:
                 if fill:
                     lines[start + 1:end] = [(indent + l) if l else l for l in got.rstrip("\n").split("\n")] \
