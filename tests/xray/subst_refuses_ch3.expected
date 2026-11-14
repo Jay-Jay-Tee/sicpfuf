@@ -1,0 +1,5 @@
+--- stderr ---
+SyntaxError at line 1
+    # args: -v 3 --subst
+SyntaxError: the substitution model only works for Python §1 and §2
+sicpfuf hint: from §3 on, names can be REASSIGNED, so a name can no longer be replaced by its value. Run with -v 1 or -v 2, or use --estep to step through the environment model instead.

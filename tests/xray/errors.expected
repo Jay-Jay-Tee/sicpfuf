@@ -1,0 +1,9 @@
+start
+--- stderr ---
+TypeError at line 3
+    return head(xs) + total(tail(xs))
+TypeError: head(xs) expects a pair as argument xs, but encountered None
+  in total, called from line 3: return head(xs) + total(tail(xs))  (x2)
+  in total, called from line 6: return total(xs) / length(xs)
+  in average, called from line 9: print(average(llist(4, 8)))
+sicpfuf hint: you took the head or tail of None, the EMPTY linked list. The usual cause is a missing base case: check `is_none(xs)` before `head(xs)` / `tail(xs)`.

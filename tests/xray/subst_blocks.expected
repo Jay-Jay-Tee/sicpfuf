@@ -1,0 +1,35 @@
+size = 3
+
+side = hypotenuse(size, 4)
+-> side = hypotenuse(3, 4)
+-> side = { def square(x): ...; total = square(3) + square(4); error('impossible') if total < 0 else math_sqrt(total) }
+-> side = { total = 3 * 3 + square(4); error('impossible') if total < 0 else math_sqrt(total) }
+-> side = { total = 9 + square(4); error('impossible') if total < 0 else math_sqrt(total) }
+-> side = { total = 9 + 4 * 4; error('impossible') if total < 0 else math_sqrt(total) }
+-> side = { total = 9 + 16; error('impossible') if total < 0 else math_sqrt(total) }
+-> side = { total = 25; error('impossible') if total < 0 else math_sqrt(total) }
+-> side = error('impossible') if 25 < 0 else math_sqrt(25)
+-> side = error('impossible') if False else math_sqrt(25)
+-> side = math_sqrt(25)
+-> side = 5.0
+
+add_side = make_adder(side)
+-> add_side = make_adder(5.0)
+-> add_side = lambda y: 5.0 + y
+
+add_side(1)
+-> (lambda y: 5.0 + y)(1)
+-> 5.0 + 1
+-> 6.0
+
+map(make_adder(10), llist(1, 2))
+-> map(lambda y: 10 + y, llist(1, 2))
+-> map(lambda y: 10 + y, [1, [2, None]])
+-> [11, [12, None]]
+
+True and (False or size > 2)
+-> False or size > 2
+-> size > 2
+-> 3 > 2
+-> True
+

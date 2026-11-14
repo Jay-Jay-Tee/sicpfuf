@@ -1,0 +1,23 @@
+   2:1    KEYWORD  'def'
+   2:5    NAME     'square'
+   2:11   OP       '('
+   2:12   NAME     'x'
+   2:13   OP       ')'
+   2:14   OP       ':'
+   2:15   NEWLINE  
+   3:1    INDENT   
+   3:5      KEYWORD  'return'
+   3:12     NAME     'x'
+   3:14     OP       '*'
+   3:16     NAME     'x'
+   3:17     NEWLINE  
+   4:1    DEDENT   
+   4:1    EOF      
+Module
+└─ body: FunctionDef  name='square'
+   ├─ params: Params
+   │  └─ args: Param  name='x'
+   └─ body: Return
+      └─ value: BinOp  op='*'
+         ├─ left: Name  id='x'
+         └─ right: Name  id='x'

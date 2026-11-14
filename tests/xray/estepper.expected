@@ -1,0 +1,31 @@
+Assigned x = 10 in the global frame
+Defined make_counter: function object fn#1, created in the global environment
+Called make_counter(): new frame E1, whose enclosing environment is the global environment (local names count, next: unassigned so far)
+Assigned count = 0 in frame E1
+Defined next: function object fn#2, created in environment E1
+Returned function object fn#2 from E1
+Assigned c = function object fn#2 in the global frame
+Called next(): the new frame would have no bindings, so the body runs in environment E1
+Looked up x: not in frame E1, found in the global frame: 10
+Assigned count = 10 in frame E1 (nonlocal)
+Returned 10 from E1
+    output: 10
+Called next(): the new frame would have no bindings, so the body runs in environment E1
+Looked up x: not in frame E1, found in the global frame: 10
+Assigned count = 20 in frame E1 (nonlocal)
+Returned 20 from E1
+    output: 20
+Defined loop: function object fn#3, created in the global environment
+Called loop(2, 0): new frame E2, whose enclosing environment is the global environment
+Looked up loop: not in frame E2, found in the global frame: function object fn#3
+Tail call loop(1, 2): new frame E3, whose enclosing environment is the global environment
+Looked up loop: not in frame E3, found in the global frame: function object fn#3
+Tail call loop(0, 3): new frame E4, whose enclosing environment is the global environment
+Returned 3 from E4
+Evaluated a lambda expression: function object fn#4, created in the global environment
+Assigned square = function object fn#4 in the global frame
+Called (anonymous)(1): new frame E5, whose enclosing environment is the global environment
+Returned 1 from E5
+Called (anonymous)(2): new frame E6, whose enclosing environment is the global environment
+Returned 4 from E6
+Assigned ys = [1, [4, None]] in the global frame

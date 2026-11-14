@@ -14,6 +14,7 @@ sicpfuf/__main__.py — the command line.
       --tokens         show the lexer's output and stop
       --ast            show the parser's tree and stop
       --typed          check the type annotations first                 (Python §4 Typed)
+      --out FOLDER     save the pictures and sounds the program makes   (rune, curve, sound)
 
 A program can also choose its own chapter with a first line like   # chapter 2
 
@@ -90,6 +91,7 @@ def run_program(source, filename, args):
     else:
         interp = Interpreter(chapter, typed=args.typed)
     interp.out_dir = args.out
+    interp.out_stem = args.stem
     code = 0
     try:
         tree = interp.load_source(source, filename)
@@ -137,7 +139,9 @@ def main(argv=None):
     ap.add_argument("--tokens", action="store_true", help="print the token stream and stop")
     ap.add_argument("--ast", action="store_true", help="print the syntax tree and stop")
     ap.add_argument("--typed", action="store_true", help="check type annotations first (Python §4 Typed)")
-    ap.add_argument("--out", default=".", help="folder for pictures and sounds (default: here)")
+    ap.add_argument("--out", default=None, metavar="FOLDER",
+                    help="save pictures (SVG) and sounds (WAV) made by show / draw_connected / play here")
+    ap.add_argument("--stem", default=None, help=argparse.SUPPRESS)     # file name prefix for --out
     args = ap.parse_args(argv)
 
     if args.code is None and args.file is None:

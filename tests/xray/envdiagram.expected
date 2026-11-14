@@ -1,0 +1,67 @@
+-- environment diagram: inside withdraw(30) --
+global env
+    make_withdraw: fn#1
+    w1: fn#2
+    w2: fn#3
+E1: make_withdraw(100)        enclosing environment: global env
+    balance: 70
+    withdraw: fn#2
+E2: make_withdraw(100)        enclosing environment: global env
+    balance: 100
+    withdraw: fn#3
+E3: withdraw(30)              enclosing environment: E1    <-- current environment
+    amount: 30
+function objects
+    fn#1   parameters: balance   body: line 2  def make_withdraw(balance):   environment: global env
+    fn#2   parameters: amount    body: line 3  def withdraw(amount):         environment: E1
+    fn#3   parameters: amount    body: line 3  def withdraw(amount):         environment: E2
+-- environment diagram: deepest point of factorial(3) --
+global env
+    make_withdraw: fn#1
+    w1: fn#2
+    w2: fn#3
+    factorial: fn#4
+E1: make_withdraw(100)        enclosing environment: global env
+    balance: 70
+    withdraw: fn#2
+E2: make_withdraw(100)        enclosing environment: global env
+    balance: 100
+    withdraw: fn#3
+E4: factorial(3)              enclosing environment: global env    (waiting)
+    n: 3
+    result: (unassigned)
+E5: factorial(2)              enclosing environment: global env    (waiting)
+    n: 2
+    result: (unassigned)
+E6: factorial(1)              enclosing environment: global env    <-- current environment
+    n: 1
+    result: (unassigned)
+function objects
+    fn#1   parameters: balance   body: line 2  def make_withdraw(balance):   environment: global env
+    fn#2   parameters: amount    body: line 3  def withdraw(amount):         environment: E1
+    fn#3   parameters: amount    body: line 3  def withdraw(amount):         environment: E2
+    fn#4   parameters: n         body: line 17  def factorial(n):            environment: global env
+-- environment diagram: end of program --
+global env    <-- current environment
+    make_withdraw: fn#1
+    w1: fn#2
+    w2: fn#3
+    factorial: fn#4
+    xs: @1 [1, [2, None]]
+    ys: @1 [1, [2, None]]
+    zs: [1, [2, None]]
+    counter: 1
+    bump: fn#5
+E1: make_withdraw(100)        enclosing environment: global env
+    balance: 70
+    withdraw: fn#2
+E2: make_withdraw(100)        enclosing environment: global env
+    balance: 100
+    withdraw: fn#3
+function objects
+    fn#1   parameters: balance   body: line 2  def make_withdraw(balance):   environment: global env
+    fn#2   parameters: amount    body: line 3  def withdraw(amount):         environment: E1
+    fn#3   parameters: amount    body: line 3  def withdraw(amount):         environment: E2
+    fn#4   parameters: n         body: line 17  def factorial(n):            environment: global env
+    fn#5   parameters: (none)    body: line 31  def bump():                  environment: global env
+(the same @number means the SAME object: `is` would say True)
