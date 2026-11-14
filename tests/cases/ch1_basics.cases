@@ -1,0 +1,210 @@
+#### arithmetic (§1)
+print(1 + 2 * 3, 7 / 2, 7 // 2, -7 // 2, 7 % 3, -7 % 3, 7 % -3, 2 ** 10, 2 ** -1, 2 ** 0.5)
+print(10 / 5, 3.0 * 2, 1e3, 1.5e16, 1e-5, 0.1 + 0.2, 123456789 * 987654321, 2 ** 100)
+print(5 // 2.0, 5.5 % 2, -7.5 % 2, 1 / 3, 1e16, 1e15, 0.0001, 0.00001, -0.0, 3.0)
+print(7 - -3, +5, -(3 + 4), - - 2, 2 ** 3 ** 2, (2 ** 3) ** 2, -2 ** 2)
+#### complex (§1)
+print(1j * 1j, (1 + 2j) * (3 - 1j), 2j + 1, abs(3 + 4j), (1 + 2j) / 2, 1 + 0j)
+#### strings (§1)
+print("abc" + "def", 'it' + "'s", "a" < "b", "abc" < "abd", "Z" < "a", "" < "a", "a" == "a", "a" != "b")
+print("hello", "world", 1, 2.5, True, None)
+print()
+print("tab\there", "quote\"d", 'single', "new\\nline")
+print(str(12) + "!", str(1.5), str(True), str(None), str("x"), repr("x"), repr(1), repr("it's"))
+#### booleans (§1)
+print(True and False, True or False, not True, not False, 1 < 2, 2 <= 2, 3 > 4, 3 >= 4, 1 == 1.0, 1 != 2)
+print(True and 1, False or "x", False and 1, True or 1, 1 < 2 and 2 < 3, not 1 < 2)
+print(True if 1 < 2 else False, 1 if True else 2, "a" if False else "b")
+#### names and functions (§1)
+size = 2
+area = size * size * math_pi
+def square(x):
+    return x * x
+def sum_of_squares(a, b):
+    return square(a) + square(b)
+print(size, area, square(5), sum_of_squares(3, 4), square(square(3)))
+print(square)
+#### conditional expression nesting (§1)
+def sign(x):
+    return 1 if x > 0 else 0 if x == 0 else -1
+print(sign(5), sign(0), sign(-3))
+#### conditional statement (§1)
+def describe(n):
+    if n < 0:
+        return "negative"
+    elif n == 0:
+        return "zero"
+    else:
+        return "positive"
+print(describe(-1), describe(0), describe(1))
+#### if without else falls through (§1)
+def f(x):
+    if x > 0:
+        return "pos"
+print(f(1), f(-1))
+#### function without return (§1)
+def f(x):
+    x + 1
+print(f(1))
+#### factorial two ways (§1)
+def factorial(n):
+    return 1 if n == 0 else n * factorial(n - 1)
+def fact_iter(product, counter, n):
+    return product if counter > n else fact_iter(counter * product, counter + 1, n)
+print(factorial(5), factorial(20), fact_iter(1, 1, 5), fact_iter(1, 1, 30))
+#### fib (§1)
+def fib(n):
+    return n if n <= 1 else fib(n - 1) + fib(n - 2)
+def fib_iter(a, b, count):
+    return b if count == 0 else fib_iter(a + b, a, count - 1)
+print(fib(15), fib_iter(1, 0, 15), fib_iter(1, 0, 100))
+#### tail recursion deep (§1)
+def loop(n, acc):
+    return acc if n == 0 else loop(n - 1, acc + n)
+print(loop(100000, 0))
+#### tail call through if statement (§1)
+def count(n, acc):
+    if n == 0:
+        return acc
+    else:
+        return count(n - 1, acc + 1)
+print(count(50000, 0))
+#### tail call through and or (§1)
+def all_pos(n):
+    return n == 0 or (n > 0 and all_pos(n - 1))
+print(all_pos(30000))
+#### mutual tail recursion (§1)
+def is_even(n):
+    return True if n == 0 else is_odd(n - 1)
+def is_odd(n):
+    return False if n == 0 else is_even(n - 1)
+print(is_even(20000), is_odd(20001))
+#### recursion depth ok (§1)
+def f(n):
+    return 0 if n == 0 else 1 + f(n - 1)
+print(f(1000))
+#### recursion depth 1023 (§1)
+def f(n):
+    return 0 if n == 0 else 1 + f(n - 1)
+print(f(1023))
+#### recursion depth 1024 fails (§1)
+def f(n):
+    return 0 if n == 0 else 1 + f(n - 1)
+print("before")
+print(f(1024))
+#### infinite recursion (§1)
+def f(n):
+    return 1 + f(n + 1)
+f(0)
+#### higher order (§1)
+def sum(term, a, next, b):
+    return 0 if a > b else term(a) + sum(term, next(a), next, b)
+def cube(x):
+    return x * x * x
+print(sum(cube, 1, lambda x: x + 1, 10), sum(lambda x: x, 1, lambda x: x + 2, 9))
+def make_adder(x):
+    return lambda y: x + y
+add4 = make_adder(4)
+print(add4(6), make_adder(1)(2), (lambda x, y: x * y)(3, 4), (lambda: 42)())
+def compose(f, g):
+    return lambda x: f(g(x))
+print(compose(lambda x: x + 1, lambda x: x * 2)(5))
+#### lambda printing (§1)
+f = lambda x: x
+def g(x):
+    return x
+print(f, g, print, math_sqrt, abs)
+#### nested functions and scope (§1)
+x = 10
+def outer(y):
+    def inner(z):
+        return x + y + z
+    return inner(3)
+print(outer(2))
+def shadow(x):
+    return x * 2
+print(shadow(4), x)
+def f():
+    x = 1
+    def g():
+        x = 2
+        return x
+    return g() + x
+print(f())
+#### local names in branches (§1)
+def f(n):
+    if n > 0:
+        y = n * 2
+        return y
+    else:
+        z = 0 - n
+        return z
+print(f(3), f(-3))
+#### math library (§1)
+print(math_sqrt(16), math_floor(3.7), math_ceil(3.2), math_pi, math_e, math_abs_missing_check if False else 1)
+#### math functions (§1)
+print(math_sqrt(2), math_floor(-3.5), math_ceil(-3.5), math_trunc(3.9), math_log(math_e), math_sin(0), math_cos(0))
+print(math_pow(2, 10), math_log2(8), math_log10(1000), math_exp(0), math_fabs(-2), math_atan2(1, 1), math_hypot_missing if False else 0)
+#### math more (§1)
+print(math_factorial(5), math_gcd(12, 18), math_isqrt(17), math_comb(5, 2), math_inf, -math_inf, math_nan, math_tau)
+print(math_isnan(math_nan), math_isinf(math_inf), math_isfinite(1.0), math_log(8, 2), math_degrees(math_pi), math_floor(2), math_sqrt(4))
+#### misc builtins (§1)
+print(abs(-3), abs(2.5), max(1, 5, 3), min(4, 2, 8), max("a", "b"), min(1.5, 2), round(2.5), round(3.5), round(2.567, 2), round(7))
+print(is_number(1), is_number(1.5), is_number("1"), is_number(True), is_string("a"), is_string(1), is_boolean(False), is_boolean(0))
+print(is_function(abs), is_function(lambda: 1), is_function(1), is_none(None), is_none(0), is_integer(1), is_integer(1.0), is_float(1.0), is_float(1))
+print(arity(abs), arity(lambda a, b: a), arity(max), arity(print), len("hello"), len(""))
+#### print returns none (§1)
+x = print("hi")
+print(x)
+#### comments and blank lines (§1)
+# a comment
+
+x = 1  # trailing
+
+def f():
+    # comment in body
+    return x
+
+print(f())
+#### docstring (§1)
+def f():
+    """A docstring."""
+    return 1
+print(f())
+#### multi line expressions (§1)
+total = (1 +
+         2 +
+         3)
+def f(a,
+      b):
+    return (a
+            if a > b
+            else b)
+print(total, f(1, 2))
+#### operators on equal precedence (§1)
+print(10 - 4 - 3, 100 / 10 / 5, 2 * 3 % 4, 7 - 2 * 3, (7 - 2) * 3, 1 + 2 == 3, not 1 == 2, 1 < 2 == True if False else 0)
+#### short circuit skips error (§1)
+def boom():
+    return 1 / 0
+print(False and boom(), True or boom())
+print(1 if True else boom())
+#### equality of mixed types (§1)
+print(1 == "1", "a" != 1, None == None, 1 == 1.0, None == 0, "" == None, 1.5 == 1.5, 2 == 2 + 0j)
+#### user shadows builtin (§1)
+def abs(x):
+    return 42
+print(abs(-1))
+max = 3
+print(max)
+#### semicolons (§1)
+a = 1; b = 2
+print(a + b)
+#### deep expression (§1)
+print(((((((((1 + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)
+#### big ints (§1)
+def power(b, e):
+    return 1 if e == 0 else b * power(b, e - 1)
+print(power(2, 200), power(3, 100) % 1000, 10 ** 20 // 3, 2 ** 64 - 1)
+#### float formatting (§1)
+print(1.0, 100.0, 1e21, 1e22, 123456789012345678.0, 0.1, 1/3, 2/3, 1e-7, 5e-324, 1.7976931348623157e308, 3.14e2)
+print(float_missing if False else 1, 4.0 / 2, 9 ** 0.5, 10 / 4, 10 // 4, 10.0 // 4, 1e100)

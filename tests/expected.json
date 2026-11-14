@@ -1,0 +1,1134 @@
+{
+ "ch1_basics/arithmetic": {
+  "error": "",
+  "stdout": "7 3.5 3 -4 1 2 -2 1024 0.5 1.4142135623730951\n2.0 6.0 1000.0 1.5e+16 1e-05 0.30000000000000004 121932631112635269 1267650600228229401496703205376\n2.0 1.5 0.5 0.3333333333333333 1e+16 1000000000000000.0 0.0001 1e-05 -0.0 3.0\n10 5 -7 2 512 64 -4\n"
+ },
+ "ch1_basics/big ints": {
+  "error": "",
+  "stdout": "1606938044258990275541962092341162602522202993782792835301376 1 33333333333333333333 18446744073709551615\n"
+ },
+ "ch1_basics/booleans": {
+  "error": "",
+  "stdout": "False True False True True True False False True True\n1 x False True True False\nTrue 1 b\n"
+ },
+ "ch1_basics/comments and blank lines": {
+  "error": "",
+  "stdout": "1\n"
+ },
+ "ch1_basics/complex": {
+  "error": "",
+  "stdout": "(-1+0j) (5+5j) (1+2j) 5.0 (0.5+1j) (1+0j)\n"
+ },
+ "ch1_basics/conditional expression nesting": {
+  "error": "",
+  "stdout": "1 0 -1\n"
+ },
+ "ch1_basics/conditional statement": {
+  "error": "",
+  "stdout": "negative zero positive\n"
+ },
+ "ch1_basics/deep expression": {
+  "error": "",
+  "stdout": "10\n"
+ },
+ "ch1_basics/docstring": {
+  "error": "",
+  "stdout": "1\n"
+ },
+ "ch1_basics/equality of mixed types": {
+  "error": "",
+  "stdout": "False True True True False False True True\n"
+ },
+ "ch1_basics/factorial two ways": {
+  "error": "",
+  "stdout": "120 2432902008176640000 120 265252859812191058636308480000000\n"
+ },
+ "ch1_basics/fib": {
+  "error": "",
+  "stdout": "610 610 354224848179261915075\n"
+ },
+ "ch1_basics/float formatting": {
+  "error": "NameNotFoundError@2",
+  "stdout": ""
+ },
+ "ch1_basics/function without return": {
+  "error": "",
+  "stdout": "None\n"
+ },
+ "ch1_basics/higher order": {
+  "error": "",
+  "stdout": "3025 25\n10 3 12 42\n11\n"
+ },
+ "ch1_basics/if without else falls through": {
+  "error": "",
+  "stdout": "pos None\n"
+ },
+ "ch1_basics/infinite recursion": {
+  "error": "RecursionError@2",
+  "stdout": ""
+ },
+ "ch1_basics/lambda printing": {
+  "error": "",
+  "stdout": "<function (anonymous)> <function g> <built-in function print> <built-in function math_sqrt> <built-in function abs>\n"
+ },
+ "ch1_basics/local names in branches": {
+  "error": "",
+  "stdout": "6 3\n"
+ },
+ "ch1_basics/math functions": {
+  "error": "NameNotFoundError@2",
+  "stdout": ""
+ },
+ "ch1_basics/math library": {
+  "error": "NameNotFoundError@1",
+  "stdout": ""
+ },
+ "ch1_basics/math more": {
+  "error": "",
+  "stdout": "120 6 4 10 inf -inf nan 6.283185307179586\nTrue True True 3.0 180.0 2 2.0\n"
+ },
+ "ch1_basics/misc builtins": {
+  "error": "",
+  "stdout": "3 2.5 5 2 b 1.5 2 4 2.57 7\nTrue True False False True False True False\nTrue True False True False True False True False\n1 2 2 0 5 0\n"
+ },
+ "ch1_basics/multi line expressions": {
+  "error": "",
+  "stdout": "6 2\n"
+ },
+ "ch1_basics/mutual tail recursion": {
+  "error": "",
+  "stdout": "True True\n"
+ },
+ "ch1_basics/names and functions": {
+  "error": "",
+  "stdout": "2 12.566370614359172 25 25 81\n<function square>\n"
+ },
+ "ch1_basics/nested functions and scope": {
+  "error": "",
+  "stdout": "15\n8 10\n3\n"
+ },
+ "ch1_basics/operators on equal precedence": {
+  "error": "Feature: chained comparisons (a < b < c)@1",
+  "stdout": ""
+ },
+ "ch1_basics/print returns none": {
+  "error": "",
+  "stdout": "hi\nNone\n"
+ },
+ "ch1_basics/recursion depth 1023": {
+  "error": "",
+  "stdout": "1023\n"
+ },
+ "ch1_basics/recursion depth 1024 fails": {
+  "error": "RecursionError@2",
+  "stdout": "before\n"
+ },
+ "ch1_basics/recursion depth ok": {
+  "error": "",
+  "stdout": "1000\n"
+ },
+ "ch1_basics/semicolons": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_basics/short circuit skips error": {
+  "error": "",
+  "stdout": "False True\n1\n"
+ },
+ "ch1_basics/strings": {
+  "error": "",
+  "stdout": "abcdef it's True True True True True True\nhello world 1 2.5 True None\n\ntab\there quote\"d single new\\nline\n12! 1.5 True None x 'x' 1 \"it's\"\n"
+ },
+ "ch1_basics/tail call through and or": {
+  "error": "",
+  "stdout": "True\n"
+ },
+ "ch1_basics/tail call through if statement": {
+  "error": "",
+  "stdout": "50000\n"
+ },
+ "ch1_basics/tail recursion deep": {
+  "error": "",
+  "stdout": "5000050000\n"
+ },
+ "ch1_basics/user shadows builtin": {
+  "error": "",
+  "stdout": "42\n3\n"
+ },
+ "ch1_errors/and left int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/and middle int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/attribute access": {
+  "error": "Feature: attribute access (a.b)@2",
+  "stdout": ""
+ },
+ "ch1_errors/augmented assignment": {
+  "error": "Feature: augmented assignment (+=)@2",
+  "stdout": ""
+ },
+ "ch1_errors/bitwise": {
+  "error": "Feature: bitwise operators (&)@1",
+  "stdout": ""
+ },
+ "ch1_errors/bool plus bool": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/bool plus int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/break ch1": {
+  "error": "Feature: break statements@1",
+  "stdout": ""
+ },
+ "ch1_errors/builtin arity": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/builtin arity too few": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/builtin type error": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/call non function": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch1_errors/call none": {
+  "error": "TypeError@3",
+  "stdout": ""
+ },
+ "ch1_errors/chained assignment": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_errors/chained comparison": {
+  "error": "Feature: chained comparisons (a < b < c)@1",
+  "stdout": ""
+ },
+ "ch1_errors/class": {
+  "error": "Feature: classes@1",
+  "stdout": ""
+ },
+ "ch1_errors/compare bools": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/compare none": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/compare str int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/conditional expression condition int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/decorator": {
+  "error": "Feature: decorators@3",
+  "stdout": ""
+ },
+ "ch1_errors/def then assign": {
+  "error": "NameReassignmentError@3",
+  "stdout": ""
+ },
+ "ch1_errors/default parameter": {
+  "error": "Feature: default values of parameters (name=value)@1",
+  "stdout": ""
+ },
+ "ch1_errors/del": {
+  "error": "Feature: del statements@2",
+  "stdout": ""
+ },
+ "ch1_errors/dict": {
+  "error": "Feature: dictionaries@1",
+  "stdout": ""
+ },
+ "ch1_errors/equality bool bool": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/equality builtin function": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/equality on bools": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/equality on functions": {
+  "error": "TypeError@3",
+  "stdout": ""
+ },
+ "ch1_errors/error after output": {
+  "error": "ZeroDivisionError@3",
+  "stdout": "1\n2\n"
+ },
+ "ch1_errors/error function": {
+  "error": "Error: bad 3",
+  "stdout": "start\n"
+ },
+ "ch1_errors/error in nested call line": {
+  "error": "TypeError@4",
+  "stdout": ""
+ },
+ "ch1_errors/error inside function": {
+  "error": "Error: not positive: -1",
+  "stdout": "1\n"
+ },
+ "ch1_errors/error no args": {
+  "error": "Error:",
+  "stdout": ""
+ },
+ "ch1_errors/error with values": {
+  "error": "Error: value was 1.5 True None end",
+  "stdout": ""
+ },
+ "ch1_errors/for loop in ch1": {
+  "error": "Feature: for loops@1",
+  "stdout": ""
+ },
+ "ch1_errors/fstring": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_errors/function called before defined ok": {
+  "error": "",
+  "stdout": "7\n"
+ },
+ "ch1_errors/function used before def": {
+  "error": "NameError@1",
+  "stdout": ""
+ },
+ "ch1_errors/global ch1": {
+  "error": "Feature: global statements@2",
+  "stdout": ""
+ },
+ "ch1_errors/if condition int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/if condition none": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/if condition string": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch1_errors/import statement": {
+  "error": "Feature: import statements (use from ... import ...)@1",
+  "stdout": ""
+ },
+ "ch1_errors/inequality bool": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/is operator ch1": {
+  "error": "Feature: is operator@1",
+  "stdout": ""
+ },
+ "ch1_errors/keyword argument": {
+  "error": "Feature: keyword arguments (name=value)@1",
+  "stdout": ""
+ },
+ "ch1_errors/lambda arity": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/lambda with default": {
+  "error": "Feature: default values of parameters (name=value)@1",
+  "stdout": ""
+ },
+ "ch1_errors/list comprehension": {
+  "error": "Feature: list comprehensions@1",
+  "stdout": ""
+ },
+ "ch1_errors/list literal in ch1": {
+  "error": "Feature: list literals@1",
+  "stdout": ""
+ },
+ "ch1_errors/math type error": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/name not found": {
+  "error": "NameNotFoundError@2",
+  "stdout": ""
+ },
+ "ch1_errors/name not found in branch": {
+  "error": "NameNotFoundError@1",
+  "stdout": ""
+ },
+ "ch1_errors/name not found in dead code": {
+  "error": "NameNotFoundError@2",
+  "stdout": ""
+ },
+ "ch1_errors/name of other function local": {
+  "error": "NameNotFoundError@5",
+  "stdout": ""
+ },
+ "ch1_errors/negate bool": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/negate string": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/none plus int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/nonlocal ch1": {
+  "error": "Feature: nonlocal statements@4",
+  "stdout": ""
+ },
+ "ch1_errors/not on int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/not on none": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/or left string": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/pair in ch1": {
+  "error": "NameNotFoundError@1",
+  "stdout": ""
+ },
+ "ch1_errors/pass ch1": {
+  "error": "Feature: pass statements@2",
+  "stdout": ""
+ },
+ "ch1_errors/raise": {
+  "error": "Feature: exceptions (raise)@1",
+  "stdout": ""
+ },
+ "ch1_errors/range name ch1": {
+  "error": "NameNotFoundError@1",
+  "stdout": ""
+ },
+ "ch1_errors/reassign both branches": {
+  "error": "NameReassignmentError@5",
+  "stdout": ""
+ },
+ "ch1_errors/reassign in function": {
+  "error": "NameReassignmentError@3",
+  "stdout": ""
+ },
+ "ch1_errors/reassign parameter": {
+  "error": "NameReassignmentError@2",
+  "stdout": ""
+ },
+ "ch1_errors/reassignment": {
+  "error": "NameReassignmentError@3",
+  "stdout": ""
+ },
+ "ch1_errors/redefine function": {
+  "error": "NameReassignmentError@3",
+  "stdout": ""
+ },
+ "ch1_errors/rest param ch1": {
+  "error": "Feature: rest parameters (*name)@1",
+  "stdout": ""
+ },
+ "ch1_errors/return outside function": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_errors/set": {
+  "error": "Feature: set displays@1",
+  "stdout": ""
+ },
+ "ch1_errors/slice": {
+  "error": "Feature: slices (a[i:j])@2",
+  "stdout": ""
+ },
+ "ch1_errors/str minus str": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/str times int": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_errors/subscript in ch1": {
+  "error": "Feature: subscript expressions@2",
+  "stdout": ""
+ },
+ "ch1_errors/syntax bad indent": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_errors/syntax missing colon": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_errors/syntax unclosed paren": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch1_errors/too few args": {
+  "error": "TypeError@3",
+  "stdout": ""
+ },
+ "ch1_errors/too many args": {
+  "error": "TypeError@3",
+  "stdout": ""
+ },
+ "ch1_errors/try": {
+  "error": "Feature: exceptions (try/except/finally)@1",
+  "stdout": ""
+ },
+ "ch1_errors/tuple": {
+  "error": "Feature: tuples@1",
+  "stdout": ""
+ },
+ "ch1_errors/tuple assignment": {
+  "error": "Feature: assignment to several names (a, b = ...)@1",
+  "stdout": ""
+ },
+ "ch1_errors/type error plus": {
+  "error": "TypeError@3",
+  "stdout": "1\n"
+ },
+ "ch1_errors/used before assigned global": {
+  "error": "NameError@1",
+  "stdout": ""
+ },
+ "ch1_errors/used before assigned in function": {
+  "error": "UnassignedLocalError@3",
+  "stdout": ""
+ },
+ "ch1_errors/while loop in ch1": {
+  "error": "Feature: while loops@1",
+  "stdout": ""
+ },
+ "ch1_errors/with": {
+  "error": "Feature: with statements@1",
+  "stdout": ""
+ },
+ "ch1_errors/zero division": {
+  "error": "ZeroDivisionError@1",
+  "stdout": ""
+ },
+ "ch1_errors/zero float division": {
+  "error": "ZeroDivisionError@1",
+  "stdout": ""
+ },
+ "ch1_errors/zero floor division": {
+  "error": "ZeroDivisionError@1",
+  "stdout": ""
+ },
+ "ch1_errors/zero modulo": {
+  "error": "ZeroDivisionError@1",
+  "stdout": ""
+ },
+ "ch1_errors/zero power negative": {
+  "error": "ZeroDivisionError@1",
+  "stdout": ""
+ },
+ "ch2_lists/accumulate style sum of squares": {
+  "error": "",
+  "stdout": "35\n"
+ },
+ "ch2_lists/append reverse": {
+  "error": "",
+  "stdout": "[1, [2, [3, [4, None]]]] [1, None] [1, None] None\n[3, [2, [1, None]]] None [3, [[1, [2, None]], None]]\n"
+ },
+ "ch2_lists/count leaves": {
+  "error": "",
+  "stdout": "5\n"
+ },
+ "ch2_lists/deep recursion via library ok": {
+  "error": "",
+  "stdout": "5000 12502500 5000 10000 4900 5000\n"
+ },
+ "ch2_lists/draw_data returns arg": {
+  "error": "",
+  "stdout": "True\n"
+ },
+ "ch2_lists/enum build": {
+  "error": "",
+  "stdout": "[1, [2, [3, [4, [5, None]]]]] [3, None] None [0, [1, [4, [9, [16, None]]]]] None\n[1.5, [2.5, [3.5, None]]]\n"
+ },
+ "ch2_lists/equality nested bool error": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch2_lists/equality nested bool short circuit": {
+  "error": "",
+  "stdout": "False\n"
+ },
+ "ch2_lists/equality nested function error": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch2_lists/equality on lists": {
+  "error": "",
+  "stdout": "True False False True False\nTrue True False\n"
+ },
+ "ch2_lists/for_each": {
+  "error": "",
+  "stdout": "1\n2\n3\nTrue\n"
+ },
+ "ch2_lists/head arity": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch2_lists/head of empty after tail": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch2_lists/head of none": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch2_lists/insertion sort": {
+  "error": "",
+  "stdout": "[1, [1, [2, [3, [4, [5, [6, [9, None]]]]]]]]\n"
+ },
+ "ch2_lists/is_llist cyclic safe names": {
+  "error": "",
+  "stdout": "False True 2\n"
+ },
+ "ch2_lists/is_none is_llist": {
+  "error": "",
+  "stdout": "True True False True True False False\n"
+ },
+ "ch2_lists/length and ref": {
+  "error": "",
+  "stdout": "4 0 10 40 2 2\n"
+ },
+ "ch2_lists/length of non list": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch2_lists/list ops on strings": {
+  "error": "",
+  "stdout": "None False ['a', ['b', None]]\n"
+ },
+ "ch2_lists/llist construction": {
+  "error": "",
+  "stdout": "[1, [2, [3, None]]] None [1, None] [[1, [2, None]], [[3, None], None]] ['a', ['b', None]]\n[1, [2, [3, None]]] 2 None\n"
+ },
+ "ch2_lists/llist_ref out of bounds": {
+  "error": "Error: llist_ref: index out of bounds",
+  "stdout": ""
+ },
+ "ch2_lists/llist_to_string": {
+  "error": "",
+  "stdout": "[1, ['a', [[2, None], None]]] None [1, 2]\n"
+ },
+ "ch2_lists/long list printing": {
+  "error": "",
+  "stdout": "[ 1,\n[ 2,\n[ 3,\n[ 4,\n[ 5,\n[ 6,\n[ 7,\n[8, [9, [10, [11, [12, [13, [14, [15, [16, [17, [18, [19, [20, None]]]]]]]]]]]]]]]]]]]]\n[ 1,\n[ 2,\n[ 3,\n[ 4,\n[ 5,\n[ 6,\n[ 7,\n[ 8,\n[ 9,\n[ 10,\n[ 11,\n[ 12,\n[ 13,\n[ 14,\n[ 15,\n[ 16,\n[ 17,\n[18, [19, [20, [21, [22, [23, [24, [25, [26, [27, [28, [29, [30, None]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n[1, [2, [3, [4, [5, [6, [7, [8, [9, [10, [11, [12, None]]]]]]]]]]]] [ 100,\n[ 101,\n[ 102,\n[ 103,\n[ 104,\n[ 105,\n[ 106,\n[ 107,\n[ 108,\n[ 109,\n[ 110,\n[ 111,\n[ 112,\n[ 113,\n[ 114,\n[115, [116, [117, [118, [119, [120, [121, [122, [123, [124, [125, None]]]]]]]]]]]]]]]]]]]]]]]]]]\n"
+ },
+ "ch2_lists/long nested printing": {
+  "error": "",
+  "stdout": "[ [1, [2, [3, [4, [5, [6, [7, [8, [9, [10, None]]]]]]]]]],\n[ [11, [12, [13, [14, [15, [16, [17, [18, [19, [20, None]]]]]]]]]],\n[[21, [22, [23, [24, [25, [26, [27, [28, [29, [30, None]]]]]]]]]], None]]]\n[ [ 1,\n  [ 2,\n  [ 3,\n  [ 4,\n  [ 5,\n  [ 6,\n  [ 7,\n  [ 8,\n  [ 9,\n  [ 10,\n  [ 11,\n  [ 12,\n  [13, [14, [15, [16, [17, [18, [19, [20, [21, [22, [23, [24, [25, None]]]]]]]]]]]]]]]]]]]]]]]]],\n5]\n[ [1, [1, None]],\n[ [2, [4, None]],\n[ [3, [9, None]],\n[ [4, [16, None]],\n[[5, [25, None]], [[6, [36, None]], [[7, [49, None]], [[8, [64, None]], None]]]]]]]]\n"
+ },
+ "ch2_lists/map filter reduce": {
+  "error": "",
+  "stdout": "[1, [4, [9, [16, [25, [36, [49, [64, [81, [100, None]]]]]]]]]]\n[2, [4, [6, [8, [10, None]]]]]\n55 [1, [2, [3, None]]]\n2 10\nNone None 99\n"
+ },
+ "ch2_lists/map over non list": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch2_lists/map with non function": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch2_lists/member remove": {
+  "error": "",
+  "stdout": "[2, [3, [2, [1, None]]]] None None [1, [3, [2, [1, None]]]] [1, [2, [3, [2, [1, None]]]]] [1, [3, [1, None]]] [2, [3, [2, None]]]\n['b', ['c', None]] None\n"
+ },
+ "ch2_lists/pair arity": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch2_lists/pairs": {
+  "error": "",
+  "stdout": "[1, 2] 1 2 True False False [[1, 2], [3, 4]]\n[1, None] [None, None] ['a', 'b'] [1.5, True]\n"
+ },
+ "ch2_lists/permutations": {
+  "error": "",
+  "stdout": "[ [1, [2, [3, None]]],\n[ [1, [3, [2, None]]],\n[ [2, [1, [3, None]]],\n[[2, [3, [1, None]]], [[3, [1, [2, None]]], [[3, [2, [1, None]]], None]]]]]]\n"
+ },
+ "ch2_lists/print_llist": {
+  "error": "",
+  "stdout": "llist(1, 2, 3)\nllist()\n[1, 2]\nllist(llist(1, 2), 'a', [3, 4])\n5\nllist(1, llist(2, llist(3)))\n"
+ },
+ "ch2_lists/reassign library name twice": {
+  "error": "NameReassignmentError@2",
+  "stdout": ""
+ },
+ "ch2_lists/shadow library": {
+  "error": "",
+  "stdout": "mine 2\n"
+ },
+ "ch2_lists/str repr of lists": {
+  "error": "",
+  "stdout": "[1, ['a', None]] [1, ['a', None]] None None x[1, 2]\n"
+ },
+ "ch2_lists/strings in lists": {
+  "error": "",
+  "stdout": "['a', [\"it's\", ['say \"hi\"', ['a\\nb', None]]]] ['x', 1]\n[ 1.0,\n[ 2.5,\n[True, [None, [-1, [<built-in function abs>, [<function (anonymous)>, None]]]]]]]\n"
+ },
+ "ch2_lists/subsets": {
+  "error": "",
+  "stdout": "[ None,\n[ [3, None],\n[ [2, None],\n[ [2, [3, None]],\n[[1, None], [[1, [3, None]], [[1, [2, None]], [[1, [2, [3, None]]], None]]]]]]]]\n"
+ },
+ "ch2_lists/tail of number": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch2_lists/tree printing": {
+  "error": "",
+  "stdout": "[[1, [2, None]], [[3, [[4, [5, None]], None]], [6, None]]]\n[[[[1, None], None], None], None]\n"
+ },
+ "ch2_lists/user recursion on long list fails": {
+  "error": "RecursionError@2",
+  "stdout": "500500\n"
+ },
+ "ch2_lists/very long list truncated": {
+  "error": "",
+  "stdout": "[ 1,\n[ 2,\n[ 3,\n[ 4,\n[ 5,\n[ 6,\n[ 7,\n[ 8,\n[ 9,\n[ 10,\n[ 11,\n[ 12,\n[ 13,\n[ 14,\n[ 15,\n[ 16,\n[ 17,\n[ 18,\n[ 19,\n[ 20,\n[ 21,\n[ 22,\n[ 23,\n[ 24,\n[ 25,\n[ 26,\n[ 27,\n[ 28,\n[ 29,\n[ 30,\n[ 31,\n[ 32,\n[ 33,\n[ 34,\n[ 35,\n[ 36,\n[ 37,\n[ 38,\n[ 39,\n[ 40,\n[ 41,\n[ 42,\n[ 43,\n[ 44,\n[ 45,\n[ 46,\n[ 47,\n[ 48,\n[ 49,\n[ 50,\n[ 51,\n[ 52,\n[ 53,\n[ 54,\n[ 55,\n[ 56,\n[ 57,\n[ 58,\n[ 59,\n[ 60,\n[ 61,\n[ 62,\n[ 63,\n[ 64,\n[ 65,\n[ 66,\n[ 67,\n[ 68,\n[ 69,\n[ 70,\n[ 71,\n[ 72,\n[ 73,\n[ 74,\n[ 75,\n[ 76,\n[ 77,\n[ 78,\n[ 79,\n[ 80,\n[ 81,\n[ 82,\n[ 83,\n[ 84,\n[ 85,\n[ 86,\n[ 87,\n[ 88,\n[ 89,\n[ 90,\n[91, [92, [93, [94, [95, [96, [97, [98, [99, [100, [101, ...<truncated>]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n"
+ },
+ "ch3_state/2d lists": {
+  "error": "",
+  "stdout": "6 2 3\n[[1, 20, 3], [4, 5, 6]]\n"
+ },
+ "ch3_state/annotated assignment": {
+  "error": "Feature: annotated assignment statements@1",
+  "stdout": ""
+ },
+ "ch3_state/array sum and swap": {
+  "error": "",
+  "stdout": "[5, 4, 3, 2, 1]\n"
+ },
+ "ch3_state/assign into string": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_state/augmented assignment ch3": {
+  "error": "Feature: augmented assignment (+=)@2",
+  "stdout": ""
+ },
+ "ch3_state/bank account closure": {
+  "error": "",
+  "stdout": "50 Insufficient funds 10 90\n"
+ },
+ "ch3_state/binary search": {
+  "error": "",
+  "stdout": "3 -1\n"
+ },
+ "ch3_state/bool ordering ch3": {
+  "error": "",
+  "stdout": "True True True\n"
+ },
+ "ch3_state/break continue": {
+  "error": "",
+  "stdout": "0\n1\n3\n4\n4\n"
+ },
+ "ch3_state/break in function inside loop": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/break outside loop": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/continue outside loop": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/counter object": {
+  "error": "",
+  "stdout": "3 1\n"
+ },
+ "ch3_state/cyclic structure print": {
+  "error": "",
+  "stdout": "1\n[1, [2, [3, [...]]]]\n[1, [...], 3]\n"
+ },
+ "ch3_state/deep loop no recursion": {
+  "error": "",
+  "stdout": "4999950000\n"
+ },
+ "ch3_state/destructive append": {
+  "error": "",
+  "stdout": "[1, [2, [3, None]]] [1, [2, [3, None]]] True\n"
+ },
+ "ch3_state/equality in ch3": {
+  "error": "",
+  "stdout": "True True True True True True True False\nTrue True False True True False\n"
+ },
+ "ch3_state/for over list": {
+  "error": "Feature: for loops must use range() — e.g. for i in range(n)@1",
+  "stdout": ""
+ },
+ "ch3_state/for over llist": {
+  "error": "Feature: for loops must use range() — e.g. for i in range(n)@1",
+  "stdout": ""
+ },
+ "ch3_state/for range forms": {
+  "error": "",
+  "stdout": "0\n1\n2\n2\n3\n4\n10\n7\n4\n1\n1\n"
+ },
+ "ch3_state/global creates name": {
+  "error": "",
+  "stdout": "5\n"
+ },
+ "ch3_state/global statement": {
+  "error": "",
+  "stdout": "2\n"
+ },
+ "ch3_state/in operator on list": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/index assignment out of range": {
+  "error": "IndexError",
+  "stdout": ""
+ },
+ "ch3_state/index out of range": {
+  "error": "IndexError",
+  "stdout": ""
+ },
+ "ch3_state/index with bool": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_state/index with float": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_state/is operator": {
+  "error": "",
+  "stdout": "True False True True True True False False True\nTrue False True False\n"
+ },
+ "ch3_state/len of number": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/list aliasing": {
+  "error": "",
+  "stdout": "[99, 2, 3] [99, 2, 3] True True False\n[[7, 0], [7, 0]]\n"
+ },
+ "ch3_state/list method": {
+  "error": "Feature: attribute access (a.b)@2",
+  "stdout": ""
+ },
+ "ch3_state/list multiply": {
+  "error": "",
+  "stdout": "[0, 0, 0, 0, 0] [1, 2, 1, 2, 1, 2] [None, None] [] []\n"
+ },
+ "ch3_state/list plus list": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/list times float": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/lists basics": {
+  "error": "",
+  "stdout": "[1, 2, 3] 3 1 3 3 1 [] [[1, 2], [3]] [1, 'a', True, None, 2.5]\n[10, 2, 30] True False False True\n"
+ },
+ "ch3_state/local shadows global on assignment": {
+  "error": "",
+  "stdout": "2 1\n"
+ },
+ "ch3_state/long list print": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/loop closures late binding": {
+  "error": "",
+  "stdout": "2 2 2\n"
+ },
+ "ch3_state/loop variable after loop and modification": {
+  "error": "",
+  "stdout": "0\n10\n20\n20\n"
+ },
+ "ch3_state/memo fib array": {
+  "error": "",
+  "stdout": "12586269025\n"
+ },
+ "ch3_state/negative index out of range": {
+  "error": "IndexError",
+  "stdout": ""
+ },
+ "ch3_state/nested long list print": {
+  "error": "",
+  "stdout": "[ [1000000, 2000000, 3000000, 4000000],\n  [5000000, 6000000, 7000000, 8000000],\n  [9000000, 10000000, 11000000, 12000000]]\n[ [ [1000000, 2000000, 3000000, 4000000],\n    [5000000, 6000000, 7000000, 8000000],\n    [9000000, 10000000, 11000000, 12000000]],\n[ [1000000, 2000000, 3000000, 4000000],\n  [5000000, 6000000, 7000000, 8000000],\n  [9000000, 10000000, 11000000, 12000000]]]\n"
+ },
+ "ch3_state/nested loops break inner": {
+  "error": "",
+  "stdout": "0 0\n0 1\n1 0\n1 1\n2 0\n2 1\n"
+ },
+ "ch3_state/nonlocal two levels": {
+  "error": "",
+  "stdout": "2\n"
+ },
+ "ch3_state/nonlocal without binding": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/pair is list": {
+  "error": "",
+  "stdout": "True True False False 5 6 2\n[1, 2] [1, [2, None]] [[1, 2], [3, 4]] [1, 2, 3] [[1, 2, 3], [4, 5, 6]]\n"
+ },
+ "ch3_state/pass statement": {
+  "error": "",
+  "stdout": "None\n"
+ },
+ "ch3_state/range as value": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/range bool arg": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/range evaluated once": {
+  "error": "",
+  "stdout": "0\n1\n2\n"
+ },
+ "ch3_state/range float arg": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/range reassigned": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/range zero step": {
+  "error": "ValueError",
+  "stdout": ""
+ },
+ "ch3_state/reassignment": {
+  "error": "",
+  "stdout": "20\n"
+ },
+ "ch3_state/rest parameters": {
+  "error": "",
+  "stdout": "[2, 3] [] 1\n[5] [4, 5, 6]\n0 6\n"
+ },
+ "ch3_state/rest too few": {
+  "error": "TypeError@3",
+  "stdout": ""
+ },
+ "ch3_state/return from loop": {
+  "error": "",
+  "stdout": "2 -1\n"
+ },
+ "ch3_state/selection sort array": {
+  "error": "",
+  "stdout": "[1, 2, 5, 5, 6, 9]\n"
+ },
+ "ch3_state/set_head on non pair": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/set_head set_tail": {
+  "error": "",
+  "stdout": "[10, 20]\n[1, [99, [3, [4, None]]]] None [1, [99, [3, [4, None]]]]\n"
+ },
+ "ch3_state/set_tail on none": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch3_state/spread non list": {
+  "error": "TypeError@3",
+  "stdout": ""
+ },
+ "ch3_state/string indexing": {
+  "error": "",
+  "stdout": "h o o 5\n"
+ },
+ "ch3_state/subscript non list": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_state/subscript none": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_state/tuple unpack swap": {
+  "error": "Feature: assignment to several names (a, b = ...)@3",
+  "stdout": ""
+ },
+ "ch3_state/type annotation param": {
+  "error": "Feature: type annotations@1",
+  "stdout": ""
+ },
+ "ch3_state/unassigned local": {
+  "error": "UnassignedLocalError@3",
+  "stdout": ""
+ },
+ "ch3_state/unassigned local in branch": {
+  "error": "UnassignedLocalError@4",
+  "stdout": "1\n"
+ },
+ "ch3_state/while condition int": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_state/while else": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch3_state/while loop": {
+  "error": "",
+  "stdout": "5 10\n"
+ },
+ "ch3_streams/enum stream and conversions": {
+  "error": "",
+  "stdout": "[1, [2, [3, [4, [5, None]]]]] None [1, [2, [3, None]]] None\n[0, [10, [20, [30, None]]]] 10 True False True\n"
+ },
+ "ch3_streams/eval_stream too many": {
+  "error": "TypeError@2",
+  "stdout": ""
+ },
+ "ch3_streams/implicit streams": {
+  "error": "",
+  "stdout": "[1, [2, [3, [4, [5, [6, [7, [8, None]]]]]]]] [0, [1, [1, [2, [3, [5, [8, [13, [21, [34, [55, [89, None]]]]]]]]]]]]\n"
+ },
+ "ch3_streams/integers and eval": {
+  "error": "",
+  "stdout": "[1, [2, [3, [4, [5, None]]]]] 101 None 3\n"
+ },
+ "ch3_streams/laziness trace": {
+  "error": "",
+  "stdout": "computing 1\nmade\ncomputing 2\ntail taken\ncomputing 2\ncomputing 3\n3\n"
+ },
+ "ch3_streams/memo stream": {
+  "error": "",
+  "stdout": "M: 1\nM: 2\nM: 3\nM: 4\nM: 5\n"
+ },
+ "ch3_streams/sieve": {
+  "error": "",
+  "stdout": "[ 2,\n[ 3,\n[5, [7, [11, [13, [17, [19, [23, [29, [31, [37, [41, [43, [47, None]]]]]]]]]]]]]]]\n"
+ },
+ "ch3_streams/stream append reverse member remove": {
+  "error": "",
+  "stdout": "[1, [2, [3, [7, [8, [9, None]]]]]] [3, [2, [1, None]]] 2 None\n[1, [3, [2, None]]] [1, [3, None]]\n"
+ },
+ "ch3_streams/stream basics": {
+  "error": "",
+  "stdout": "1 2 None\n[1, <function (anonymous)>]\n"
+ },
+ "ch3_streams/stream constructor": {
+  "error": "",
+  "stdout": "[1, <built-in function anonymous stream>] None [1, [2, [3, None]]] [1, [2, [3, None]]] 3\n"
+ },
+ "ch3_streams/stream for each": {
+  "error": "",
+  "stdout": "1\n2\n3\nTrue\n"
+ },
+ "ch3_streams/stream map filter": {
+  "error": "",
+  "stdout": "[2, [4, [6, [8, [10, None]]]]] [1, [4, [9, [16, [25, None]]]]] 9\n"
+ },
+ "ch3_streams/stream to llist depth": {
+  "error": "",
+  "stdout": "900\n"
+ },
+ "ch3_streams/stream_ref past end": {
+  "error": "Error: None stream_tail(xs) expects a pair as argument xs, but encountered",
+  "stdout": ""
+ },
+ "ch3_streams/stream_tail of non stream": {
+  "error": "Error: [2, None] stream_tail(xs) expects a function as the tail of the argument pair xs, but encountered",
+  "stdout": ""
+ },
+ "ch3_streams/stream_tail of none": {
+  "error": "Error: None stream_tail(xs) expects a pair as argument xs, but encountered",
+  "stdout": ""
+ },
+ "ch4_mce/apply in underlying python": {
+  "error": "",
+  "stdout": "3 5 9\n2 7\n"
+ },
+ "ch4_mce/ch4 has everything": {
+  "error": "",
+  "stdout": "[1, 2] 2 [2, None]\n"
+ },
+ "ch4_mce/parse assignment and names": {
+  "error": "",
+  "stdout": "['assignment', [['name', ['x', None]], [['literal', [4, None]], None]]]\n[ 'list_assignment',\n[['name', ['xs', None]], [['literal', [0, None]], [['literal', [4, None]], None]]]] ['list_access', [['name', ['xs', None]], [['name', ['i', None]], None]]]\n"
+ },
+ "ch4_mce/parse conditionals": {
+  "error": "",
+  "stdout": "[ 'conditional_expression',\n[['name', ['p', None]], [['name', ['a', None]], [['name', ['b', None]], None]]]]\n[ 'conditional_statement',\n[ ['name', ['p', None]],\n[ ['assignment', [['name', ['x', None]], [['literal', [1, None]], None]]],\n[['assignment', [['name', ['x', None]], [['literal', [2, None]], None]]], None]]]]\n[ 'conditional_statement',\n[ ['name', ['p', None]],\n[ ['assignment', [['name', ['x', None]], [['literal', [1, None]], None]]],\n[['pass_statement', None], None]]]]\n[ 'conditional_statement',\n[ ['name', ['p', None]],\n[ ['assignment', [['name', ['x', None]], [['literal', [1, None]], None]]],\n[ [ 'conditional_statement',\n  [ ['name', ['q', None]],\n  [ ['assignment', [['name', ['x', None]], [['literal', [2, None]], None]]],\n  [['assignment', [['name', ['x', None]], [['literal', [3, None]], None]]], None]]]],\nNone]]]]\n"
+ },
+ "ch4_mce/parse error": {
+  "error": "SyntaxError",
+  "stdout": ""
+ },
+ "ch4_mce/parse function definition": {
+  "error": "",
+  "stdout": "[ 'function_definition',\n[ ['name', ['f', None]],\n[ [['name', ['x', None]], [['name', ['y', None]], None]],\n[ [ 'return_statement',\n  [ [ 'binary_operator_combination',\n    ['+', [['name', ['x', None]], [['name', ['y', None]], None]]]],\n  None]],\nNone]]]]\n[ 'function_definition',\n[ ['name', ['g', None]],\n[ None,\n[ [ 'sequence',\n  [ [ ['assignment', [['name', ['x', None]], [['literal', [1, None]], None]]],\n    [['return_statement', [['name', ['x', None]], None]], None]],\n  None]],\nNone]]]]\n[ 'function_definition',\n[ ['name', ['h', None]],\n[ [ ['name', ['a', None]],\n  [['rest_element', [['name', ['rest', None]], None]], None]],\n[['return_statement', [['name', ['a', None]], None]], None]]]]\n"
+ },
+ "ch4_mce/parse in ch3": {
+  "error": "NameNotFoundError@1",
+  "stdout": ""
+ },
+ "ch4_mce/parse lambda and application": {
+  "error": "",
+  "stdout": "[ 'lambda_expression',\n[ [['name', ['x', None]], None],\n[ [ 'binary_operator_combination',\n  ['+', [['name', ['x', None]], [['literal', [1, None]], None]]]],\nNone]]]\n[ 'application',\n[ ['name', ['f', None]],\n[[['literal', [1, None]], [['literal', [2, None]], None]], None]]] ['application', [['name', ['f', None]], [None, None]]] [ 'application',\n[['lambda_expression', [None, [['literal', [1, None]], None]]], [None, None]]] [ 'application',\n[ ['name', ['f', None]],\n[[['starred_expression', [['name', ['xs', None]], None]], None], None]]]\n"
+ },
+ "ch4_mce/parse literals and names": {
+  "error": "",
+  "stdout": "['literal', [1, None]] ['name', ['x', None]] ['literal', ['s', None]] ['literal', [True, None]] ['literal', [None, None]] ['literal', [1.5, None]]\n"
+ },
+ "ch4_mce/parse loops": {
+  "error": "",
+  "stdout": "[ 'while_loop',\n[ [ 'binary_operator_combination',\n  ['<', [['name', ['x', None]], [['literal', [3, None]], None]]]],\n[ [ 'assignment',\n  [ ['name', ['x', None]],\n  [ [ 'binary_operator_combination',\n    ['+', [['name', ['x', None]], [['literal', [1, None]], None]]]],\n  None]]],\nNone]]]\n[ 'for_loop',\n[ ['name', ['i', None]],\n[ ['range_args', [['literal', [3, None]], None]],\n[ [ 'application',\n  [['name', ['print', None]], [[['name', ['i', None]], None], None]]],\nNone]]]]\n[ 'for_loop',\n[ ['name', ['i', None]],\n[ [ 'range_args',\n  [['literal', [1, None]], [['name', ['n', None]], [['literal', [2, None]], None]]]],\n[ [ 'sequence',\n  [[['break_statement', None], [['continue_statement', None], None]], None]],\nNone]]]]\n"
+ },
+ "ch4_mce/parse misc statements": {
+  "error": "",
+  "stdout": "[ 'function_definition',\n[ ['name', ['f', None]],\n[ None,\n[ [ 'sequence',\n  [ [ ['global_statement', [[['name', ['a', None]], None], None]],\n    [ [ 'nonlocal_statement',\n      [[['name', ['b', None]], [['name', ['c', None]], None]], None]],\n    [['pass_statement', None], None]]],\n  None]],\nNone]]]]\n[ 'list_expression',\n[ [['literal', [1, None]], [['literal', [2, None]], [['literal', [3, None]], None]]],\nNone]] ['list_expression', [None, None]]\n['import_from', ['rune', [['show', ['heart', None]], None]]]\n"
+ },
+ "ch4_mce/parse non string": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch4_mce/parse operators": {
+  "error": "",
+  "stdout": "[ 'binary_operator_combination',\n[ '+',\n[ ['literal', [1, None]],\n[ [ 'binary_operator_combination',\n  ['*', [['literal', [2, None]], [['literal', [3, None]], None]]]],\nNone]]]]\n['unary_operator_combination', ['-unary', [['name', ['x', None]], None]]] ['unary_operator_combination', ['not', [['name', ['p', None]], None]]] ['unary_operator_combination', ['+unary', [['name', ['x', None]], None]]]\n[ 'logical_composition',\n[ 'or',\n[ [ 'logical_composition',\n  ['and', [['name', ['a', None]], [['name', ['b', None]], None]]]],\n[['name', ['c', None]], None]]]] [ 'binary_operator_combination',\n['<', [['name', ['a', None]], [['name', ['b', None]], None]]]] [ 'binary_operator_combination',\n['==', [['name', ['a', None]], [['name', ['b', None]], None]]]] [ 'binary_operator_combination',\n['is not', [['name', ['a', None]], [['name', ['b', None]], None]]]]\n"
+ },
+ "ch4_mce/parse result is llist": {
+  "error": "",
+  "stdout": "assignment ['name', ['x', None]] binary_operator_combination True 3\n"
+ },
+ "ch4_mce/parse sequence": {
+  "error": "",
+  "stdout": "[ 'sequence',\n[ [ ['assignment', [['name', ['x', None]], [['literal', [1, None]], None]]],\n  [ ['assignment', [['name', ['y', None]], [['literal', [2, None]], None]]],\n  [ [ 'binary_operator_combination',\n    ['+', [['name', ['x', None]], [['name', ['y', None]], None]]]],\n  None]]],\nNone]]\n['sequence', [None, None]]\n"
+ },
+ "ch4_mce/tiny evaluator": {
+  "error": "Error: unknown component ['name', ['x', None]]",
+  "stdout": "3 2.5\n"
+ },
+ "ch4_mce/tokenize": {
+  "error": "",
+  "stdout": "['x', ['=', ['1', ['+', ['2', None]]]]]\n[ 'def',\n['f', ['(', ['x', [')', [':', ['\\n', ['', ['return', ['x', ['', None]]]]]]]]]]]\n"
+ }
+}

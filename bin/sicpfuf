@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""Run sicpfuf from anywhere:   ~/sicpfuf/bin/sicpfuf program.py -v 2
+Tip: add  alias sicpfuf=~/sicpfuf/bin/sicpfuf  to ~/.zshrc, then just type  sicpfuf program.py"""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from sicpfuf.__main__ import main  # noqa: E402
+
+sys.exit(main())

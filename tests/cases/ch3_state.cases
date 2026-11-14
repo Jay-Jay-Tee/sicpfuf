@@ -1,0 +1,401 @@
+#### reassignment (§3)
+x = 1
+x = x + 1
+x = x * 10
+print(x)
+#### while loop (§3)
+i = 0
+total = 0
+while i < 5:
+    total = total + i
+    i = i + 1
+print(i, total)
+#### for range forms (§3)
+for i in range(3):
+    print(i)
+for i in range(2, 5):
+    print(i)
+for i in range(10, 0, -3):
+    print(i)
+for i in range(0):
+    print("never")
+for i in range(5, 2):
+    print("never")
+print(i)
+#### break continue (§3)
+for i in range(10):
+    if i == 2:
+        continue
+    if i == 5:
+        break
+    print(i)
+n = 0
+while True:
+    n = n + 1
+    if n > 3:
+        break
+print(n)
+#### nested loops break inner (§3)
+for i in range(3):
+    for j in range(3):
+        if j == 2:
+            break
+        print(i, j)
+#### loop variable after loop and modification (§3)
+for i in range(3):
+    i = i * 10
+    print(i)
+print(i)
+#### return from loop (§3)
+def find(xs, x):
+    for i in range(len(xs)):
+        if xs[i] == x:
+            return i
+    return -1
+print(find([5, 6, 7], 7), find([5, 6, 7], 9))
+#### range evaluated once (§3)
+n = 3
+for i in range(n):
+    n = 10
+    print(i)
+#### lists basics (§3)
+xs = [1, 2, 3]
+print(xs, len(xs), xs[0], xs[2], xs[-1], xs[-3], [], [[1, 2], [3]], [1, "a", True, None, 2.5])
+xs[0] = 10
+xs[-1] = 30
+print(xs, is_list(xs), is_list(1), is_list(None), is_list(pair(1, 2)))
+#### list multiply (§3)
+a = [0] * 5
+b = 3 * [1, 2]
+c = [None] * 2
+d = [1] * 0
+print(a, b, c, d, [0] * -1)
+#### list aliasing (§3)
+a = [1, 2, 3]
+b = a
+b[0] = 99
+print(a, b, a is b, a == [99, 2, 3], a is [99, 2, 3])
+row = [0] * 2
+grid = [row] * 2
+grid[0][0] = 7
+print(grid)
+#### 2d lists (§3)
+m = [[1, 2, 3], [4, 5, 6]]
+print(m[1][2], len(m), len(m[0]))
+m[0][1] = 20
+print(m)
+#### pair is list (§3)
+print(pair(1, 2) == [1, 2], is_pair([1, 2]), is_pair([1, 2, 3]), is_pair([1]), head([5, 6]), tail([5, 6]), len(llist(1, 2, 3)))
+print([1, 2], [1, [2, None]], [[1, 2], [3, 4]], [1, 2, 3], [[1, 2, 3], [4, 5, 6]])
+#### string indexing (§3)
+s = "hello"
+print(s[0], s[4], s[-1], len(s))
+#### equality in ch3 (§3)
+print(1 == True, 0 == False, True == True, [1, 2] == [1, 2], [1, [2]] == [1, [2]], None == None, "a" == "a", 1 == "1")
+def f():
+    return 1
+g = f
+print(f == f, f == g, f == (lambda: 1), abs == abs, True != False, [1] != [1])
+#### is operator (§3)
+a = [1]
+b = [1]
+print(a is a, a is b, a is not b, 1 is 1, "a" is "a", None is None, 1 is 1.0, True is 1, 1.5 is 1.5)
+p = pair(1, 2)
+q = p
+print(p is q, pair(1, 2) is pair(1, 2), abs is abs, (lambda: 1) is (lambda: 1))
+#### bool ordering ch3 (§3)
+print(True < 2, False < True, True >= 1)
+#### set_head set_tail (§3)
+p = pair(1, 2)
+set_head(p, 10)
+set_tail(p, 20)
+print(p)
+xs = llist(1, 2, 3)
+set_head(tail(xs), 99)
+print(xs, set_tail(tail(tail(xs)), llist(4)), xs)
+#### cyclic structure print (§3)
+xs = llist(1, 2, 3)
+set_tail(tail(tail(xs)), xs)
+print(head(tail(tail(tail(xs)))))
+print(xs)
+ys = [1, 2, 3]
+ys[1] = ys
+print(ys)
+#### destructive append (§3)
+def d_append(xs, ys):
+    if is_none(xs):
+        return ys
+    else:
+        set_tail(xs, d_append(tail(xs), ys))
+        return xs
+a = llist(1, 2)
+b = llist(3)
+c = d_append(a, b)
+print(a, c, a is c)
+#### bank account closure (§3)
+def make_withdraw(balance):
+    def withdraw(amount):
+        nonlocal balance
+        if balance >= amount:
+            balance = balance - amount
+            return balance
+        else:
+            return "Insufficient funds"
+    return withdraw
+w1 = make_withdraw(100)
+w2 = make_withdraw(100)
+print(w1(50), w1(70), w1(40), w2(10))
+#### global statement (§3)
+count = 0
+def bump():
+    global count
+    count = count + 1
+    return count
+bump()
+bump()
+print(count)
+#### global creates name (§3)
+def setup():
+    global made
+    made = 5
+setup()
+print(made)
+#### local shadows global on assignment (§3)
+x = 1
+def f():
+    x = 2
+    return x
+print(f(), x)
+#### unassigned local (§3)
+x = 1
+def f():
+    print(x)
+    x = 2
+f()
+#### unassigned local in branch (§3)
+def f(flag):
+    if flag:
+        y = 1
+    return y
+print(f(True))
+print(f(False))
+#### nonlocal without binding (§3)
+x = 1
+def f():
+    nonlocal x
+    x = 2
+f()
+#### nonlocal two levels (§3)
+def outer():
+    n = 0
+    def middle():
+        def inner():
+            nonlocal n
+            n = n + 1
+            return n
+        return inner()
+    middle()
+    return middle()
+print(outer())
+#### counter object (§3)
+def make_counter():
+    count = 0
+    def next():
+        nonlocal count
+        count = count + 1
+        return count
+    return next
+c = make_counter()
+c()
+c()
+print(c(), make_counter()())
+#### loop closures late binding (§3)
+fs = [None] * 3
+for i in range(3):
+    fs[i] = lambda: i
+print(fs[0](), fs[1](), fs[2]())
+#### index out of range (§3)
+xs = [1, 2]
+print(xs[5])
+#### negative index out of range (§3)
+xs = [1, 2]
+print(xs[-3])
+#### index assignment out of range (§3)
+xs = [1, 2]
+xs[2] = 3
+#### index with float (§3)
+xs = [1, 2]
+print(xs[1.0])
+#### index with bool (§3)
+xs = [1, 2]
+print(xs[True])
+#### subscript non list (§3)
+x = 5
+print(x[0])
+#### subscript none (§3)
+x = None
+print(x[0])
+#### assign into string (§3)
+s = "abc"
+s[0] = "x"
+#### list plus list (§3)
+print([1] + [2])
+#### list times float (§3)
+print([1] * 2.0)
+#### in operator on list (§3)
+print(1 in [1, 2])
+#### while condition int (§3)
+i = 3
+while i:
+    i = i - 1
+#### for over list (§3)
+for x in [1, 2, 3]:
+    print(x)
+#### for over llist (§3)
+for x in llist(1, 2):
+    print(x)
+#### range as value (§3)
+r = range(3)
+#### range reassigned (§3)
+range = 5
+#### range float arg (§3)
+for i in range(2.5):
+    print(i)
+#### range zero step (§3)
+for i in range(0, 5, 0):
+    print(i)
+#### range bool arg (§3)
+for i in range(True):
+    print(i)
+#### break outside loop (§3)
+break
+#### continue outside loop (§3)
+def f():
+    continue
+#### break in function inside loop (§3)
+for i in range(3):
+    def f():
+        break
+#### pass statement (§3)
+def f():
+    pass
+for i in range(2):
+    pass
+if True:
+    pass
+print(f())
+#### rest parameters (§3)
+def f(a, *xs):
+    return xs
+print(f(1, 2, 3), f(1), arity(f))
+ys = [4, 5]
+print(f(*ys), f(0, *ys, 6))
+def total(*nums):
+    t = 0
+    for i in range(len(nums)):
+        t = t + nums[i]
+    return t
+print(total(), total(1, 2, 3))
+#### spread non list (§3)
+def f(*xs):
+    return xs
+print(f(*5))
+#### rest too few (§3)
+def f(a, b, *xs):
+    return a
+print(f(1))
+#### len of number (§3)
+print(len(5))
+#### set_head on non pair (§3)
+set_head([1, 2, 3], 0)
+#### set_tail on none (§3)
+set_tail(None, 0)
+#### augmented assignment ch3 (§3)
+x = 1
+x += 1
+#### list method (§3)
+xs = [1]
+xs.append(2)
+#### tuple unpack swap (§3)
+a = 1
+b = 2
+a, b = b, a
+#### annotated assignment (§3)
+x: int = 5
+#### type annotation param (§3)
+def f(x: int) -> int:
+    return x
+#### while else (§3)
+i = 0
+while i < 2:
+    i = i + 1
+else:
+    print("else")
+#### array sum and swap (§3)
+def swap(A, i, j):
+    temp = A[i]
+    A[i] = A[j]
+    A[j] = temp
+def reverse_array(A):
+    n = len(A)
+    for i in range(n // 2):
+        swap(A, i, n - 1 - i)
+A = [1, 2, 3, 4, 5]
+reverse_array(A)
+print(A)
+#### selection sort array (§3)
+def selection_sort(A):
+    n = len(A)
+    for i in range(n - 1):
+        smallest = i
+        for j in range(i + 1, n):
+            if A[j] < A[smallest]:
+                smallest = j
+        t = A[i]
+        A[i] = A[smallest]
+        A[smallest] = t
+A = [5, 2, 9, 1, 5, 6]
+selection_sort(A)
+print(A)
+#### memo fib array (§3)
+def memo_fib(n):
+    memo = [None] * (n + 1)
+    def fib(k):
+        if memo[k] is not None:
+            return memo[k]
+        else:
+            result = k if k <= 1 else fib(k - 1) + fib(k - 2)
+            memo[k] = result
+            return result
+    return fib(n)
+print(memo_fib(50))
+#### binary search (§3)
+def binary_search(A, v):
+    low = 0
+    high = len(A) - 1
+    while low <= high:
+        mid = math_floor((low + high) / 2)
+        if v == A[mid]:
+            return mid
+        elif v < A[mid]:
+            high = mid - 1
+        else:
+            low = mid + 1
+    return -1
+A = [1, 3, 5, 7, 9, 11]
+print(binary_search(A, 7), binary_search(A, 4))
+#### deep loop no recursion (§3)
+total = 0
+for i in range(100000):
+    total = total + i
+print(total)
+#### long list print (§3)
+xs = [0] * 30
+for i in range(30):
+    xs[i] = i * 1000
+print(xs)
+print([[1, 2, 3], [4, 5, 6], [7, 8, 9]], [[i] * 12 for_missing] if False else 0)
+#### nested long list print (§3)
+m = [[1000000, 2000000, 3000000, 4000000], [5000000, 6000000, 7000000, 8000000], [9000000, 10000000, 11000000, 12000000]]
+print(m)
+print([m, m])
