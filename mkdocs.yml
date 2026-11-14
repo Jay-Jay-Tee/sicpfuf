@@ -71,3 +71,76 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Getting started: start.md
+  - Finals kit:
+      - finals/index.md
+      - Topic checklist: finals/checklist.md
+      - One-page sheets:
+          - finals/sheets/index.md
+          - Substitution model & processes: finals/sheets/substitution.md
+          - Orders of growth: finals/sheets/growth.md
+          - Scope & higher-order functions: finals/sheets/scope-hof.md
+          - Pairs, llists & box-and-pointer: finals/sheets/llists.md
+          - Trees & CPS: finals/sheets/trees-cps.md
+          - Streams: finals/sheets/streams.md
+          - The environment model: finals/sheets/environment-model.md
+          - Mutation, lists & loops: finals/sheets/mutation-lists-loops.md
+          - Memoization, searching & sorting: finals/sheets/memo-search-sort.md
+          - The metacircular evaluator: finals/sheets/mce.md
+          - Typed Python §4: finals/sheets/types.md
+          - The classic traps: finals/sheets/traps.md
+      - Exam mode: finals/exam-mode.md
+      - Mock final 1: finals/mock-1.md
+      - Mock final 2: finals/mock-2.md
+      - Mock final 3: finals/mock-3.md
+  - The Book:
+      - book/index.md
+      - "Unit 1 · Functions":
+          - book/01-elements.md
+          - book/02-runes.md
+          - book/03-substitution-recursion.md
+          - book/04-orders-of-growth.md
+          - book/05-higher-order-scope.md
+          - book/06-curves-sound.md
+      - "Unit 2 · Data":
+          - book/07-data-abstraction.md
+          - book/08-llist-processing.md
+          - book/09-trees-cps.md
+          - book/10-sorting-symbolic.md
+          - book/11-streams.md
+      - "Unit 3 · State":
+          - book/12-state-mutation.md
+          - book/13-lists-loops.md
+          - book/14-environment-model.md
+          - book/15-search-sort-memo.md
+          - book/16-streams-ii.md
+      - "Unit 4 · Beyond":
+          - book/17-mce.md
+          - book/18-mce-lazy.md
+          - book/19-types-objects.md
+          - book/20-big-picture.md
+      - book/glossary.md
+  - Drills:
+      - practice/index.md
+      - practice/01-elements.md
+      - practice/02-substitution-processes.md
+      - practice/03-orders-of-growth.md
+      - practice/04-hof-scope.md
+      - practice/05-llists-box-pointer.md
+      - practice/06-llist-processing.md
+      - practice/07-trees-cps.md
+      - practice/08-sorting-symbolic-streams.md
+      - practice/09-state-mutation.md
+      - practice/10-lists-loops.md
+      - practice/11-environment-model.md
+      - practice/12-memo-search-sort.md
+      - practice/13-streams-ii.md
+      - practice/14-mce.md
+      - practice/15-types.md
+  - Reference:
+      - reference/index.md
+      - reference/language.md
+      - reference/library.md
+      - reference/errors.md
+      - reference/xray.md
+      - reference/internals.md
