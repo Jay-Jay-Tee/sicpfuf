@@ -185,8 +185,9 @@ def environment(snapshot, label=None):
             call = f"{env.name}({', '.join(short(a_, 14) for a_ in (env.args or []))})"
         parts.append(f'<text x="{FRAME_X}" y="{y + 14}" font-weight="bold">{title}</text>')
         if call:
+            room = int((frame_w + 90) / (CHAR_W * 0.86)) - len(title) - 2     # stop before the function column
             parts.append(f'<text class="small" x="{FRAME_X + (len(title) + 1.5) * CHAR_W:.0f}" y="{y + 14}">'
-                         f'{esc(short_text(call, 40))}</text>')
+                         f'{esc(short_text(call, max(12, room)))}</text>')
         y += 20
         h = max(1, len(lines)) * LINE_H + 2 * PAD
         position[id(env)] = (y, h)
