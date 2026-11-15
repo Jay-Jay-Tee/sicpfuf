@@ -59,7 +59,10 @@ def source_line(lines, n):
 
 
 def format_syntax_error(err, lines):
-    if err.kind.startswith("Feature not supported"):
+    if err.kind == "Missing type annotation":          # Python §4 Typed (xray/typecheck.py)
+        out = [f"Missing type annotation: {err.msg} (line {err.line}, col {err.col})"]
+        last = f"MissingTypeAnnotationError: {err.msg}"
+    elif err.kind.startswith("Feature not supported"):
         out = [f"{err.kind} (line {err.line}, col {err.col})"]
         last = f"FeatureNotSupportedError: {err.msg}"
     else:
@@ -97,7 +100,7 @@ def syntax_hint(err):
 
 def format_runtime_error(err, lines):
     if isinstance(err, UserError):                 # error("...") prints just its message
-        out = [f"Error: {err.msg}"]
+        out = [f"Error: {err.msg}".rstrip()]
         if err.line:
             out.append(f"  (error(...) was called at line {err.line})")
         return "\n".join(out)

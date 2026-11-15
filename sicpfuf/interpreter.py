@@ -31,6 +31,7 @@ from .chapters import check_program
 from .env import Environment
 from .errors import SicpError
 from .parser import parse
+from . import values as values_module
 from .values import Closure, Builtin, TailCall, type_name, a, short
 
 # ------------------------------------------------------------- signals
@@ -107,6 +108,7 @@ class Interpreter:
         if chapter not in (1, 2, 3, 4):
             raise ValueError("chapter must be 1, 2, 3 or 4")
         self.chapter = chapter
+        values_module.NAME_PAIRS = chapter <= 2
         self.typed = typed
         self.max_depth = max_depth     # how many calls may be WAITING at once (py-slang: 1024)
         self.out = out or sys.stdout
@@ -144,12 +146,17 @@ class Interpreter:
     def write(self, text):
         self.out.write(text)
 
-    def load_source(self, source, filename="<sicpfuf>"):
-        """text → checked tree. Raises SicpSyntaxError if it is not a valid program."""
+    def load_source(self, source, filename="<sicpfuf>", typecheck=False):
+        """text → checked tree. Raises SicpSyntaxError if it is not a valid program.
+        typecheck=True (Python §4 Typed): the TYPES are checked first, as py-slang does,
+        before the chapter's own rules (xray/typecheck.py)."""
         self.sources[filename] = source.replace("\r\n", "\n").split("\n")
         if "show_env" in source:
             self.diagrams = True       # remember each call's arguments as text, before they can change
         tree = parse(source, filename)
+        if typecheck:
+            from .xray import typecheck as checker
+            checker.check(self, tree, filename)
         known = self.lib.names(self) | set(self.program_env.vars)      # (names from --with FILE count too)
         check_program(tree, self.chapter, known, self.lib.module_exports(),
                       filename, self.typed, self.lib.later_names(self.chapter))

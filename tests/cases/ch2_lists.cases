@@ -146,3 +146,7 @@ def reverse(xs):
     return 42
 print(map(lambda x: x + 1, llist(1, 2)))
 print(filter(lambda x: x > 1, llist(1, 2, 3)))
+#### llist_ref messages (§2)
+print(llist_ref(llist("a", "b"), 2))
+#### llist_ref of none (§2)
+print(llist_ref(None, 0))

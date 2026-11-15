@@ -218,11 +218,13 @@ def for_each(fun, xs):
         return for_each(fun, tail(xs))
 
 def llist_ref(xs, n):
-    if is_none(xs):
-        return error("llist_ref: index out of bounds")
-    elif n == 0:
+    if n == 0:
+        if is_none(xs):
+            error("llist_ref: index out of bounds on None linked list")
         return head(xs)
     else:
+        if is_none(xs):
+            error("llist_ref: index out of bounds")
         return llist_ref(tail(xs), n - 1)
 
 def llist_to_string(xs):

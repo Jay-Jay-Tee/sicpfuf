@@ -95,6 +95,11 @@ def make(interp):
             return round(x)                       # round half to EVEN: round(2.5) is 2, round(3.5) is 4
         if type(ndigits[0]) is not int:
             raise SicpError("TypeError", f"round(x, n) expects an integer n, but got {a(type_name(ndigits[0]))}")
+        if type(x) is float and ndigits[0] >= 0:
+            # round the number AS WRITTEN (2.675 → 2.68), half to even, like Source Academy
+            import decimal
+            step = decimal.Decimal(1).scaleb(-ndigits[0])
+            return float(decimal.Decimal(repr(x)).quantize(step, rounding=decimal.ROUND_HALF_EVEN))
         return round(x, ndigits[0])
 
     def b_len(x):

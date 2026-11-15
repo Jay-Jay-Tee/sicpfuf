@@ -113,6 +113,8 @@ def error_kind(err):
         return "Feature"
     if first.startswith("Error:"):
         return first
+    if first.startswith("'break'") or first.startswith("'continue'"):
+        return "SyntaxError"
     m = re.match(r"(\w+)", first)
     return m.group(1) if m else ""
 

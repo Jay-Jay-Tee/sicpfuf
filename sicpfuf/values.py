@@ -66,6 +66,9 @@ def is_pair(v):
     return type(v) is list and len(v) == 2
 
 
+NAME_PAIRS = True       # in §1/§2 a two-item list is called a "pair" in messages; from §3 a "list"
+
+
 def type_name(v):
     """The name used in error messages."""
     t = type(v)
@@ -82,7 +85,7 @@ def type_name(v):
     if t is str:
         return "str"
     if t is list:
-        return "pair" if len(v) == 2 else "list"
+        return "pair" if len(v) == 2 and NAME_PAIRS else "list"
     if t is Closure or t is Builtin:
         return "function"
     return t.__name__

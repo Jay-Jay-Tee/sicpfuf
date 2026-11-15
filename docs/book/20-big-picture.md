@@ -149,7 +149,7 @@ if xs:
     print("not empty")
 ```
 ```text
-TypeError: if condition must be bool, not pair
+TypeError: if condition must be bool, not list
 ```
 
 ```python title="§4"

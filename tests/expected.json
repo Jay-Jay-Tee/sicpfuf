@@ -127,6 +127,10 @@
   "error": "",
   "stdout": "1000\n"
  },
+ "ch1_basics/round to digits": {
+  "error": "",
+  "stdout": "2.68 1.0 0.12 2 -1.6 1200.0 7\n"
+ },
  "ch1_basics/semicolons": {
   "error": "SyntaxError",
   "stdout": ""
@@ -631,6 +635,14 @@
   "error": "",
   "stdout": "[1, [2, [3, None]]] None [1, None] [[1, [2, None]], [[3, None], None]] ['a', ['b', None]]\n[1, [2, [3, None]]] 2 None\n"
  },
+ "ch2_lists/llist_ref messages": {
+  "error": "Error: llist_ref: index out of bounds on None linked list",
+  "stdout": ""
+ },
+ "ch2_lists/llist_ref of none": {
+  "error": "Error: llist_ref: index out of bounds on None linked list",
+  "stdout": ""
+ },
  "ch2_lists/llist_ref out of bounds": {
   "error": "Error: llist_ref: index out of bounds",
   "stdout": ""
@@ -851,6 +863,10 @@
   "error": "TypeError@1",
   "stdout": ""
  },
+ "ch3_state/list type names": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
  "ch3_state/lists basics": {
   "error": "",
   "stdout": "[1, 2, 3] 3 1 3 3 1 [] [[1, 2], [3]] [1, 'a', True, None, 2.5]\n[10, 2, 30] True False False True\n"
@@ -1061,6 +1077,10 @@
  },
  "ch3_streams/stream_tail of non stream": {
   "error": "Error: [2, None] stream_tail(xs) expects a function as the tail of the argument pair xs, but encountered",
+  "stdout": ""
+ },
+ "ch3_streams/stream_tail of non-function tail": {
+  "error": "Error: 2 stream_tail(xs) expects a function as the tail of the argument pair xs, but encountered",
   "stdout": ""
  },
  "ch3_streams/stream_tail of none": {
