@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "editor-browser",
+      "request": "launch",
+      "name": "sicpfuf: Textbook beside code",
+      "url": "https://jay-jay-tee.github.io/sicpfuf/book/"
+    },
+    {
+      "type": "editor-browser",
+      "request": "launch",
+      "name": "sicpfuf: Local textbook (MkDocs running)",
+      "url": "http://127.0.0.1:8000/sicpfuf/book/"
+    },
+    {
+      "type": "editor-browser",
+      "request": "launch",
+      "name": "sicpfuf: Visual stepper beside code",
+      "url": "http://127.0.0.1:8765/",
+      "preLaunchTask": "sicpfuf: Start local stepper"
+    }
+  ]
+}

@@ -42,7 +42,6 @@ ORACLE = os.environ.get("SICPFUF_ORACLE", os.path.expanduser("~/.cache/sicpfuf/p
 EXPECTED = os.path.join(ROOT, "tests", "expected.json")
 HEADER = re.compile(r"^#### (.+?) \(§([1-4])( typed)?\)( noline)?\s*$")
 PYSLANG = os.path.dirname(os.path.dirname(ORACLE))
-TSX = os.path.join(PYSLANG, "node_modules", ".bin", "tsx")
 TYPED_ORACLE = os.path.join(ROOT, "tests", "typed_oracle.ts")
 SYNTAX = ("SyntaxError", "IndentationError", "Unexpected", "ScopeConflictError")
 
@@ -102,10 +101,10 @@ def run_case(cmd_prefix, chapter, code, typed=False):
         f.write(code)
         path = f.name
     try:
-        _, out, err = run(cmd_prefix + [path, "-v", str(chapter)] + (["--typed"] if typed else []))
+        status, out, err = run(cmd_prefix + [path, "-v", str(chapter)] + (["--typed"] if typed else []))
     finally:
         os.unlink(path)
-    result = {"stdout": out, "error": signature(err)}
+    result = {"stdout": out, "error": signature(err) or (f"ProcessExit({status})" if status else "")}
     if typed:
         result["types"] = type_errors(err)
     return result
@@ -132,30 +131,30 @@ def typed_oracle(cases):
     prints when it runs the program with its types erased."""
     if not cases:
         return {}
-    folder = tempfile.mkdtemp()
-    paths = []
-    for i, (name, _, code, _, _) in enumerate(cases):
-        paths.append(os.path.join(folder, f"case{i}.py"))
-        open(paths[-1], "w", encoding="utf-8").write(code)
-    code, out, err = run([TSX, TYPED_ORACLE] + paths, cwd=PYSLANG, timeout=600)
-    answers = [json.loads(l) for l in out.split("\n") if l.startswith("{")]
-    if code != 0 or len(answers) != len(cases):
-        raise SystemExit(f"typed oracle failed:\n{err[-3000:]}")
-    results = {}
-    for (name, _, _, _, _), path, a in zip(cases, paths, answers):
-        if "erased" in a:
-            open(path, "w", encoding="utf-8").write(a["erased"])
-            _, stdout, stderr = run(["node", ORACLE, path, "-v", "4"])
-            results[name] = {"stdout": stdout, "error": signature(stderr), "types": []}
-        elif "errors" in a:
-            types = [re.sub(r"^(\d+):\d+ ", r"\1 ", e) for e in a["errors"]]
-            results[name] = {"stdout": "", "error": f"StaticTypeError@{types[0].split()[0]}", "types": types}
-        else:
-            message = a.get("rule") or a.get("syntax", "")
-            m = re.match(r"Missing type annotation: (.*) \(line (\d+), col \d+\)$", message)
-            results[name] = {"stdout": "", "error": signature(message),
-                             "types": [f"{m.group(2)} {m.group(1)}"] if m else []}
-    return results
+    with tempfile.TemporaryDirectory() as folder:
+        paths = []
+        for i, (name, _, code, _, _) in enumerate(cases):
+            paths.append(os.path.join(folder, f"case{i}.py"))
+            open(paths[-1], "w", encoding="utf-8").write(code)
+        code, out, err = run(["node", "--import", "tsx", TYPED_ORACLE] + paths, cwd=PYSLANG, timeout=600)
+        answers = [json.loads(l) for l in out.split("\n") if l.startswith("{")]
+        if code != 0 or len(answers) != len(cases):
+            raise SystemExit(f"typed oracle failed:\n{err[-3000:]}")
+        results = {}
+        for (name, _, _, _, _), path, a in zip(cases, paths, answers):
+            if "erased" in a:
+                open(path, "w", encoding="utf-8").write(a["erased"])
+                _, stdout, stderr = run(["node", ORACLE, path, "-v", "4"])
+                results[name] = {"stdout": stdout, "error": signature(stderr), "types": []}
+            elif "errors" in a:
+                types = [re.sub(r"^(\d+):\d+ ", r"\1 ", e) for e in a["errors"]]
+                results[name] = {"stdout": "", "error": f"StaticTypeError@{types[0].split()[0]}", "types": types}
+            else:
+                message = a.get("rule") or a.get("syntax", "")
+                m = re.match(r"Missing type annotation: (.*) \(line (\d+), col \d+\)$", message)
+                results[name] = {"stdout": "", "error": signature(message),
+                                 "types": [f"{m.group(2)} {m.group(1)}"] if m else []}
+        return results
 
 
 def same(a, b, noline=False):
@@ -224,14 +223,19 @@ def main():
     if not only:
         for path in sorted(glob.glob(os.path.join(ROOT, "tests", "xray", "*.py"))):
             name = os.path.relpath(path, ROOT)
-            first = open(path, encoding="utf-8").readline()
+            with open(path, encoding="utf-8") as source:
+                first = source.readline()
             extra = first[len("# args:"):].split() if first.startswith("# args:") else []
             _, out, err = run(SICPFUF + [name] + extra)
             got = out + ("--- stderr ---\n" + err if err else "")
             exp_path = path[:-3] + ".expected"
-            if update or not os.path.exists(exp_path):
+            if update:
                 open(exp_path, "w", encoding="utf-8").write(got)
                 print(f"wrote {os.path.relpath(exp_path, ROOT)}")
+                continue
+            if not os.path.exists(exp_path):
+                failed += 1
+                print(f"FAIL  {name}: no expected output recorded (run with --update)")
                 continue
             if got == open(exp_path, encoding="utf-8").read():
                 passed += 1

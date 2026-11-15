@@ -1,0 +1,78 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "sicpfuf: Start local stepper",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "-m",
+        "sicpfuf",
+        "--ui",
+        "--no-browser",
+        "--port",
+        "8765"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "sicpfuf",
+        "pattern": {
+          "regexp": "^(.+):(\\d+): (.+)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^sicpfuf stepper:",
+          "endsPattern": "^Ctrl-C stops the UI\\."
+        }
+      }
+    },
+    {
+      "label": "sicpfuf: Run current Python file",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "-m",
+        "sicpfuf",
+        "${file}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "sicpfuf: Terminal stepper (current file)",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "-m",
+        "sicpfuf",
+        "--tui",
+        "${file}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

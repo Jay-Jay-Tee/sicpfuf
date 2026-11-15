@@ -10,14 +10,16 @@ import webbrowser
 ASSETS = Path(__file__).parent
 MAX_REQUEST = 100_000
 DEFAULT_SOURCE = "def square(x):\n    return x * x\n\nprint(square(2 + 1))\n"
+DEFAULT_TYPED_SOURCE = "def square(x: int) -> int:\n    return x * x\n\nprint(square(2 + 1))\n"
 
 
-def run_trace(source, chapter, mode):
+def run_trace(source, chapter, mode, stdin="", typed=False, graphics=True):
     """A fresh subprocess bounds expensive operations as well as interpreter steps."""
     try:
         result = subprocess.run(
             [sys.executable, "-m", "sicpfuf.ui", "--trace"],
-            input=json.dumps({"source": source, "chapter": chapter, "mode": mode}),
+            input=json.dumps({"source": source, "chapter": chapter, "mode": mode, "stdin": stdin,
+                              "typed": typed, "graphics": graphics}),
             text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             cwd=str(ASSETS.parents[1]), timeout=10,
         )
@@ -89,17 +91,22 @@ def make_handler(session):
                     raise ValueError("Choose Python §1, §2, §3 or §4.")
                 if mode not in ("environment", "substitution"):
                     raise ValueError("Choose the environment or substitution stepper.")
+                if not isinstance(data.get("stdin", ""), str):
+                    raise ValueError("Program input must be text.")
+                typed = data.get("typed", False)
+                if type(typed) is not bool or (typed and (chapter != 4 or mode != "environment")):
+                    raise ValueError("Typed checking requires Python §4 and the environment stepper.")
             except (ValueError, UnicodeError) as exc:
                 self.send(400, {"error": str(exc)})
                 return
-            self.send(200, run_trace(data["source"], chapter, mode))
+            self.send(200, run_trace(data["source"], chapter, mode, data.get("stdin", ""), typed=typed))
 
     return Handler
 
 
-def serve(source=None, filename=None, chapter=2, mode="environment", port=0, open_browser=True):
-    session = {"source": DEFAULT_SOURCE if source is None else source,
-               "filename": filename or "Untitled", "chapter": chapter, "mode": mode}
+def serve(source=None, filename=None, chapter=2, mode="environment", port=0, open_browser=True, typed=False):
+    session = {"source": (DEFAULT_TYPED_SOURCE if typed else DEFAULT_SOURCE) if source is None else source,
+               "filename": filename or "Untitled", "chapter": chapter, "mode": mode, "typed": typed}
     server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(session))
     server.daemon_threads = True
     url = "http://127.0.0.1:" + str(server.server_address[1]) + "/"

@@ -20,6 +20,7 @@
       <option value="1">Python §1</option><option value="2">Python §2</option>
       <option value="3">Python §3</option><option value="4">Python §4</option>
     </select>
+    <label class="typed-toggle"><input id="typed" type="checkbox"> Typed</label>
     <button id="run" type="button">Run</button>
   </header>
   <main>
@@ -29,6 +30,10 @@
         <pre id="gutter" aria-hidden="true">1</pre>
         <textarea id="code" aria-label="Program source" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       </div>
+      <details class="program-input">
+        <summary>Program input</summary>
+        <textarea id="stdin" aria-label="Program input, one line for each input call" placeholder="One line for each input() call" spellcheck="false"></textarea>
+      </details>
       <div class="section-title">Output</div>
       <pre id="output">No output yet.</pre>
       <pre id="error" role="alert" hidden></pre>

@@ -83,11 +83,31 @@ class UITests(unittest.TestCase):
         with patch("sicpfuf.ui.subprocess.run", side_effect=subprocess.TimeoutExpired("trace", 10)):
             self.assertIn("10 seconds", run_trace("", 2, "environment")["error"])
 
+    def test_program_input_in_both_models(self):
+        for mode in ("environment", "substitution"):
+            with self.subTest(mode=mode):
+                result = run_trace('name = input("Name: ")\nprint(name)\n', 2, mode, "Ada\n")
+                self.assertIsNone(result["error"])
+                self.assertEqual(result["steps"][-1]["output"], "Name: Ada\n")
+
+    def test_typed_trace_checks_before_execution(self):
+        result = run_trace('print("should not run")\nx: int = "wrong"\n', 4, "environment", typed=True)
+        self.assertIn("StaticTypeError", result["error"])
+        self.assertEqual(result["steps"][-1]["output"], "")
+        good = run_trace('def square(x: int) -> int:\n    return x * x\nprint(square(3))\n', 4, "environment", typed=True)
+        self.assertIsNone(good["error"])
+        self.assertEqual(good["steps"][-1]["output"], "9\n")
+
+    def test_typed_api_rejects_other_chapters_and_substitution(self):
+        for chapter, mode in ((2, "environment"), (4, "substitution")):
+            status, body = self.request("/api/trace", {"source": "", "chapter": chapter, "mode": mode, "typed": True})
+            self.assertEqual(status, 400)
+
     def test_cli_opens_ui_without_entering_repl(self):
         with patch("sicpfuf.ui.serve", return_value=0) as opened:
             self.assertEqual(main(["--ui", "--no-browser"]), 0)
         self.assertEqual(opened.call_args.args, (None, None, 2, "environment"))
-        self.assertEqual(opened.call_args.kwargs, {"port": 0, "open_browser": False})
+        self.assertEqual(opened.call_args.kwargs, {"port": 0, "open_browser": False, "typed": False})
 
     def test_cli_loads_file_and_chapter(self):
         with TemporaryDirectory() as folder:
@@ -101,6 +121,23 @@ class UITests(unittest.TestCase):
         with patch("sicpfuf.ui.serve", return_value=0) as opened:
             self.assertEqual(main(["--ui", "--subst", "-c", "print(7)"]), 0)
         self.assertEqual(opened.call_args.args, ("print(7)", "<string>", 2, "substitution"))
+
+    def test_cli_opens_typed_interfaces(self):
+        with patch("sicpfuf.ui.serve", return_value=0) as opened:
+            self.assertEqual(main(["--ui", "--typed", "-c", "x: int = 1"]), 0)
+        self.assertEqual(opened.call_args.args[2], 4)
+        self.assertTrue(opened.call_args.kwargs["typed"])
+        with patch("sicpfuf.ui.terminal.start", return_value=0) as opened:
+            self.assertEqual(main(["--tui", "--typed", "-c", "x: int = 1"]), 0)
+        self.assertEqual(opened.call_args.args[2], 4)
+        self.assertTrue(opened.call_args.kwargs["typed"])
+
+    def test_ui_only_flags_require_browser_ui(self):
+        for arguments in (["--no-browser"], ["--tui", "--port", "8765"], ["--ui", "--tui"]):
+            with self.subTest(arguments=arguments), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as result:
+                    main(arguments)
+                self.assertEqual(result.exception.code, 2)
 
     def test_cli_reports_unavailable_port(self):
         with patch("sicpfuf.ui.serve", side_effect=OSError("port unavailable")), contextlib.redirect_stderr(io.StringIO()) as err:

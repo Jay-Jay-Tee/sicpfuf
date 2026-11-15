@@ -27,8 +27,37 @@ FUNCTIONS = {
 FALLBACKS = {      # for older Pythons that lack these
     "cbrt": lambda x: math.copysign(abs(x) ** (1 / 3), x),
     "exp2": lambda x: 2.0 ** x,
-    "fma": lambda x, y, z: x * y + z,
 }
+
+
+def fused_multiply_add(x, y, z):
+    """Source Academy's compensated multiply-add, consistent across Python versions.
+
+    Splitting each factor recovers the product's rounding error (Dekker's method),
+    then a compensated sum adds z. A plain x*y+z loses that extra precision. We
+    keep the reference runtime's non-finite behaviour, rather than selecting a
+    different implementation according to the host Python's math.fma availability.
+    """
+    def number(value):
+        try:
+            return float(value)
+        except OverflowError:
+            return -math.inf if value < 0 else math.inf
+
+    x, y, z = number(x), number(y), number(z)
+    product = x * y
+    splitter = 134217729.0
+    scaled_x, scaled_y = x * splitter, y * splitter
+    high_x, high_y = scaled_x - (scaled_x - x), scaled_y - (scaled_y - y)
+    low_x, low_y = x - high_x, y - high_y
+    residual = product - high_x * high_y
+    residual -= low_x * high_y
+    residual -= high_x * low_y
+    product_error = low_x * low_y - residual
+    total = product + z
+    z_part = total - product
+    sum_error = (product - (total - z_part)) + (z - z_part)
+    return total + (product_error + sum_error)
 
 
 def wrap(name, fn):
@@ -50,7 +79,7 @@ def make():
     from . import builtin
     out = dict(CONSTANTS)
     for name, count in FUNCTIONS.items():
-        fn = getattr(math, name, None) or FALLBACKS[name]
+        fn = fused_multiply_add if name == "fma" else getattr(math, name, None) or FALLBACKS[name]
         lo, hi = count if isinstance(count, tuple) else (count, count)
         out["math_" + name] = builtin("math_" + name, wrap(name, fn), lo, hi)
     return out

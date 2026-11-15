@@ -76,6 +76,7 @@ nav:
   - Getting started: start.md
   - Finals kit:
       - finals/index.md
+      - Past-paper study routes: finals/past-papers.md
       - Topic checklist: finals/checklist.md
       - One-page sheets:
           - finals/sheets/index.md
@@ -97,6 +98,7 @@ nav:
       - Mock final 3: finals/mock-3.md
   - The Book:
       - book/index.md
+      - Course, studios & reflections: book/course-map.md
       - "Unit 1 · Functions":
           - book/01-elements.md
           - book/02-runes.md
@@ -121,6 +123,7 @@ nav:
           - book/18-mce-lazy.md
           - book/19-types-objects.md
           - book/20-big-picture.md
+      - Applied study patterns: book/21-applied-patterns.md
       - book/glossary.md
   - Drills:
       - practice/index.md
@@ -141,6 +144,7 @@ nav:
       - practice/15-types.md
   - Reference:
       - reference/index.md
+      - Compatibility & sources: reference/compatibility.md
       - reference/language.md
       - reference/library.md
       - reference/errors.md

@@ -79,6 +79,17 @@ class PlaygroundTests(unittest.TestCase):
         result = trace("xs = [1, 2]\n", chapter=1)
         self.assertIsNotNone(result["error"])
 
+    def test_terminal_histories_omit_graphics_without_changing_execution(self):
+        source = "def f(x):\n    return x + 1\nprint(f(3))\n"
+        graphic = trace(source, 2)
+        text = trace(source, 2, graphics=False)
+        for shown, plain in zip(graphic["steps"], text["steps"]):
+            self.assertEqual(shown["frames"], plain["frames"])
+            self.assertEqual(shown["functions"], plain["functions"])
+            self.assertEqual(shown["output"], plain["output"])
+            self.assertIsNone(plain["diagram"])
+        self.assertLess(len(json.dumps(text)), len(json.dumps(graphic)) // 2)
+
     def test_environment_diagram_has_inspectable_frames_and_functions(self):
         import xml.etree.ElementTree as ET
         result = trace("def f(x):\n    return x + 1\nprint(f(2))\n")

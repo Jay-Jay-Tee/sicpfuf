@@ -581,7 +581,7 @@ llist('print', '(', 'x', '+', '1', ')')
 
 ## Modules
 
-A module's names exist only after you import them, and only by name: `from rune import heart, show`. (`import rune` and `from rune import *` are not allowed.) Modules work in every chapter. sicpfuf draws pictures as text in the terminal and, with `--out FOLDER`, also saves them as SVG pictures and WAV sounds (see [the x-ray tools](xray.md#saving-pictures-and-sounds-out)).
+A module's names exist only after you import them, and only by name: `from rune import heart, show`. (`import rune` and `from rune import *` are not allowed.) Modules work in every chapter. sicpfuf draws pictures as text in the terminal and, with `--out FOLDER`, also saves them as SVG pictures and WAV sounds (see [the x-ray tools](xray.md#saving-pictures-and-sounds-out-folder)).
 
 ### rune
 

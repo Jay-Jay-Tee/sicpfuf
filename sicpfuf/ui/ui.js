@@ -10,6 +10,11 @@
     get("play").textContent = "Play";
   }
 
+  function controls(disabled) {
+    [code, mode, chapter, get("stdin"), get("run")].forEach(el => { el.disabled = disabled; });
+    get("typed").disabled = disabled || chapter.value !== "4" || mode.value !== "environment";
+  }
+
   function lines() {
     get("gutter").textContent = code.value.split("\n").map((_, i) => i + 1).join("\n");
     get("gutter").scrollTop = code.scrollTop;
@@ -77,16 +82,17 @@
     if (running) return;
     running = true;
     invalidate();
-    [code, mode, chapter, get("run")].forEach(el => { el.disabled = true; });
+    controls(true);
     get("message").textContent = "Tracing…";
     try {
       const response = await fetch("/api/trace", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: code.value, chapter: Number(chapter.value), mode: mode.value })
+        body: JSON.stringify({ source: code.value, chapter: Number(chapter.value), mode: mode.value, stdin: get("stdin").value, typed: get("typed").checked })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not run the program.");
       history = result;
+      index = result.error ? Math.max(0, result.steps.length - 1) : 0;
       render();
     } catch (error) {
       get("message").textContent = "Could not trace the program. Is sicpfuf still running?";
@@ -94,7 +100,7 @@
       get("error").textContent = error.message;
     } finally {
       running = false;
-      [code, mode, chapter, get("run")].forEach(el => { el.disabled = false; });
+      controls(false);
     }
   }
 
@@ -109,6 +115,7 @@
     timer = setInterval(() => move(index + 1), 900);
   });
   code.addEventListener("input", invalidate);
+  get("stdin").addEventListener("input", invalidate);
   code.addEventListener("scroll", lines);
   code.addEventListener("keydown", event => {
     if (event.key === "Tab") {
@@ -122,9 +129,16 @@
     const substitution = mode.value === "substitution";
     Array.from(chapter.options).forEach(option => { option.disabled = substitution && Number(option.value) > 2; });
     if (substitution && Number(chapter.value) > 2) chapter.value = "2";
+    if (substitution || chapter.value !== "4") get("typed").checked = false;
+    controls(false);
     invalidate();
   });
-  chapter.addEventListener("change", invalidate);
+  chapter.addEventListener("change", () => {
+    if (chapter.value !== "4") get("typed").checked = false;
+    controls(false);
+    invalidate();
+  });
+  get("typed").addEventListener("change", invalidate);
   get("diagram").addEventListener("click", event => {
     const frame = event.target.closest("[data-frame]"), fn = event.target.closest("[data-function]");
     const step = history && history.steps[index];
@@ -148,7 +162,7 @@
   });
   window.addEventListener("pagehide", pause);
   render();
-  [code, mode, chapter, get("run")].forEach(el => { el.disabled = true; });
+  controls(true);
   fetch("/api/session").then(response => {
     if (!response.ok) throw new Error("Could not load the program.");
     return response.json();
@@ -156,11 +170,12 @@
     code.value = session.source;
     mode.value = session.mode;
     chapter.value = session.chapter;
+    get("typed").checked = Boolean(session.typed);
     get("filename").textContent = session.filename;
     mode.dispatchEvent(new Event("change"));
     run();
   }).catch(error => {
-    [code, mode, chapter, get("run")].forEach(el => { el.disabled = false; });
+    controls(false);
     get("message").textContent = error.message + " Start sicpfuf --ui again.";
   });
 })();

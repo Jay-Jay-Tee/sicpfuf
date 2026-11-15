@@ -1,5 +1,10 @@
 # The Book: start here
 
+Start with the **[course map](course-map.md)** to connect every supplied lecture, studio and
+reflection to a chapter and practice route. The **[applied-patterns workshop](21-applied-patterns.md)**
+builds on the core chapters, and the **[past-paper routes](../finals/past-papers.md)** connect
+the three supplied finals to the relevant skills. The map also records missing material.
+
 <p class="chapter-goal">An easy textbook for the whole course, one chapter per lecture, where every program really runs.</p>
 
 !!! abstract "The big idea, in plain words"

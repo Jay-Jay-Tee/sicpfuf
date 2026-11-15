@@ -1,5 +1,9 @@
 # Finals kit
 
+Have the supplied previous-year papers? Use the **[past-paper study routes](past-papers.md)**
+to find the chapters and drills for each question group. For lectures, studios and reflections,
+start at the **[course map](../book/course-map.md)**.
+
 <p class="chapter-goal">Ten days to the final: what is on it, what to do each day, how to check yourself, and how to spend the two hours.</p>
 
 !!! abstract "The kit in one breath"

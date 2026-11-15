@@ -12,6 +12,8 @@ button { cursor: pointer; }
 button:disabled, input:disabled { opacity: .4; cursor: default; }
 button:hover:enabled { border-color: var(--accent); }
 #run { background: var(--accent); color: var(--bg); font-weight: 600; }
+.typed-toggle { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+.typed-toggle input { accent-color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 main { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 1.4fr); gap: 24px; padding: 22px; max-width: 1800px; margin: auto; }
 section { min-width: 0; }
@@ -24,6 +26,9 @@ pre, textarea { font: 13px/21px ui-monospace, SFMono-Regular, Menlo, Consolas, m
 #output, #error, #inspection, #before, #after { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; max-height: 260px; margin: 0 0 12px; }
 #error { border-left: 3px solid #d34c4c; }
 .hint { font-size: 12px; }
+.program-input { margin: 12px 0; font-size: 12px; color: var(--muted); }
+.program-input summary { cursor: pointer; }
+#stdin { display: block; width: 100%; min-height: 64px; margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--text); resize: vertical; }
 nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 #position { flex: 1; min-width: 80px; accent-color: var(--accent); }
 #count { font-size: 12px; color: var(--muted); min-width: 6ch; text-align: right; }

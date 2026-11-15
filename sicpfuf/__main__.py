@@ -161,6 +161,7 @@ def main(argv=None):
     ap.add_argument("--ast", action="store_true", help="print the syntax tree and stop")
     ap.add_argument("--typed", action="store_true", help="check type annotations first (Python §4 Typed)")
     ap.add_argument("--ui", action="store_true", help="open the built-in visual steppers in your browser")
+    ap.add_argument("--tui", action="store_true", help="open the stepper inside the terminal")
     ap.add_argument("--no-browser", action="store_true", help="--ui: print the URL without opening a browser")
     ap.add_argument("--port", type=int, default=0, help="--ui: local port (default: choose a free port)")
     ap.add_argument("--out", default=None, metavar="FOLDER",
@@ -169,12 +170,16 @@ def main(argv=None):
                     help="run FILE first (up to its `# DEMO` line), then the program")
     ap.add_argument("--stem", default=None, help=argparse.SUPPRESS)     # file name prefix for --out
     args = ap.parse_args(argv)
+    if args.ui and args.tui:
+        ap.error("choose --ui or --tui")
+    if (args.no_browser or args.port) and not args.ui:
+        ap.error("--no-browser and --port require --ui")
 
-    if args.code is None and args.file is None and not args.ui:
+    if args.code is None and args.file is None and not (args.ui or args.tui):
         from .repl import repl
         return repl(args.chapter or 4)
 
-    if args.ui and args.code is None and args.file is None:
+    if (args.ui or args.tui) and args.code is None and args.file is None:
         source, filename = None, None
     elif args.code is not None:
         source, filename = args.code, "<string>"
@@ -187,21 +192,28 @@ def main(argv=None):
             return 2
         filename = args.file
 
-    if args.ui:
+    if args.ui or args.tui:
         if not 0 <= args.port <= 65535:
             ap.error("--port must be between 0 and 65535")
-        if args.typed or args.prelude or args.tokens or args.ast or args.trace or args.out or args.env or args.steps:
-            ap.error("--ui supports -v, --subst and --estep; use other x-ray flags without --ui")
+        if args.prelude or args.tokens or args.ast or args.trace or args.out or args.env or args.steps:
+            ap.error("the stepper UI supports -v, --subst, --estep and --typed; use other x-ray flags separately")
         from .ui import serve
         chapter = chapter_of(source, args.chapter) if source is not None else args.chapter or 2
+        if args.typed:
+            if args.subst or (args.chapter is not None and args.chapter != 4):
+                ap.error("--typed requires Python §4 and the environment stepper")
+            chapter = 4
         first_line = (source or "").lstrip("\n").split("\n", 1)[0].strip()
         if args.subst and args.chapter is None and not CHAPTER_LINE.match(first_line):
             chapter = 2
         if args.subst and chapter > 2:
             ap.error("the substitution stepper needs Python §1 or §2; use --estep for §3 and §4")
+        if args.tui:
+            from .ui.terminal import start
+            return start(source, filename, chapter, "substitution" if args.subst else "environment", typed=args.typed)
         try:
             return serve(source, filename, chapter, "substitution" if args.subst else "environment",
-                         port=args.port, open_browser=not args.no_browser)
+                         port=args.port, open_browser=not args.no_browser, typed=args.typed)
         except OSError as exc:
             print(f"sicpfuf: could not start the UI: {exc}", file=sys.stderr)
             return 2

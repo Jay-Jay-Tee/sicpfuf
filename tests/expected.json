@@ -51,6 +51,18 @@
   "error": "NameNotFoundError@2",
   "stdout": ""
  },
+ "ch1_basics/fma compensated cancellation": {
+  "error": "",
+  "stdout": "4.930380657631324e-32\n"
+ },
+ "ch1_basics/fma float result": {
+  "error": "",
+  "stdout": "10.0 True\n"
+ },
+ "ch1_basics/fma reference extremes": {
+  "error": "",
+  "stdout": "nan nan nan\n"
+ },
  "ch1_basics/function without return": {
   "error": "",
   "stdout": "None\n"

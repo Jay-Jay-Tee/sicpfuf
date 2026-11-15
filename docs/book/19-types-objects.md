@@ -62,8 +62,8 @@ type Point = Pair[float, float]          # a type alias: a new name for a type
 ```
 
 !!! note "About the typed programs on this page"
-    The typed programs are illustrations (they are not run on this page). Where it helps, the same
-    program without annotations is shown running in Python §4.
+    Programs labelled **§4 · --typed** are checked and run automatically along with the other
+    examples. Where it helps, the same program without annotations is also shown in Python §4.
 
 ## Types are sets of values
 

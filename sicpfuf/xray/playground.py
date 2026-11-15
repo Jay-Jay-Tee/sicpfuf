@@ -20,12 +20,13 @@ class TraceLimit(Exception):
 
 
 class BrowserStepper(EnvStepper):
-    def __init__(self, chapter=3):
+    def __init__(self, chapter=3, typed=False, graphics=True):
         self.recording = False
         self.history = []
         self.line = 0
         self.operations = 0
-        super().__init__(chapter=chapter, out=io.StringIO(), max_depth=80)
+        self.graphics = graphics
+        super().__init__(chapter=chapter, out=io.StringIO(), max_depth=80, typed=typed)
         self.diagrams = True
         self.recording = True
 
@@ -76,7 +77,7 @@ class BrowserStepper(EnvStepper):
                 function = fn_name(value) if type(value) is Closure and not value.prelude else None
                 bindings.append({"name": name, "value": snapshot.value_text(value)
                                  if name in env.vars else "(unassigned)", "function": function})
-                if type(value) is list and id(value) not in seen and len(data) < 6:
+                if self.graphics and type(value) is list and id(value) not in seen and len(data) < 6:
                     seen.add(id(value))
                     data.append({"label": frame_name(env) + "." + name,
                                  "svg": svg.box_pointer(value)})
@@ -90,23 +91,25 @@ class BrowserStepper(EnvStepper):
                      for f in sorted(snapshot.functions.values(), key=lambda f: f.serial)]
         self.history.append({"message": message, "line": self.line if line is None else line,
                              "frames": frames, "functions": functions, "data": data,
-                             "diagram": svg.environment(snapshot, interactive=True),
+                             "diagram": svg.environment(snapshot, interactive=True) if self.graphics else None,
                              "output": self.out.getvalue()})
 
 
-def trace(source, chapter=3, mode="environment"):
+def trace(source, chapter=3, mode="environment", typed=False, graphics=True):
     """Return a bounded, JSON-safe trace; retain useful history on user errors."""
     if mode == "substitution":
         return substitution_trace(source, chapter)
-    interp = BrowserStepper(chapter)
+    interp = BrowserStepper(chapter, typed=typed, graphics=graphics)
     error = None
     interp.capture("Ready. Step forward to start the program.")
     try:
-        interp.run_source(source)
+        tree = interp.load_source(source, typecheck=typed)
+        interp.run_tree(tree)
         interp.capture("Program finished.")
     except (SicpError, SicpSyntaxError) as exc:
         lines = source.splitlines()
-        error = (format_syntax_error(exc, lines) if isinstance(exc, SicpSyntaxError)
+        error = (exc.report(lines) if hasattr(exc, "report") else
+                 format_syntax_error(exc, lines) if isinstance(exc, SicpSyntaxError)
                  else format_runtime_error(exc, lines))
         if len(interp.history) < 250:
             interp.capture("Program stopped: " + str(exc), line=exc.line or 0)

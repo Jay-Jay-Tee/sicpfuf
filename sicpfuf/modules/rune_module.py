@@ -23,6 +23,7 @@ when sicpfuf runs with  --out FOLDER.
 """
 
 import math
+import os
 import random
 
 from ..errors import SicpError
@@ -145,11 +146,10 @@ def to_svg(rune, size=512):
     return "\n".join(out) + "\n"
 
 
-def to_text(rune, width=48):
+def to_text(rune, width=48, use_colour=False):
     """The rune as text: a grid of `width` x `width` dots, two dots (upper/lower) per character."""
-    grid = [[False] * width for _ in range(width)]
+    grid = [[None] * width for _ in range(width)]
     for _, colour, triangles in flatten(rune):
-        ink = min(colour) < 0.9                     # white paint ERASES (useful with overlay)
         for (x1, y1), (x2, y2), (x3, y3) in triangles:
             # to grid coordinates: column 0 is x = -1, row 0 is y = +1
             ax, ay = (x1 + 1) / 2 * width, (1 - y1) / 2 * width
@@ -166,14 +166,35 @@ def to_text(rune, width=48):
                     w2 = ((cx - bx) * (py - by) - (cy - by) * (px - bx)) / area
                     w3 = ((ax - cx) * (py - cy) - (ay - cy) * (px - cx)) / area
                     if w1 >= 0 and w2 >= 0 and w3 >= 0:
-                        grid[row][col] = ink
+                        grid[row][col] = colour
     lines = ["┌" + "─" * width + "┐"]
     for row in range(0, width, 2):
-        upper, lower = grid[row], grid[row + 1] if row + 1 < width else [False] * width
-        lines.append("│" + "".join("█" if u and l else "▀" if u else "▄" if l else " "
-                                   for u, l in zip(upper, lower)) + "│")
+        upper, lower = grid[row], grid[row + 1] if row + 1 < width else [None] * width
+        if use_colour:
+            # Two RGB samples per terminal cell, on the same white canvas as the SVG.
+            cells, foreground, background = [], None, None
+            for u, l in zip(upper, lower):
+                u = tuple(round(x * 255) for x in u) if u is not None else (255, 255, 255)
+                l = tuple(round(x * 255) for x in l) if l is not None else (255, 255, 255)
+                if background != l:
+                    cells.append("\033[48;2;" + ";".join(map(str, l)) + "m")
+                    background = l
+                if u != l and foreground != u:
+                    cells.append("\033[38;2;" + ";".join(map(str, u)) + "m")
+                    foreground = u
+                cells.append(" " if u == l else "▀")
+            lines.append("│" + "".join(cells) + "\033[0m│")
+        else:
+            ink = lambda colour: colour is not None and min(colour) < .9
+            lines.append("│" + "".join("█" if ink(u) and ink(l) else "▀" if ink(u) else "▄" if ink(l) else " "
+                                       for u, l in zip(upper, lower)) + "│")
     lines.append("└" + "─" * width + "┘")
     return "\n".join(lines)
+
+
+def terminal_colour(out):
+    return (bool(getattr(out, "isatty", lambda: False)())
+            and "NO_COLOR" not in os.environ and os.environ.get("TERM") != "dumb")
 
 
 def save_figure(interp, kind, extension, data, binary=False):
@@ -328,7 +349,7 @@ def make(interp):
     def show(interp_, node, rune):
         """Display the rune. Returns the rune, so show(...) can sit inside an expression."""
         need_rune("show", rune)
-        interp_.write(to_text(rune) + "\n")
+        interp_.write(to_text(rune, use_colour=terminal_colour(interp_.out)) + "\n")
         path = save_figure(interp_, "rune", "svg", to_svg(rune))
         if path and not getattr(interp_, "out_stem", None):
             interp_.write(f"[saved {path}]\n")

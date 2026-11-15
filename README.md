@@ -6,15 +6,16 @@ sublanguages **Python §1–§4**).
 
 **Website: https://jay-jay-tee.github.io/sicpfuf/**
 
-The program includes a small **stepper UI**. Run `python3 -m sicpfuf --ui my_program.py` to
-open it locally: edit code, step forward or backward through an environment diagram, or watch
-substitution reduce an expression. It uses your installed Python and works offline.
+The program includes a **terminal stepper**: `python3 -m sicpfuf --tui my_program.py`.
+Keep editing in VS Code, then reload and step through the saved file below. An optional local
+browser interface is available with `--ui`. Both use installed Python and work offline.
 
 It has three parts:
 
 - **A finals kit**: a topic checklist, one-page summary sheets, three original two-hour mock papers
   with machine-checked solutions, and an exam mode with a clock.
-- **A book and drills** that follow the course in order: 20 chapters and 15 pages of practice problems.
+- **A book and drills**: 20 core chapters, an applied-patterns workshop, 15 practice pages,
+  a lecture/studio/reflection map and routes through the supplied previous-year finals.
 - **An interpreter for Python §1–§4**, written in readable Python, with x-ray tools:
 
   | | |
@@ -38,20 +39,48 @@ You need Python 3.9 or newer, nothing else.
     python3 -m sicpfuf my_program.py -v 1 --subst    # watch the substitution model
     python3 -m sicpfuf --ui my_program.py            # open the built-in visual UI
     python3 -m sicpfuf --ui --subst -v 1             # start with the substitution stepper
+    python3 -m sicpfuf --tui my_program.py           # step inside the terminal
+    python3 -m sicpfuf --tui my_program.py --typed   # Python §4 Typed in the terminal
 
-The UI opens a local browser tab and prints its URL. Keep the terminal open; Ctrl-C stops it.
+`--tui` uses the terminal directly: arrows or n/p step, Space plays, r reloads the saved file,
+1–4 changes chapter, Tab switches model, t toggles Typed in §4, and q quits. Press i to enter
+program input; Ctrl-G saves that input and retraces. It needs curses support (included with the
+macOS/Linux Python used here). It displays frames and bindings as terminal text, not SVG graphics.
+
+`--ui` opens a local browser tab and prints its URL. Keep the terminal open; Ctrl-C stops it.
 Use `--no-browser` to open the printed URL yourself, or `--port 8765` to choose a port.
 Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 250 events,
-15,000 interpreter operations, and 10 seconds. Typed checking and other CLI x-ray flags remain
-available from the terminal; the UI focuses on the two steppers.
+15,000 interpreter operations, and 10 seconds. Python §4 Typed is available with `--typed` in
+either interface, and with the Typed checkbox in the browser. Type errors prevent execution.
+Expand **Program input** to supply one line per `input()` call. Rune previews keep colour in
+terminals; redirected output stays plain. Set `NO_COLOR=1` to disable terminal colour.
+
+## Read beside your code in VS Code
+
+Open this folder in VS Code. In **Run and Debug**, choose **sicpfuf: Textbook beside code**
+and start it. The book opens inside VS Code in a dedicated side editor group, which stays
+separate from your code tabs. This uses VS Code's built-in integrated browser; no extension is needed.
+
+Choose **sicpfuf: Visual stepper beside code** to start the local stepper in that pane too.
+If you are already serving the docs with MkDocs, **sicpfuf: Local textbook (MkDocs running)**
+opens the current local book instead of the published one. Stop the stepper server with
+**Tasks: Terminate Task** when you finish.
+
+For the terminal workflow, run **Tasks: Run Task → sicpfuf: Terminal stepper (current file)**
+with your Python file active. **sicpfuf: Run current Python file** runs it through the course
+interpreter rather than ordinary Python's Run File command.
+
+The included editor declarations also let Pylance recognise sicpfuf's extra built-ins and
+module imports. These provide name/signature hints; `sicpfuf --typed` remains the course-language
+type checker. If VS Code retains an old “show_env is not defined” warning, reload the window.
 
 ## How it is checked
 
 - `python3 tests/run_tests.py` runs hundreds of programs and compares what sicpfuf prints, and the
   errors it reports, with Source Academy's own implementation of the languages (py-slang).
 - Every program on the website is run by `tests/check_docs.py`: the outputs you see are real.
-- `python3 -m unittest discover -s tests -p 'test_*.py'` checks browser trace snapshots,
-  closures, mutation, errors and execution limits.
+- `python3 -m unittest discover -s tests -p 'test_*.py'` checks serialized stepper histories,
+  closures, mutation, typed diagnostics, editor hints, errors and execution limits.
 - `tests/test_ui.py` checks the local UI's API and CLI integration. `tests/ui.cjs` checks its
   controls and diagrams using jsdom. The UI itself needs no JavaScript packages.
 
