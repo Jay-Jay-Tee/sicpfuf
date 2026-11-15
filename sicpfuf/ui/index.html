@@ -10,8 +10,9 @@
 </head>
 <body>
   <header>
-    <strong>sicpfuf <span>stepper</span></strong>
-    <span id="filename">Untitled</span>
+    <strong><span class="brand-mark" aria-hidden="true">s.</span> sicpfuf <span class="app-name">stepper</span></strong>
+    <span class="local-badge"><span aria-hidden="true"></span> Local session</span>
+    <div class="configuration">
     <select id="mode" aria-label="Execution model">
       <option value="environment">E-stepper</option>
       <option value="substitution">Substitution</option>
@@ -21,40 +22,58 @@
       <option value="3">Python §3</option><option value="4">Python §4</option>
     </select>
     <label class="typed-toggle"><input id="typed" type="checkbox"> Typed</label>
-    <button id="run" type="button">Run</button>
+    <button id="run" type="button" title="Run · Ctrl / ⌘ + Enter">Run</button>
+    </div>
   </header>
   <main>
-    <section aria-label="Source code">
-      <div class="section-title">Code <span>Ctrl / ⌘ + Enter to run</span></div>
+    <section class="source-panel panel" aria-label="Source code">
+      <div class="panel-heading"><div><span class="file-icon" aria-hidden="true">py</span> <span id="filename">Untitled</span></div><span id="run-state" class="state">Ready</span></div>
       <div class="editor">
         <pre id="gutter" aria-hidden="true">1</pre>
+        <div id="highlight" aria-hidden="true"><pre id="syntax"></pre></div>
         <textarea id="code" aria-label="Program source" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       </div>
       <details class="program-input">
         <summary>Program input</summary>
         <textarea id="stdin" aria-label="Program input, one line for each input call" placeholder="One line for each input() call" spellcheck="false"></textarea>
       </details>
-      <div class="section-title">Output</div>
-      <pre id="output">No output yet.</pre>
-      <pre id="error" role="alert" hidden></pre>
-      <p class="hint">Runs locally. Editing here does not overwrite your file.</p>
-    </section>
-    <section aria-label="Execution steps">
-      <nav aria-label="Step controls">
-        <button id="back" type="button">← Back</button>
-        <button id="next" type="button">Next →</button>
-        <button id="play" type="button">Play</button>
-        <input id="position" type="range" min="0" max="0" value="0" aria-label="Execution step">
-        <span id="count">0 / 0</span>
-      </nav>
-      <p id="message" role="status">Loading…</p>
-      <div id="diagram" aria-label="Environment diagram"></div>
-      <div id="reduction" hidden>
-        <div class="section-title">Before</div><pre id="before"></pre>
-        <div class="section-title">After</div><pre id="after"></pre>
+      <div class="console">
+        <div class="section-title">Output <span>At the selected step</span></div>
+        <pre id="output">No output yet.</pre>
+        <pre id="error" role="alert" hidden></pre>
       </div>
-      <pre id="inspection" hidden></pre>
+    </section>
+    <section class="execution-panel panel" aria-label="Execution steps">
+      <div class="panel-heading"><div><span class="model-icon" aria-hidden="true">⌘</span> <span id="model-title">Environment model</span></div><span id="count">0 / 0</span></div>
+      <div class="step-event"><span id="event-kind">START</span><p id="message" role="status">Loading…</p></div>
+      <div class="model-workspace">
+        <div class="visualization">
+          <div id="diagram-toolbar"><span>Frames &amp; closures</span><div><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button" title="Fit diagram to view">Fit</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div></div>
+          <div id="diagram" aria-label="Environment diagram"></div>
+          <div id="reduction" hidden>
+            <div class="section-title">Before</div><pre id="before"></pre>
+            <div class="section-title">After <span>Changed expression highlighted</span></div><pre id="after"></pre>
+          </div>
+        </div>
+        <aside id="frame-panel" aria-label="Current frame">
+          <div class="section-title">Current frame</div>
+          <h2 id="frame-name">Global</h2><p id="frame-call">Whole program</p><p id="frame-parent"></p>
+          <div class="section-title bindings-title">Bindings</div>
+          <dl id="bindings"></dl><p id="frame-hint" class="hint">Step forward to see bindings.</p>
+          <div id="inspection-panel" hidden><div class="section-title">Selection <button id="clear-inspection" aria-label="Clear selection" type="button">×</button></div><pre id="inspection" hidden></pre></div>
+        </aside>
+      </div>
+      <nav aria-label="Step controls">
+        <div class="transport">
+        <button id="back" type="button">← Back</button>
+        <button id="play" type="button">Play</button>
+        <button id="next" type="button">Next →</button>
+        </div>
+        <input id="position" type="range" min="0" max="0" value="0" aria-label="Execution step">
+        <select id="speed" aria-label="Playback speed"><option value="1800">0.5×</option><option value="900" selected>1×</option><option value="450">2×</option><option value="180">5×</option></select>
+      </nav>
     </section>
   </main>
+  <footer><span>Edits stay in this session. Your file is unchanged.</span><span><kbd>←</kbd> <kbd>→</kbd> Step <span class="footer-divider">/</span> <kbd>Space</kbd> Play <span class="footer-divider">/</span> <kbd>⌘ / Ctrl</kbd> + <kbd>Enter</kbd> Run</span></footer>
 </body>
 </html>

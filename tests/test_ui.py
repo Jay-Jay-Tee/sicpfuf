@@ -107,7 +107,7 @@ class UITests(unittest.TestCase):
         with patch("sicpfuf.ui.serve", return_value=0) as opened:
             self.assertEqual(main(["--ui", "--no-browser"]), 0)
         self.assertEqual(opened.call_args.args, (None, None, 2, "environment"))
-        self.assertEqual(opened.call_args.kwargs, {"port": 0, "open_browser": False, "typed": False})
+        self.assertEqual(opened.call_args.kwargs, {"port": 0, "open_browser": False, "typed": False, "max_steps": 400})
 
     def test_cli_loads_file_and_chapter(self):
         with TemporaryDirectory() as folder:
@@ -121,6 +121,20 @@ class UITests(unittest.TestCase):
         with patch("sicpfuf.ui.serve", return_value=0) as opened:
             self.assertEqual(main(["--ui", "--subst", "-c", "print(7)"]), 0)
         self.assertEqual(opened.call_args.args, ("print(7)", "<string>", 2, "substitution"))
+
+    def test_step_limit_reaches_worker_and_both_interfaces(self):
+        for mode in ("environment", "substitution"):
+            result = run_trace("print(1 + 2)\n", 2, mode, max_steps=2)
+            self.assertEqual(len(result["steps"]), 2)
+            self.assertIn("2 steps", result["error"])
+        for flag, target in (("--ui", "sicpfuf.ui.serve"), ("--tui", "sicpfuf.ui.terminal.start")):
+            with patch(target, return_value=0) as opened:
+                self.assertEqual(main([flag, "--max-steps", "800"]), 0)
+            self.assertEqual(opened.call_args.kwargs["max_steps"], 800)
+        for value in ("0", "5001"):
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as result:
+                main(["--ui", "--max-steps", value])
+            self.assertEqual(result.exception.code, 2)
 
     def test_cli_opens_typed_interfaces(self):
         with patch("sicpfuf.ui.serve", return_value=0) as opened:

@@ -20,12 +20,13 @@ class TraceLimit(Exception):
 
 
 class BrowserStepper(EnvStepper):
-    def __init__(self, chapter=3, typed=False, graphics=True):
+    def __init__(self, chapter=3, typed=False, graphics=True, max_steps=250):
         self.recording = False
         self.history = []
         self.line = 0
         self.operations = 0
         self.graphics = graphics
+        self.max_steps = max_steps
         super().__init__(chapter=chapter, out=io.StringIO(), max_depth=80, typed=typed)
         self.diagrams = True
         self.recording = True
@@ -61,8 +62,8 @@ class BrowserStepper(EnvStepper):
             self.capture(text)
 
     def capture(self, message, line=None):
-        if len(self.history) >= 250:
-            raise TraceLimit("Trace stopped at 250 steps. Try a smaller example.")
+        if len(self.history) >= self.max_steps:
+            raise TraceLimit(f"Trace stopped at {self.max_steps} steps. Increase --max-steps to see more.")
         snapshot = Snapshot(self)
         frames = []
         data = []
@@ -95,11 +96,11 @@ class BrowserStepper(EnvStepper):
                              "output": self.out.getvalue()})
 
 
-def trace(source, chapter=3, mode="environment", typed=False, graphics=True):
+def trace(source, chapter=3, mode="environment", typed=False, graphics=True, max_steps=250):
     """Return a bounded, JSON-safe trace; retain useful history on user errors."""
     if mode == "substitution":
-        return substitution_trace(source, chapter)
-    interp = BrowserStepper(chapter, typed=typed, graphics=graphics)
+        return substitution_trace(source, chapter, max_steps)
+    interp = BrowserStepper(chapter, typed=typed, graphics=graphics, max_steps=max_steps)
     error = None
     interp.capture("Ready. Step forward to start the program.")
     try:
@@ -111,7 +112,7 @@ def trace(source, chapter=3, mode="environment", typed=False, graphics=True):
         error = (exc.report(lines) if hasattr(exc, "report") else
                  format_syntax_error(exc, lines) if isinstance(exc, SicpSyntaxError)
                  else format_runtime_error(exc, lines))
-        if len(interp.history) < 250:
+        if len(interp.history) < max_steps:
             interp.capture("Program stopped: " + str(exc), line=exc.line or 0)
     except (TraceLimit, RecursionError) as exc:
         error = str(exc)
@@ -150,16 +151,16 @@ class SubstitutionInterpreter(Interpreter):
 
 
 class SubstitutionRecorder(Stepper):
-    def __init__(self, interp):
-        super().__init__(interp, limit=250)
+    def __init__(self, interp, max_steps=250):
+        super().__init__(interp, limit=max_steps)
         self.history = []
         self.output = io.StringIO()
         self.line = 0
         interp.recorder = self
 
     def capture(self, message, expression=""):
-        if len(self.history) >= 250:
-            raise TraceLimit("Trace stopped at 250 steps. Try a smaller example.")
+        if len(self.history) >= self.limit:
+            raise TraceLimit(f"Trace stopped at {self.limit} steps. Increase --max-steps to see more.")
         self.history.append({"message": message, "line": self.line, "expression": expression,
                              "frames": [], "functions": [], "data": [],
                              "output": self.output.getvalue()})
@@ -186,9 +187,9 @@ class SubstitutionRecorder(Stepper):
             self.line = previous
 
 
-def substitution_trace(source, chapter):
+def substitution_trace(source, chapter, max_steps=250):
     interp = SubstitutionInterpreter(chapter)
-    recorder = SubstitutionRecorder(interp)
+    recorder = SubstitutionRecorder(interp, max_steps)
     error = None
     recorder.capture("Ready. Step forward to start the program.")
     try:
@@ -203,7 +204,7 @@ def substitution_trace(source, chapter):
         lines = source.splitlines()
         error = (format_syntax_error(exc, lines) if isinstance(exc, SicpSyntaxError)
                  else format_runtime_error(exc, lines))
-        if len(recorder.history) < 250:
+        if len(recorder.history) < max_steps:
             recorder.line = exc.line or recorder.line
             recorder.capture("Program stopped: " + str(exc), recorder.last_line or "")
     except (TraceLimit, RecursionError) as exc:

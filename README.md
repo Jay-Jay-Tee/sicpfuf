@@ -49,7 +49,10 @@ macOS/Linux Python used here). It displays frames and bindings as terminal text,
 
 `--ui` opens a local browser tab and prints its URL. Keep the terminal open; Ctrl-C stops it.
 Use `--no-browser` to open the printed URL yourself, or `--port 8765` to choose a port.
-Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 250 events,
+The browser UI includes syntax colours, a current-frame binding inspector, diagram zoom,
+and adjustable playback speed. Arrow keys step and Space plays when the editor is not focused.
+Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 400 events
+(adjust with `--max-steps 1000`, up to 5000; press + in the terminal to increase and retrace),
 15,000 interpreter operations, and 10 seconds. Python §4 Typed is available with `--typed` in
 either interface, and with the Typed checkbox in the browser. Type errors prevent execution.
 Expand **Program input** to supply one line per `input()` call. Rune previews keep colour in

@@ -14,7 +14,7 @@ def main():
     data = json.load(sys.stdin)
     sys.stdin = io.StringIO(data.get("stdin", ""))
     result = trace(data["source"], data["chapter"], data["mode"], typed=data.get("typed", False),
-                   graphics=data.get("graphics", True))
+                   graphics=data.get("graphics", True), max_steps=data.get("max_steps", 250))
     print(json.dumps(result))
     return 0
 

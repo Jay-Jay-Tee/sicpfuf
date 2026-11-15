@@ -13,13 +13,13 @@ DEFAULT_SOURCE = "def square(x):\n    return x * x\n\nprint(square(2 + 1))\n"
 DEFAULT_TYPED_SOURCE = "def square(x: int) -> int:\n    return x * x\n\nprint(square(2 + 1))\n"
 
 
-def run_trace(source, chapter, mode, stdin="", typed=False, graphics=True):
+def run_trace(source, chapter, mode, stdin="", typed=False, graphics=True, max_steps=250):
     """A fresh subprocess bounds expensive operations as well as interpreter steps."""
     try:
         result = subprocess.run(
             [sys.executable, "-m", "sicpfuf.ui", "--trace"],
             input=json.dumps({"source": source, "chapter": chapter, "mode": mode, "stdin": stdin,
-                              "typed": typed, "graphics": graphics}),
+                              "typed": typed, "graphics": graphics, "max_steps": max_steps}),
             text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             cwd=str(ASSETS.parents[1]), timeout=10,
         )
@@ -99,14 +99,15 @@ def make_handler(session):
             except (ValueError, UnicodeError) as exc:
                 self.send(400, {"error": str(exc)})
                 return
-            self.send(200, run_trace(data["source"], chapter, mode, data.get("stdin", ""), typed=typed))
+            self.send(200, run_trace(data["source"], chapter, mode, data.get("stdin", ""), typed=typed,
+                                     max_steps=session.get("max_steps", 400)))
 
     return Handler
 
 
-def serve(source=None, filename=None, chapter=2, mode="environment", port=0, open_browser=True, typed=False):
+def serve(source=None, filename=None, chapter=2, mode="environment", port=0, open_browser=True, typed=False, max_steps=400):
     session = {"source": (DEFAULT_TYPED_SOURCE if typed else DEFAULT_SOURCE) if source is None else source,
-               "filename": filename or "Untitled", "chapter": chapter, "mode": mode, "typed": typed}
+               "filename": filename or "Untitled", "chapter": chapter, "mode": mode, "typed": typed, "max_steps": max_steps}
     server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(session))
     server.daemon_threads = True
     url = "http://127.0.0.1:" + str(server.server_address[1]) + "/"

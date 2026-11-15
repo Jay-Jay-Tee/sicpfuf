@@ -152,7 +152,7 @@ def main(argv=None):
     ap.add_argument("-v", "--chapter", type=int, choices=(1, 2, 3, 4), default=None,
                     help="which Python § to run (default: 4, or the file's `# chapter N` line)")
     ap.add_argument("--subst", action="store_true", help="show the substitution model step by step")
-    ap.add_argument("--max-steps", type=int, default=400, help="--subst: stop after this many steps")
+    ap.add_argument("--max-steps", type=int, default=400, help="steppers: stop after this many steps (default: 400)")
     ap.add_argument("--estep", action="store_true", help="show the environment model step by step")
     ap.add_argument("--trace", metavar="NAMES", help="draw the call tree of these functions (comma separated)")
     ap.add_argument("--env", action="store_true", help="draw the environment diagram at the end")
@@ -193,6 +193,8 @@ def main(argv=None):
         filename = args.file
 
     if args.ui or args.tui:
+        if not 2 <= args.max_steps <= 5000:
+            ap.error("UI --max-steps must be between 2 and 5000")
         if not 0 <= args.port <= 65535:
             ap.error("--port must be between 0 and 65535")
         if args.prelude or args.tokens or args.ast or args.trace or args.out or args.env or args.steps:
@@ -210,10 +212,11 @@ def main(argv=None):
             ap.error("the substitution stepper needs Python §1 or §2; use --estep for §3 and §4")
         if args.tui:
             from .ui.terminal import start
-            return start(source, filename, chapter, "substitution" if args.subst else "environment", typed=args.typed)
+            return start(source, filename, chapter, "substitution" if args.subst else "environment",
+                         typed=args.typed, max_steps=args.max_steps)
         try:
             return serve(source, filename, chapter, "substitution" if args.subst else "environment",
-                         port=args.port, open_browser=not args.no_browser, typed=args.typed)
+                         port=args.port, open_browser=not args.no_browser, typed=args.typed, max_steps=args.max_steps)
         except OSError as exc:
             print(f"sicpfuf: could not start the UI: {exc}", file=sys.stderr)
             return 2

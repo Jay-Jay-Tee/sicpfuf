@@ -72,10 +72,12 @@ is not a substitute for Python §4 Typed.
 
 ## Local UI and native Python
 
-The UI runs a fresh local subprocess for each trace. Limits are 250 events, 15,000 interpreter
+The UI runs a fresh local subprocess for each trace. Default limits are 400 events, 15,000 interpreter
 operations and 10 seconds. Optional program input supplies one line per `input()` call;
 browser “Cancel” input is not emulated. `--typed` is supported in the §4 environment UI and
 terminal stepper; errors are reported before execution. Other CLI x-ray flags remain separate.
+Use `--max-steps 1000` to change the event limit (2–5000), or press + in the terminal to
+increase it and retrace. The operation and time limits still apply.
 
 `--tui` is a terminal-text view of the same histories, with reload and keyboard navigation.
 Its frames are text rather than the graphical SVG view available in `--ui`.

@@ -14,7 +14,7 @@ def model_lines(step, mode, error=None):
         if mode == "substitution":
             lines.extend(["EXPRESSION", step.get("expression") or "Step forward to begin."])
         else:
-            for frame in step["frames"]:
+            for frame in sorted(step["frames"], key=lambda frame: not frame["current"]):
                 lines.append(frame["id"] + ("  [current]" if frame["current"] else ""))
                 lines.append("  " + frame["call"])
                 lines.append("  enclosing -> " + frame["parent"])
@@ -31,7 +31,20 @@ def model_lines(step, mode, error=None):
     return "\n".join(lines).splitlines()
 
 
-def start(source=None, filename=None, chapter=2, mode="environment", typed=False):
+def source_rows(source, active, width, height):
+    rows, focus = [], 0
+    for number, line in enumerate(source.splitlines(), 1):
+        if number == active:
+            focus = len(rows)
+        chunks = textwrap.wrap(line.expandtabs(4), max(1, width - 4),
+                               replace_whitespace=False, drop_whitespace=False) or [""]
+        rows.extend((number, (f"{number:>3} " if i == 0 else "    ") + chunk)
+                    for i, chunk in enumerate(chunks))
+    top = max(0, min(focus - height // 3, len(rows) - height))
+    return rows[top:top + height]
+
+
+def start(source=None, filename=None, chapter=2, mode="environment", typed=False, max_steps=400):
     if not sys.stdin.isatty() or not sys.stdout.isatty():
         print("sicpfuf: --tui needs an interactive terminal; use --ui for the browser interface.", file=sys.stderr)
         return 2
@@ -42,7 +55,7 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
         return 2
 
     def run(screen):
-        nonlocal source, chapter, mode, typed
+        nonlocal source, chapter, mode, typed, max_steps
         source = (DEFAULT_TYPED_SOURCE if typed else DEFAULT_SOURCE) if source is None else source
         index, offset, playing, last_tick = 0, 0, False, 0.0
         program_input = ""
@@ -72,7 +85,8 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
             screen.erase()
             put(1, 2, "Tracing locally…", max(1, screen.getmaxyx()[1] - 4))
             screen.refresh()
-            result = run_trace(source, chapter, mode, stdin=program_input, typed=typed, graphics=False)
+            result = run_trace(source, chapter, mode, stdin=program_input, typed=typed,
+                               graphics=False, max_steps=max_steps)
             if result["error"]:
                 index = max(0, len(result["steps"]) - 1)
             return result
@@ -92,11 +106,8 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
                 put(2, 1, "CODE", divider - 2, curses.A_BOLD)
                 put(2, divider + 2, f"MODEL  {index + 1 if steps else 0}/{len(steps)}", width - divider - 3, curses.A_BOLD)
                 active = step["line"] if step else 0
-                code_lines = source.splitlines()
-                top = max(0, active - body_height // 2) if active else 0
-                for row, text in enumerate(code_lines[top:top + body_height]):
-                    line = top + row + 1
-                    put(row + 3, 1, f"{line:>3} {text}", divider - 2,
+                for row, (line, text) in enumerate(source_rows(source, active, divider - 2, body_height)):
+                    put(row + 3, 1, text, divider - 2,
                         curses.A_REVERSE if line == active else 0)
                 for row in range(2, height - 4):
                     put(row, divider, "|", 1, curses.A_DIM)
@@ -108,9 +119,13 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
                 for row, text in enumerate(rows[offset:offset + body_height]):
                     put(row + 3, divider + 2, text, right_width,
                         curses.A_BOLD if "[current]" in text or text in ("ERROR", "EXPRESSION", "OUTPUT") else 0)
-                put(height - 4, 1, status or (step["message"] if step else "No steps recorded."), width - 2)
+                error = history.get("error") if history else None
+                limit = error and "Trace stopped at" in error
+                message = (f"TRACE LIMIT {max_steps}: press + to increase and retrace" if limit else
+                           error.splitlines()[0] if error else step["message"] if step else "No steps recorded.")
+                put(height - 4, 1, status or message, width - 2, curses.A_BOLD if error else 0)
                 put(height - 2, 1, "←/p Back  →/n Next  Space Play  r Reload  ↑↓ Scroll  q Quit", width - 2, curses.A_REVERSE)
-                put(height - 1, 1, "1–4 Chapter  Tab Model  t Typed  i Input  Home/End Jump", width - 2, curses.A_DIM)
+                put(height - 1, 1, "1–4 Chapter  Tab Model  t Typed  i Input  + More steps  Home/End Jump", width - 2, curses.A_DIM)
             screen.refresh()
             key = screen.getch()
             count = len(history["steps"]) if history else 0
@@ -136,6 +151,9 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
                 offset = max(0, offset - 1)
             elif key == ord("r"):
                 history = reload_trace(read_file=True) or history
+            elif key == ord("+"):
+                max_steps = min(5000, max_steps * 2)
+                history = reload_trace()
             elif key == ord("i") and height >= 12 and width >= 64:
                 from curses.textpad import Textbox
                 playing = False

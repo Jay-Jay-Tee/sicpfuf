@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from sicpfuf.ui.terminal import model_lines, start
+from sicpfuf.ui.terminal import model_lines, source_rows, start
 from sicpfuf.xray.playground import trace
 
 
@@ -19,6 +19,21 @@ class TerminalTests(unittest.TestCase):
         self.assertIn("x = 2", text)
         self.assertIn("enclosing -> global env", text)
         self.assertIn("FUNCTION OBJECTS", text)
+        self.assertTrue(text.startswith("E1  [current]"))
+
+    def test_code_wraps_without_losing_long_lines(self):
+        source = "def f(x):\n    return x if x == 0 else f(x - 1)\n"
+        rows = source_rows(source, 2, 18, 20)
+        joined = "".join(text[4:] for number, text in rows if number == 2)
+        self.assertEqual(joined, source.splitlines()[1])
+
+    def test_fibonacci_example_finishes_with_configured_limit(self):
+        program = "def fib_iter(a, b, count):\n    return b if count == 0 else fib_iter(a + b, a, count - 1)\ndef fast_fib(n):\n    return fib_iter(1, 0, n)\nprint(fast_fib(10), fast_fib(20), fast_fib(100))\n"
+        small = trace(program, 4, graphics=False)
+        self.assertIn("250 steps", small["error"])
+        complete = trace(program, 4, graphics=False, max_steps=400)
+        self.assertIsNone(complete["error"])
+        self.assertEqual(complete["steps"][-1]["output"], "55 6765 354224848179261915075\n")
 
     def test_substitution_and_errors(self):
         step = trace("print(2 + 3)\n", 1, "substitution")["steps"][1]
