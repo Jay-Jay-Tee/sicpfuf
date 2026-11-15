@@ -1,6 +1,6 @@
 # Compatibility and sources checked
 
-Review date: **15 November 2026**.
+Review date: **16 November 2026**.
 
 sicpfuf is an independent study interpreter. Its reference behaviour is Source Academy's
 Python implementation, **py-slang**. Differential tests compare output and errors on concrete
@@ -72,6 +72,10 @@ inference diagnostics. Columns are not part of the differential comparison.
 A separate public Python Typed PDF could not be retrieved. This comparison uses the available
 py-slang implementation and course material. The JavaScript **Source §4 Typed** specification
 is not a substitute for Python §4 Typed.
+
+`--typed` selects §4, overriding a file's chapter header. Other explicit chapter flags and
+`--subst` are rejected with it. The interactive prompt has no typed mode; the CLI reports this
+rather than silently starting an untyped session.
 
 ## Local UI and native Python
 

@@ -104,7 +104,7 @@ def load_prelude(interp, path):
 
 
 def run_program(source, filename, args):
-    chapter = chapter_of(source, args.chapter)
+    chapter = 4 if args.typed else chapter_of(source, args.chapter)
     if args.estep:
         from .xray.estepper import EnvStepper
         interp = EnvStepper(chapter, typed=args.typed)
@@ -174,8 +174,12 @@ def main(argv=None):
         ap.error("choose --ui or --tui")
     if (args.no_browser or args.port) and not args.ui:
         ap.error("--no-browser and --port require --ui")
+    if args.typed and (args.subst or args.chapter not in (None, 4)):
+        ap.error("--typed requires Python §4 and cannot be combined with --subst")
 
     if args.code is None and args.file is None and not (args.ui or args.tui):
+        if args.typed:
+            ap.error("--typed needs a file, -c, --ui or --tui; the interactive prompt does not support typed checking")
         from .repl import repl
         return repl(args.chapter or 4)
 
@@ -202,8 +206,6 @@ def main(argv=None):
         from .ui import serve
         chapter = chapter_of(source, args.chapter) if source is not None else args.chapter or 2
         if args.typed:
-            if args.subst or (args.chapter is not None and args.chapter != 4):
-                ap.error("--typed requires Python §4 and the environment stepper")
             chapter = 4
         first_line = (source or "").lstrip("\n").split("\n", 1)[0].strip()
         if args.subst and args.chapter is None and not CHAPTER_LINE.match(first_line):

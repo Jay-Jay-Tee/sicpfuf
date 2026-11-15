@@ -89,6 +89,8 @@ type checker. If VS Code retains an old “show_env is not defined” warning, r
   closures, mutation, typed diagnostics, editor hints, errors and execution limits.
 - `tests/test_ui.py` checks the local UI's API and CLI integration. `tests/ui.cjs` checks its
   controls and diagrams using jsdom. The UI itself needs no JavaScript packages.
+- Website deployment waits for the interpreter and UI CI jobs, including the real Pyodide
+  worker checks. To request a manual deployment, run the **tests** workflow on `main`.
 
 ## Not official
 

@@ -3,6 +3,7 @@ name: tests
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -30,3 +31,12 @@ jobs:
       - run: mkdocs build --strict
       - run: node tests/website_ui.cjs "$RUNNER_TEMP/sicpfuf-ui/node_modules/jsdom" site
       - run: node --experimental-vm-modules tests/website_worker.mjs "$RUNNER_TEMP/sicpfuf-ui/node_modules/pyodide/pyodide.mjs" site
+
+  docs:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: [test, ui]
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml

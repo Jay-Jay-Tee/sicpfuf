@@ -508,6 +508,10 @@ sicpfuf hint: a linked list (LList) or a stream can be None: the EMPTY list. Tes
 
 Without `--typed`, annotations are "Feature not supported", as in the untyped chapters. sicpfuf's checker is its own small one, written to be read ([`xray/typecheck.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/sicpfuf/xray/typecheck.py)); it follows the rules of the course's checker but may not accept or reject exactly the same programs in every corner.
 
+`--typed` selects Python §4 even if the file has an older chapter header. It cannot be
+combined with `-v 1`, `-v 2`, `-v 3` or `--subst`. Typed checking requires a file, `-c`,
+`--ui` or `--tui`; it is not available in the interactive prompt.
+
 ## The interactive prompt
 
 Start it with `python3 -m sicpfuf -v N` (no file). Type a statement and press Enter. Unlike a program file, the prompt **shows the value** of an expression you type (unless it is `None`). Names you declare stay for the next lines. A `def`, `if`, `while` or `for` continues on `...>` lines; finish it with an empty line.
