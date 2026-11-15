@@ -164,7 +164,7 @@ digits_iter(507, 1)
     -> 3
     ```
 
-    Every application line is just `digits_iter(n, count)` with new numbers: no operation waits outside the call. The whole state of the computation is in the two arguments.
+    Every application line is only `digits_iter(n, count)` with new numbers: no operation waits outside the call. The whole state of the computation is in the two arguments.
 
 ## 5. Recursive to iterative ★★
 
