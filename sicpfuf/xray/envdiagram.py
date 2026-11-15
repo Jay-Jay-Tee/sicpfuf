@@ -111,12 +111,15 @@ class Snapshot:
             return text
         return show_atom(v)
 
-    def list_text(self, v, depth=0):
+    def list_text(self, v, depth=0, inside=()):
+        if id(v) in inside:                      # a list that contains itself (a cycle)
+            return "[...]"
         if depth > 30:
             return "..."
+        inside = inside + (id(v),)
         parts = []
         for x in v[:12]:
-            parts.append(self.list_text(x, depth + 1) if type(x) is list else
+            parts.append(self.list_text(x, depth + 1, inside) if type(x) is list else
                          fn_name(x) if type(x) is Closure and not x.prelude else short(x, 30))
         if len(v) > 12:
             parts.append("...")
