@@ -2,6 +2,11 @@
 
 <p class="chapter-goal">Draw exactly where every variable lives, so you can predict any Python §3 program and draw its environment diagram in the exam.</p>
 
+!!! tip "Try it as you read"
+    Open the [interactive environment lab](../playground.md) to edit programs and step through
+    their frames, closures and mutations. Use **Explore step by step** under a code example
+    to bring that program into the lab.
+
 !!! abstract "The big idea, in plain words"
     Think of a stack of sticky-note sheets. Each sheet (a **frame**) lists some names and their values.
     Every sheet is stuck onto an older sheet (its **enclosing environment**), down to the sheet of the

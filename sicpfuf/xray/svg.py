@@ -146,7 +146,7 @@ def box_pointer(value):
 LINE_H, FRAME_X, PAD = 22, 96, 10
 
 
-def environment(snapshot, label=None):
+def environment(snapshot, label=None, interactive=False):
     """The environment diagram of an envdiagram.Snapshot as SVG text.
 
     Layout: frames in a column on the left, in the order they were made. Each function
@@ -178,6 +178,9 @@ def environment(snapshot, label=None):
     fn_x = right + 120
     position, dots = {}, {}             # id(env) → (top, height);  closure serial → [(x, y, env)]
     for env, lines in rows:
+        if interactive:
+            key = "global env" if env.kind == "program" else f"E{env.serial}"
+            parts.append(f'<g data-frame="{key}" tabindex="0" role="button" aria-label="Inspect {key}">')
         if env.kind == "program":
             title, call = "global env", ""
         else:
@@ -193,6 +196,9 @@ def environment(snapshot, label=None):
         h = max(1, len(lines)) * LINE_H + 2 * PAD
         position[id(env)] = (y, h)
         parts.append(f'<rect class="frame" x="{FRAME_X}" y="{y}" width="{frame_w:.0f}" height="{h}" rx="7"/>')
+        if interactive and env is snapshot.current:
+            parts.append(f'<rect x="{FRAME_X}" y="{y}" width="{frame_w:.0f}" height="{h}" rx="7" '
+                         'fill="none" stroke="#008577" stroke-width="4" pointer-events="none"/>')
         for i, (name, text, closure) in enumerate(lines):
             ty = y + PAD + i * LINE_H + 16
             parts.append(f'<text x="{FRAME_X + PAD}" y="{ty}">{esc(name + ": " + text)}</text>')
@@ -200,6 +206,8 @@ def environment(snapshot, label=None):
                 dot_x = FRAME_X + PAD + (len(name) + 2) * CHAR_W + 6
                 parts.append(f'<circle class="dot" cx="{dot_x:.1f}" cy="{ty - 5}" r="3.5"/>')
                 dots.setdefault(closure.serial, []).append((dot_x, ty - 5, env))
+        if interactive:
+            parts.append("</g>")
         y += h + 22
     bottom = y
     # enclosing-environment arrows, in lanes down the left margin
@@ -236,6 +244,8 @@ def environment(snapshot, label=None):
     for anchor, serial, f, home, mine in placed:
         fy = max(anchor, fy + 78) if fy else max(anchor, 40)
         cx = fn_x
+        if interactive:
+            parts.append(f'<g data-function="fn#{serial}" tabindex="0" role="button" aria-label="Inspect function {serial}">')
         parts.append(f'<circle class="box" cx="{cx}" cy="{fy}" r="11"/><circle class="box" cx="{cx + 22}" cy="{fy}" r="11"/>'
                      f'<circle class="dot" cx="{cx}" cy="{fy}" r="3"/><circle class="dot" cx="{cx + 22}" cy="{fy}" r="3"/>')
         params = ", ".join(f.params + (["*" + f.vararg] if f.vararg else []))
@@ -251,6 +261,8 @@ def environment(snapshot, label=None):
             ty = min(max(fy - 15, hy + 7), hy + hh - 7)
             parts.append(f'<path class="line" d="M{cx + 22},{fy} C{cx + 22},{fy - 44} {right + 70:.0f},{ty} '
                          f'{right + 2:.0f},{ty}" marker-end="url(#arrow)"/>')
+        if interactive:
+            parts.append("</g>")
     width = fn_x + 350 if snapshot.functions else right + 40
     return document(width, max(bottom, fy + 64) + 6, parts)
 

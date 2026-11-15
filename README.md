@@ -6,6 +6,12 @@ sublanguages **Python §1–§4**).
 
 **Website: https://jay-jay-tee.github.io/sicpfuf/**
 
+The website also has **visual steppers**: edit code, step backward and forward through a clickable
+environment diagram, or watch substitution reduce an expression. Inspect captured frames, zoom
+the diagram, jump through execution history, and watch shared pairs change. Book examples open directly in the UI.
+Built-in examples need no Python download; custom runs use the same interpreter through Pyodide
+in a browser worker.
+
 It has three parts:
 
 - **A finals kit**: a topic checklist, one-page summary sheets, three original two-hour mock papers
@@ -38,6 +44,11 @@ You need Python 3.9 or newer, nothing else.
 - `python3 tests/run_tests.py` runs hundreds of programs and compares what sicpfuf prints, and the
   errors it reports, with Source Academy's own implementation of the languages (py-slang).
 - Every program on the website is run by `tests/check_docs.py`: the outputs you see are real.
+- `python3 -m unittest discover -s tests -p 'test_*.py'` checks browser trace snapshots,
+  closures, mutation, errors and execution limits.
+- Before publishing, the docs workflow also runs `tests/playground_worker.mjs` against real
+  Pyodide and `tests/playground_ui.cjs` against the built site. Both accept local runtime paths
+  so the checks can run without downloading dependencies again.
 
 ## Not official
 

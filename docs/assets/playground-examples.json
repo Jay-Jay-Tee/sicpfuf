@@ -1,0 +1,68 @@
+[
+  {
+    "id": "counter",
+    "title": "A closure that remembers",
+    "chapter": 3,
+    "hint": "Watch balance in E1. Each call changes the same captured binding. Try making a second counter: does it share E1?",
+    "source": "def make_counter(balance):\n    def add(amount):\n        nonlocal balance\n        balance = balance + amount\n        return balance\n    return add\n\ncounter = make_counter(10)\nprint(counter(5))\nprint(counter(2))\n"
+  },
+  {
+    "id": "scope",
+    "title": "Which x does it use?",
+    "chapter": 3,
+    "hint": "The enclosing environment comes from where f was defined. Change the x passed to g and predict f's answer.",
+    "source": "x = 10\n\ndef f(y):\n    return x + y\n\ndef g(x):\n    answer = f(3)\n    return answer\n\nprint(g(100))\n"
+  },
+  {
+    "id": "recursion",
+    "title": "Recursion builds frames",
+    "chapter": 3,
+    "hint": "Each call gets its own n. Why do all the enclosing-environment buttons point to global env? Try factorial(4).",
+    "source": "def factorial(n):\n    if n == 0:\n        return 1\n    else:\n        return n * factorial(n - 1)\n\nprint(factorial(3))\n"
+  },
+  {
+    "id": "independent",
+    "title": "Two independent closures",
+    "chapter": 3,
+    "hint": "The two lambda objects remember different calls of make_adder, even though they came from the same line of code.",
+    "source": "def make_adder(x):\n    return lambda y: x + y\n\nadd_two = make_adder(2)\nadd_ten = make_adder(10)\nprint(add_two(5))\nprint(add_ten(5))\n"
+  },
+  {
+    "id": "sharing",
+    "title": "Shared pairs and mutation",
+    "chapter": 3,
+    "hint": "xs and ys point to the same pair. Step past set_head and compare the picture. Try ys = pair(1, None) instead.",
+    "source": "xs = pair(1, pair(2, None))\nys = xs\nset_head(ys, 99)\nprint(head(xs))\nprint(xs is ys)\n"
+  },
+  {
+    "id": "tail",
+    "title": "Tail calls pass control on",
+    "chapter": 3,
+    "hint": "Compare with ordinary factorial. The previous call does not wait for multiplication: the accumulator carries the answer.",
+    "source": "def factorial_iter(n, answer):\n    if n == 0:\n        return answer\n    else:\n        return factorial_iter(n - 1, n * answer)\n\nprint(factorial_iter(4, 1))\n"
+  },
+  {
+    "id": "subst-factorial",
+    "title": "Factorial: deferred multiplication",
+    "chapter": 1,
+    "mode": "substitution",
+    "hint": "Watch the multiplications build up before they can reduce. Change factorial(3) to factorial(4).",
+    "source": "def factorial(n):\n    return 1 if n == 0 else n * factorial(n - 1)\n\nprint(factorial(3))\n"
+  },
+  {
+    "id": "subst-higher-order",
+    "title": "Substituting a function argument",
+    "chapter": 2,
+    "mode": "substitution",
+    "hint": "A function can be an argument too. Follow how twice replaces f and x before it applies the lambda.",
+    "source": "def twice(f, x):\n    return f(f(x))\n\nprint(twice(lambda n: n + 3, 4))\n"
+  },
+  {
+    "id": "subst-conditional",
+    "title": "Only one branch runs",
+    "chapter": 1,
+    "mode": "substitution",
+    "hint": "The predicate reduces first. The branch with division by zero is never evaluated. Try changing 3 > 0 to 3 < 0.",
+    "source": "def choose(x):\n    return x + 1 if x > 0 else 1 / 0\n\nprint(choose(3))\n"
+  }
+]

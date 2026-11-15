@@ -12,3 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 tests/run_tests.py
+      - run: python3 -m unittest discover -s tests -p 'test_*.py'
