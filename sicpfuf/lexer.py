@@ -226,8 +226,9 @@ class Lexer:
         while self.peek().isalnum() or self.peek() == "_":
             self.advance()
         word = self.src[start:self.pos]
-        # f"...", r'...', b'...', rf"...", rb'...'  → string with a prefix
-        if self.peek() in "'\"" and word.lower() in ("f", "r", "rf", "fr", "b", "rb", "br"):
+        # The reference grammar recognises f-strings (then rejects the feature),
+        # but not raw/bytes prefixes: those remain a name followed by a string.
+        if self.peek() in "'\"" and word.lower() == "f":
             self.read_string(prefix=word.lower(), line=line, col=col)
             return
         self.add(KEYWORD if word in KEYWORDS else NAME, word, line, col)

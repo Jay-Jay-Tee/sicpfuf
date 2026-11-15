@@ -55,6 +55,10 @@ class Environment:
             if sc is not None:
                 if name in sc.local_names:
                     # The name belongs to THIS function's frame, but has no value yet.
+                    if env is not self:
+                        raise SicpError("NameError",
+                                        f"cannot access free variable '{name}' where it is not associated with a value in enclosing scope",
+                                        line)
                     raise SicpError("UnassignedLocalError",
                                     f"cannot access local variable '{name}' where it is not associated with a value",
                                     line)

@@ -19,6 +19,10 @@
   "error": "",
   "stdout": "(-1+0j) (5+5j) (1+2j) 5.0 (0.5+1j) (1+0j)\n"
  },
+ "ch1_basics/complex power uses reference polar evaluation": {
+  "error": "",
+  "stdout": "(-3+4.000000000000002j)\n(-6.960664459571899+2.7296244647840076j)\n(-0.22251715680177267+0.10070913113607541j)\n"
+ },
  "ch1_basics/conditional expression nesting": {
   "error": "",
   "stdout": "1 0 -1\n"
@@ -139,6 +143,18 @@
   "error": "",
   "stdout": "1000\n"
  },
+ "ch1_basics/reference math factorial rejects floats": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
+ "ch1_basics/reference math nextafter accepts a step count": {
+  "error": "",
+  "stdout": "1.0000000000000004\n-0.0\n1.0\n5e-323\n"
+ },
+ "ch1_basics/reference math perm rejects floats": {
+  "error": "TypeError@1",
+  "stdout": ""
+ },
  "ch1_basics/round to digits": {
   "error": "",
   "stdout": "2.68 1.0 0.12 2 -1.6 1200.0 7\n"
@@ -170,6 +186,10 @@
  "ch1_basics/user shadows builtin": {
   "error": "",
   "stdout": "42\n3\n"
+ },
+ "ch1_errors/adjacent string syntax rejected": {
+  "error": "SyntaxError",
+  "stdout": ""
  },
  "ch1_errors/and left int": {
   "error": "TypeError@1",
@@ -271,6 +291,10 @@
   "error": "Feature: dictionaries@1",
   "stdout": ""
  },
+ "ch1_errors/enclosing variable unassigned is a free variable error": {
+  "error": "NameError@3",
+  "stdout": ""
+ },
  "ch1_errors/equality bool bool": {
   "error": "TypeError@1",
   "stdout": ""
@@ -367,6 +391,10 @@
   "error": "Feature: default values of parameters (name=value)@1",
   "stdout": ""
  },
+ "ch1_errors/lambda yield is a generator feature": {
+  "error": "Feature: generators (yield)@1",
+  "stdout": ""
+ },
  "ch1_errors/list comprehension": {
   "error": "Feature: list comprehensions@1",
   "stdout": ""
@@ -437,6 +465,10 @@
  },
  "ch1_errors/range name ch1": {
   "error": "NameNotFoundError@1",
+  "stdout": ""
+ },
+ "ch1_errors/raw string syntax rejected": {
+  "error": "SyntaxError",
   "stdout": ""
  },
  "ch1_errors/reassign both branches": {

@@ -216,3 +216,20 @@ print(math_fma(2, 3, 4), is_float(math_fma(2, 3, 4)))
 print(math_fma(1.0000000000000002, 1.0000000000000002, -1.0000000000000004))
 #### fma reference extremes (§1)
 print(math_fma(math_inf, 0, 1), math_fma(1e308, 2, -1e308), math_fma(math_nan, 1, 2))
+
+#### complex power uses reference polar evaluation (§1)
+print((1 + 2j) ** 2)
+print((1 + 2j) ** 2.5)
+print((1 + 2j) ** (1 + 2j))
+
+#### reference math nextafter accepts a step count (§1)
+print(math_nextafter(1, 2, 2))
+print(math_nextafter(-1e-323, 1, 2))
+print(math_nextafter(1, math_nan, 0))
+print(math_nextafter(0, math_inf, 10))
+
+#### reference math factorial rejects floats (§1)
+print(math_factorial(2.5))
+
+#### reference math perm rejects floats (§1)
+print(math_perm(2.5))

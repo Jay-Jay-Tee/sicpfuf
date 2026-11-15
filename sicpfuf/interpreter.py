@@ -23,6 +23,7 @@ RETURN a signal (BREAK, CONTINUE or a ReturnValue) that each enclosing block pas
 upwards until a loop or a function call handles it.
 """
 
+import math
 import operator
 import sys
 
@@ -33,6 +34,24 @@ from .errors import SicpError
 from .parser import parse
 from . import values as values_module
 from .values import Closure, Builtin, TailCall, type_name, a, short
+
+
+def complex_power(base, exponent):
+    """Use the reference evaluator's polar formula, including its rounding.
+
+    Python optimises integral complex powers (for example, squaring by
+    multiplication); the reference evaluates exp(w * log(z)) for every power.
+    Keep Python's zero-base rules, which also avoid taking log(0).
+    """
+    z, w = complex(base), complex(exponent)
+    radius = math.hypot(z.real, z.imag)
+    if radius == 0:
+        return z ** w
+    angle = math.atan2(z.imag, z.real)
+    log_radius = math.log(radius)
+    magnitude = math.exp(w.real * log_radius - w.imag * angle)
+    phase = w.imag * log_radius + w.real * angle
+    return complex(magnitude * math.cos(phase), magnitude * math.sin(phase))
 
 # ------------------------------------------------------------- signals
 BREAK = "<break>"
@@ -436,6 +455,8 @@ class Interpreter:
                 return x + y
             if tx is complex or ty is complex:
                 if (tx is complex or tx in NUMBER) and (ty is complex or ty in NUMBER) and op in COMPLEX_OPS:
+                    if op == "**":
+                        return complex_power(x, y)
                     return ARITH[op](x, y)
             elif op == "*" and self.chapter >= 3:
                 if tx is list and ty is int:       # [0] * 3  →  [0, 0, 0]

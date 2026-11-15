@@ -293,3 +293,20 @@ def f(x):
 def g(x):
     return x + None
 print(f(1))
+
+#### raw string syntax rejected (§1)
+print(r"a\nb")
+
+#### adjacent string syntax rejected (§1)
+print("a" "b")
+
+#### enclosing variable unassigned is a free variable error (§1)
+def outer():
+    def inner():
+        return x
+    inner()
+    x = 1
+outer()
+
+#### lambda yield is a generator feature (§1)
+f = lambda: (yield 1)

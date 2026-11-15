@@ -149,7 +149,9 @@ class Checker:
             self.fail("SyntaxError", "chained assignment (a = b = ...) is not part of Python §1-§4", s,
                       "write one assignment per line.")
         target = s.targets[0]
-        if isinstance(target, (N.TupleExpr, N.ListExpr)):
+        if isinstance(target, N.ListExpr):
+            self.fail("SyntaxError", "assignment to a list of names is not part of Python §1-§4", s)
+        if isinstance(target, N.TupleExpr):
             self.unsupported("assignment to several names (a, b = ...)", s)
         if isinstance(target, N.Attribute):
             self.unsupported("assignment to attributes (a.b = ...)", s)
@@ -182,10 +184,10 @@ class Checker:
         self.block(s.orelse)
 
     def s_While(self, s):
-        if self.chapter < 3:
-            self.unsupported("while loops", s)
         if s.orelse:
             self.fail("SyntaxError", "`while ... else` is not part of Python §1-§4", s)
+        if self.chapter < 3:
+            self.unsupported("while loops", s)
         self.expr(s.test)
         self.loop_body(s.body)
 
@@ -197,10 +199,10 @@ class Checker:
             self.scope.loops -= 1
 
     def s_For(self, s):
-        if self.chapter < 3:
-            self.unsupported("for loops", s)
         if s.orelse:
             self.fail("SyntaxError", "`for ... else` is not part of Python §1-§4", s)
+        if self.chapter < 3:
+            self.unsupported("for loops", s)
         if not isinstance(s.target, N.Name):
             self.unsupported("unpacking in for loops (for a, b in ...)", s)
         it = s.iter
@@ -213,6 +215,8 @@ class Checker:
         self.loop_body(s.body)
 
     def s_ImportFrom(self, s):
+        if any(alias.name == "*" for alias in s.names):
+            self.fail("SyntaxError", "import * is not part of Python §1-§4", s)
         exports = self.module_exports.get(s.module)
         if exports is None:
             self.fail("ModuleNotFoundError", f"there is no module named '{s.module}'", s,
@@ -253,7 +257,7 @@ class Checker:
         if params.kwarg:
             self.unsupported("keyword parameters (**kwargs)", node)
         if params.kwonly:
-            self.unsupported("keyword-only parameters", node)
+            self.fail("SyntaxError", "keyword-only parameters are not part of Python §1-§4", node)
         if params.vararg and self.chapter < 3:
             self.unsupported("rest parameters (*name)", node)
         if not self.typed:

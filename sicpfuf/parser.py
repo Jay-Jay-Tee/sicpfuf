@@ -570,7 +570,9 @@ class Parser:
         if self.check_kw("lambda"):
             return self.lambda_expr()
         if self.check_kw("yield"):
-            self.error("`yield` is not part of Python §1-§4")
+            raise SicpSyntaxError("Python §1-§4 does not have generators (yield)", self.filename,
+                                  t.line, t.col,
+                                  kind="Feature not supported in this sublanguage: generators (yield)")
         body = self.or_test()
         if self.match_kw("if"):
             test = self.or_test()
@@ -772,6 +774,8 @@ class Parser:
         t = self.tok
         parts, any_f = [], False
         while self.tok.type in (STRING, FSTRING):
+            if parts:
+                self.error("adjacent string literals are not part of Python §1-§4")
             s = self.next()
             if s.type == FSTRING:
                 any_f = True
