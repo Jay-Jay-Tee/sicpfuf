@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<rect width="512" height="512" fill="#ffffff"/>
+<path d="M128.00,64.00L128.00,0.00L64.00,0.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,64.00L128.00,0.00L192.00,0.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,192.00L128.00,256.00L192.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,192.00L128.00,256.00L64.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,64.00L384.00,0.00L448.00,0.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,64.00L384.00,0.00L320.00,0.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,192.00L384.00,256.00L320.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,192.00L384.00,256.00L448.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,448.00L384.00,512.00L448.00,512.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,448.00L384.00,512.00L320.00,512.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,320.00L384.00,256.00L320.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M384.00,320.00L384.00,256.00L448.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,448.00L128.00,512.00L64.00,512.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,448.00L128.00,512.00L192.00,512.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,320.00L128.00,256.00L192.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+<path d="M128.00,320.00L128.00,256.00L64.00,256.00Z" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="0.4"/>
+</svg>

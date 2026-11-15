@@ -415,7 +415,7 @@ Space: a loop that uses a fixed number of variables needs Θ(1) extra space. A l
 
     ??? success "Answer"
         On an odd element, `continue` skips `i = i + 1`, so `i` never moves and the loop runs forever.
-        Fix: write `i = i + 1` just before the `continue` as well, or loop with
+        Fix: also write `i = i + 1` right before the `continue`, or loop with
         `for i in range(len(xs))` and delete both the `i = 0` and the `i = i + 1` lines.
 
 4. What does this print, and why?
