@@ -6,11 +6,9 @@ sublanguages **Python §1–§4**).
 
 **Website: https://jay-jay-tee.github.io/sicpfuf/**
 
-The website also has **visual steppers**: edit code, step backward and forward through a clickable
-environment diagram, or watch substitution reduce an expression. Inspect captured frames, zoom
-the diagram, jump through execution history, and watch shared pairs change. Book examples open directly in the UI.
-Built-in examples need no Python download; custom runs use the same interpreter through Pyodide
-in a browser worker.
+The program includes a small **stepper UI**. Run `python3 -m sicpfuf --ui my_program.py` to
+open it locally: edit code, step forward or backward through an environment diagram, or watch
+substitution reduce an expression. It uses your installed Python and works offline.
 
 It has three parts:
 
@@ -38,6 +36,14 @@ You need Python 3.9 or newer, nothing else.
     python3 -m sicpfuf -v 2                          # interactive prompt, Python §2
     python3 -m sicpfuf examples/mce.py               # a metacircular evaluator
     python3 -m sicpfuf my_program.py -v 1 --subst    # watch the substitution model
+    python3 -m sicpfuf --ui my_program.py            # open the built-in visual UI
+    python3 -m sicpfuf --ui --subst -v 1             # start with the substitution stepper
+
+The UI opens a local browser tab and prints its URL. Keep the terminal open; Ctrl-C stops it.
+Use `--no-browser` to open the printed URL yourself, or `--port 8765` to choose a port.
+Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 250 events,
+15,000 interpreter operations, and 10 seconds. Typed checking and other CLI x-ray flags remain
+available from the terminal; the UI focuses on the two steppers.
 
 ## How it is checked
 
@@ -46,9 +52,8 @@ You need Python 3.9 or newer, nothing else.
 - Every program on the website is run by `tests/check_docs.py`: the outputs you see are real.
 - `python3 -m unittest discover -s tests -p 'test_*.py'` checks browser trace snapshots,
   closures, mutation, errors and execution limits.
-- Before publishing, the docs workflow also runs `tests/playground_worker.mjs` against real
-  Pyodide and `tests/playground_ui.cjs` against the built site. Both accept local runtime paths
-  so the checks can run without downloading dependencies again.
+- `tests/test_ui.py` checks the local UI's API and CLI integration. `tests/ui.cjs` checks its
+  controls and diagrams using jsdom. The UI itself needs no JavaScript packages.
 
 ## Not official
 

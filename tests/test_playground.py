@@ -1,4 +1,4 @@
-"""Behavioral checks for the browser's serialized execution history."""
+"""Behavioral checks for the built-in UI's serialized execution history."""
 
 import json
 from pathlib import Path
@@ -17,7 +17,7 @@ def binding(step, frame, name):
 class PlaygroundTests(unittest.TestCase):
     def test_examples_and_output_match(self):
         examples = json.loads((Path(__file__).resolve().parents[1] /
-                               "docs/assets/playground-examples.json").read_text())
+                               "sicpfuf/ui/examples.json").read_text())
         expected = ["15\n17\n", "13\n", "6\n", "7\n15\n", "99\nTrue\n", "24\n", "6\n", "10\n", "4\n"]
         self.assertEqual(len(examples), len(expected))
         for example, output in zip(examples, expected):

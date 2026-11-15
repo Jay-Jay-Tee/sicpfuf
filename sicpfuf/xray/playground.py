@@ -1,7 +1,7 @@
-"""Serializable environment history for the website, using the real interpreter.
+"""Serializable histories for the built-in UI, using the real interpreter.
 
 Snapshots contain strings, never live values: rewinding a mutation must not change
-an earlier picture. The browser runs this in a disposable worker.
+an earlier picture. The UI runs this in an isolated local subprocess.
 """
 
 import io

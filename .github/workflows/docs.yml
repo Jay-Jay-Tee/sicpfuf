@@ -24,15 +24,6 @@ jobs:
           python-version: "3.12"
       - run: pip install -r docs/requirements.txt
       - run: mkdocs build --strict
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "26"
-      - name: Install browser test runtimes
-        run: npm install --prefix "$RUNNER_TEMP/sicpfuf-browser" --no-audit --no-fund pyodide@0.29.4 jsdom@30.1.3
-      - name: Check the real Python worker
-        run: node --experimental-vm-modules tests/playground_worker.mjs "$RUNNER_TEMP/sicpfuf-browser/node_modules/pyodide/pyodide.mjs" site
-      - name: Check playground interactions
-        run: node tests/playground_ui.cjs "$RUNNER_TEMP/sicpfuf-browser/node_modules/jsdom" site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>sicpfuf · stepper</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/ui.css">
+  <script src="/ui.js" defer></script>
+</head>
+<body>
+  <header>
+    <strong>sicpfuf <span>stepper</span></strong>
+    <span id="filename">Untitled</span>
+    <select id="mode" aria-label="Execution model">
+      <option value="environment">E-stepper</option>
+      <option value="substitution">Substitution</option>
+    </select>
+    <select id="chapter" aria-label="Python chapter">
+      <option value="1">Python §1</option><option value="2">Python §2</option>
+      <option value="3">Python §3</option><option value="4">Python §4</option>
+    </select>
+    <button id="run" type="button">Run</button>
+  </header>
+  <main>
+    <section aria-label="Source code">
+      <div class="section-title">Code <span>Ctrl / ⌘ + Enter to run</span></div>
+      <div class="editor">
+        <pre id="gutter" aria-hidden="true">1</pre>
+        <textarea id="code" aria-label="Program source" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+      </div>
+      <div class="section-title">Output</div>
+      <pre id="output">No output yet.</pre>
+      <pre id="error" role="alert" hidden></pre>
+      <p class="hint">Runs locally. Editing here does not overwrite your file.</p>
+    </section>
+    <section aria-label="Execution steps">
+      <nav aria-label="Step controls">
+        <button id="back" type="button">← Back</button>
+        <button id="next" type="button">Next →</button>
+        <button id="play" type="button">Play</button>
+        <input id="position" type="range" min="0" max="0" value="0" aria-label="Execution step">
+        <span id="count">0 / 0</span>
+      </nav>
+      <p id="message" role="status">Loading…</p>
+      <div id="diagram" aria-label="Environment diagram"></div>
+      <div id="reduction" hidden>
+        <div class="section-title">Before</div><pre id="before"></pre>
+        <div class="section-title">After</div><pre id="after"></pre>
+      </div>
+      <pre id="inspection" hidden></pre>
+    </section>
+  </main>
+</body>
+</html>
