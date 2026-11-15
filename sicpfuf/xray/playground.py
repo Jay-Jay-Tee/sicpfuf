@@ -27,6 +27,9 @@ class BrowserStepper(EnvStepper):
         self.operations = 0
         self.graphics = graphics
         self.max_steps = max_steps
+        self.seen_frames = {}
+        self.seen_functions = {}
+        self.history_objects = 0
         super().__init__(chapter=chapter, out=io.StringIO(), max_depth=80, typed=typed)
         self.diagrams = True
         self.recording = True
@@ -65,6 +68,19 @@ class BrowserStepper(EnvStepper):
         if len(self.history) >= self.max_steps:
             raise TraceLimit(f"Trace stopped at {self.max_steps} steps. Increase --max-steps to see more.")
         snapshot = Snapshot(self)
+        # Reachability is measured before adding historical objects. Keeping a
+        # frame for teaching must not itself make its closure cycle reachable.
+        live_frames, live_functions = set(snapshot.frames), set(snapshot.functions)
+        self.seen_frames.update(snapshot.frames)
+        self.seen_functions.update(snapshot.functions)
+        snapshot.frames.update(self.seen_frames)
+        snapshot.functions.update(self.seen_functions)
+        snapshot.unreachable_frames = set(snapshot.frames) - live_frames
+        snapshot.unreachable_functions = set(snapshot.functions) - live_functions
+        self.history_objects += len(snapshot.frames) + len(snapshot.functions)
+        if self.history_objects > 50000:
+            raise TraceLimit("Trace stopped: diagram history is too large. Try a smaller input.")
+        on_stack = {id(env) for env in snapshot.stack}
         frames = []
         data = []
         seen = set()
@@ -85,10 +101,11 @@ class BrowserStepper(EnvStepper):
             frames.append({"id": frame_name(env), "parent": frame_name(env.parent),
                            "call": env.name + "(" + ", ".join(env.args or []) + ")"
                            if env.kind == "function" else "Whole program",
-                           "current": env is snapshot.current, "bindings": bindings})
+                           "current": env is snapshot.current, "reachable": id(env) in live_frames,
+                           "on_stack": id(env) in on_stack, "bindings": bindings})
         functions = [{"id": fn_name(f), "params": f.params + (["*" + f.vararg] if f.vararg else []),
                       "line": f.node.line, "source": snapshot.source(f.node.line),
-                      "env": frame_name(f.env)}
+                      "env": frame_name(f.env), "reachable": f.serial in live_functions}
                      for f in sorted(snapshot.functions.values(), key=lambda f: f.serial)]
         self.history.append({"message": message, "line": self.line if line is None else line,
                              "frames": frames, "functions": functions, "data": data,

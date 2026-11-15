@@ -51,6 +51,31 @@ class PlaygroundTests(unittest.TestCase):
         self.assertEqual(current["parent"], "global env")
         self.assertEqual(call["line"], 5)
 
+    def test_unreachable_frames_and_closure_cycles_stay_in_history(self):
+        source = "def add(a, b):\n    def add(c, d):\n        return c + d\n    return add(a, b)\nprint(add(5, 6))\n"
+        result = trace(source, 2)
+        self.assertIsNone(result["error"])
+        final = result["steps"][-1]
+        frames = {frame["id"]: frame for frame in final["frames"]}
+        self.assertEqual(set(frames), {"global env", "E1", "E2"})
+        self.assertTrue(frames["global env"]["reachable"])
+        self.assertFalse(frames["E1"]["reachable"])
+        self.assertFalse(frames["E2"]["reachable"])
+        self.assertEqual(binding(final, "E1", "add"), "fn#2")
+        self.assertEqual(binding(final, "E2", "c"), "5")
+        self.assertFalse(next(fn for fn in final["functions"] if fn["id"] == "fn#2")["reachable"])
+        self.assertIn('class="unreachable" data-reachable="false"', final["diagram"])
+        call = next(step for step in result["steps"] if step["message"].startswith("Tail call"))
+        self.assertTrue(next(frame for frame in call["frames"] if frame["id"] == "E1")["reachable"])
+        self.assertEqual(result["steps"][0]["frames"][0]["bindings"], [])
+
+    def test_returned_frame_kept_alive_by_a_closure_is_not_grey(self):
+        result = trace("def make(x):\n    return lambda y: x + y\nf = make(2)\nprint(f(3))\n", 2)
+        frames = {frame["id"]: frame for frame in result["steps"][-1]["frames"]}
+        self.assertTrue(frames["E1"]["reachable"])
+        self.assertFalse(frames["E1"]["on_stack"])
+        self.assertFalse(frames["E2"]["reachable"])
+
     def test_errors_preserve_output_and_history(self):
         result = trace("print(7)\nx = 1 / 0\n")
         self.assertIn("ZeroDivisionError", result["error"])

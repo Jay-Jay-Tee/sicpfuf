@@ -46,6 +46,10 @@ extra_css:
   - assets/extra.css
 extra_javascript:
   - assets/exam-timer.js
+  - assets/stepper-links.js
+
+hooks:
+  - scripts/build_playground.py
 
 markdown_extensions:
   - admonition
@@ -74,6 +78,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting started: start.md
+  - Visual stepper: playground.md
   - Finals kit:
       - finals/index.md
       - Past-paper study routes: finals/past-papers.md

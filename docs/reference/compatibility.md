@@ -29,8 +29,11 @@ program in Source Academy and record the discrepancy rather than silently changi
 The [official environment-stepper specification](https://docs.sourceacademy.org/python/python_4_estepper.pdf)
 defines individual reductions with frames and shared objects. sicpfuf instead records environment
 events: definitions, calls, lookups across frames, assignments, mutations and returns. One event
-is not necessarily one expression reduction. Its snapshots omit unreachable frames; they do
-not retain grey garbage with a “clear unreachable” control. See the
+is not necessarily one expression reduction. The visual UI and terminal histories retain
+previously seen frames and functions; unreachable ones are greyed out (labelled in the terminal).
+A returned frame stays reachable when a live closure retains it. There is currently no
+“clear unreachable” control. The standalone `show_env()` snapshot still shows only reachable
+frames. See the
 [official guide](https://docs.sourceacademy.org/python/e-stepper/) when comparing interfaces.
 
 The substitution stepper uses applicative order in Python §1–§2 and has no normal-order mode.
@@ -78,6 +81,12 @@ browser “Cancel” input is not emulated. `--typed` is supported in the §4 en
 terminal stepper; errors are reported before execution. Other CLI x-ray flags remain separate.
 Use `--max-steps 1000` to change the event limit (2–5000), or press + in the terminal to
 increase it and retrace. The operation and time limits still apply.
+Retained diagram history is also bounded to 50,000 frame/function entries across its snapshots.
+
+The [website stepper](../playground.md) uses the same UI and interpreter inside a browser worker.
+Examples have build-checked histories, so opening one needs no Python download. Edited code
+loads Pyodide on first use; Stop terminates its worker. This is separate from the local UI's
+subprocess backend. The website allows up to 60 seconds to load Python and 10 seconds to trace.
 
 `--tui` is a terminal-text view of the same histories, with reload and keyboard navigation.
 Its frames are text rather than the graphical SVG view available in `--ui`.

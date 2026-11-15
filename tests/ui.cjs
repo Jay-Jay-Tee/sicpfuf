@@ -10,6 +10,9 @@ const js = readFileSync(resolve(root, 'sicpfuf/ui/ui.js'), 'utf8');
 const dom = new JSDOM(html, { url: 'http://127.0.0.1:8765/', runScripts: 'outside-only' });
 const w = dom.window, doc = w.document;
 const get = id => doc.getElementById(id);
+const style = doc.createElement('style');
+style.textContent = readFileSync(resolve(root, 'sicpfuf/ui/ui.css'), 'utf8');
+doc.head.append(style);
 const source = 'def square(x):\n    return x * x\nprint(square(2 + 1))\n';
 const timers = new Map();
 let timer = 0;
@@ -61,6 +64,11 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   while (!/Called square/.test(get('message').textContent) && !get('next').disabled) get('next').click();
   assert.equal(get('frame-name').textContent, 'E1');
   assert.equal(get('bindings').textContent, 'x3');
+  const fn = get('diagram').querySelector('[data-function]');
+  fn.focus();
+  assert.equal(w.getComputedStyle(fn).outline, 'none');
+  fn.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  assert.match(get('inspection').textContent, /fn#1/);
   const position = get('position').value;
   get('code').dispatchEvent(new w.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
   assert.equal(get('position').value, position); // editing arrows never step

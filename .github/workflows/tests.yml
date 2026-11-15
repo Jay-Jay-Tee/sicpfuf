@@ -24,5 +24,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "26"
-      - run: npm install --prefix "$RUNNER_TEMP/sicpfuf-ui" --no-audit --no-fund jsdom@30.1.3
+      - run: npm install --prefix "$RUNNER_TEMP/sicpfuf-ui" --no-audit --no-fund jsdom@30.1.3 pyodide@0.29.4
       - run: node tests/ui.cjs "$RUNNER_TEMP/sicpfuf-ui/node_modules/jsdom"
+      - run: pip install -r docs/requirements.txt
+      - run: mkdocs build --strict
+      - run: node tests/website_ui.cjs "$RUNNER_TEMP/sicpfuf-ui/node_modules/jsdom" site
+      - run: node --experimental-vm-modules tests/website_worker.mjs "$RUNNER_TEMP/sicpfuf-ui/node_modules/pyodide/pyodide.mjs" site

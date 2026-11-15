@@ -73,8 +73,12 @@ pre, textarea { font: 13px/21px ui-monospace, SFMono-Regular, Menlo, Consolas, m
 #diagram svg .frame, #diagram svg .box { fill: var(--panel); stroke: var(--muted); }
 #diagram svg .line { stroke: var(--muted); }#diagram svg marker path, #diagram svg .dot { fill: var(--muted); }
 #diagram svg [data-current="true"] .frame { stroke: var(--accent); stroke-width: 2; fill: var(--highlight); }
-#diagram [role="button"] { cursor: pointer; }
-#diagram [role="button"]:hover .frame, #diagram [role="button"]:focus .frame, #diagram .selected .frame, #diagram .selected .box { stroke: var(--accent); stroke-width: 2.5; }
+#diagram [role="button"] { cursor: pointer; outline: none; }
+/* SVG groups include connecting arrows. A rectangular browser focus ring around
+   their bounds crosses unrelated frames; highlight the actual shapes instead. */
+#diagram [role="button"]:hover .frame, #diagram [role="button"]:focus .frame,
+#diagram [role="button"]:hover .box, #diagram [role="button"]:focus .box,
+#diagram .selected .frame, #diagram .selected .box { stroke: var(--accent); stroke-width: 2.5; }
 .empty-diagram { display: grid; place-content: center; height: 100%; text-align: center; color: var(--muted); padding: 30px; }
 #frame-panel { padding: 18px 16px; overflow: auto; border-left: 1px solid var(--line); }
 #frame-name { margin: 0 0 5px; font: 600 17px/1.4 ui-monospace, monospace; }
@@ -99,3 +103,21 @@ kbd { font: inherit; padding: 1px 3px; border: 1px solid var(--line); border-rad
 .model-workspace.substitution { grid-template-columns: minmax(0, 1fr); }
 #code:disabled { -webkit-text-fill-color: transparent; opacity: 1; }
 @media (max-width: 800px) { nav { gap: 8px; padding: 12px; flex-wrap: wrap; } }
+
+/* Explicit theme follows the textbook when embedded. */
+:root[data-theme="light"] { color-scheme: light;
+  --bg: #eff1f3; --panel: #fff; --surface: #f6f7f8; --canvas: #fafbfc;
+  --text: #25303b; --muted: #687887; --line: #dce2e7; --accent: #087f72;
+  --on-accent: #fff; --highlight: #e2f2ed; --dot: #dfe6e9; --error: #b63848;
+  --keyword: #8652b5; --string: #487e42; --number: #b36a2c; --comment: #76838c;
+}
+:root[data-theme="dark"] { color-scheme: dark;
+  --bg: #14171c; --panel: #1c2027; --surface: #222730; --canvas: #191e25;
+  --text: #dce3ed; --muted: #94a1b3; --line: #303844; --accent: #6bd4bd;
+  --on-accent: #112b25; --highlight: #253c38; --dot: #2b333f; --error: #ff9b9f;
+  --keyword: #c8a0e8; --string: #a4ca92; --number: #e7b782; --comment: #84929f;
+}
+#example { max-width: 235px; }
+.model-legend { display: block; margin-top: 3px; font-size: 10px; opacity: .8; }
+#diagram .unreachable { opacity: .45; }
+#diagram .unreachable:focus, #diagram .unreachable:hover { opacity: .8; }

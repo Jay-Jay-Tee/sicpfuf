@@ -23,3 +23,14 @@
 #exam-timer button:hover { border-color: var(--md-accent-fg-color); }
 body.exam-running .md-typeset details.solution { display: none; }
 @media print { #exam-timer { display: none; } }
+
+/* The stepper shares the built-in UI, isolated from the book's typography. */
+.stepper-frame { display: block; width: 100%; height: calc(100vh - 190px); min-height: 780px;
+  border: 1px solid var(--md-default-fg-color--lightest); border-radius: 10px; }
+body:has(.stepper-frame) .md-grid { max-width: 96rem; }
+.md-typeset .stepper-fullscreen { display: inline-block; margin: .65rem 0; font-size: .75rem; }
+.md-typeset a.stepper-explore { display: inline-flex; align-items: center; margin: 0 .75rem .7rem;
+  padding: .35rem .65rem; border: 1px solid var(--md-default-fg-color--lighter); border-radius: 5px;
+  color: var(--md-typeset-a-color); font: 500 .68rem/1.5 var(--md-text-font-family); }
+.md-typeset a.stepper-explore:hover { border-color: currentColor; background: var(--md-accent-fg-color--transparent); }
+@media (max-width: 800px) { .stepper-frame { height: 1220px; } }

@@ -6,6 +6,9 @@ sublanguages **Python §1–§4**).
 
 **Website: https://jay-jay-tee.github.io/sicpfuf/**
 
+**[Online visual stepper](https://jay-jay-tee.github.io/sicpfuf/playground/)**: edit and run code
+in your browser, with environment diagrams, substitution and Python §4 Typed.
+
 The program includes a **terminal stepper**: `python3 -m sicpfuf --tui my_program.py`.
 Keep editing in VS Code, then reload and step through the saved file below. An optional local
 browser interface is available with `--ui`. Both use installed Python and work offline.

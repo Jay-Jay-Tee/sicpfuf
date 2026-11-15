@@ -6,6 +6,8 @@
 2. **An easy textbook and drills** that follow the course in order, from "what is a name" to the metacircular evaluator.
 3. **A tiny interpreter for Python §1–§4**, written in readable Python, that *shows you* the two mental models the course is built on.
 
+[Open the visual stepper →](playground.md){ .md-button .md-button--primary }
+
 ```python title="§1 · --subst"
 def factorial(n):
     return 1 if n == 1 else n * factorial(n - 1)

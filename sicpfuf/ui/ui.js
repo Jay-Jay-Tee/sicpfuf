@@ -1,6 +1,7 @@
 (function () {
   "use strict";
   const get = id => document.getElementById(id);
+  const request = (path, options) => window.sicpfufRequest ? window.sicpfufRequest(path, options) : fetch(path, options);
   const code = get("code"), mode = get("mode"), chapter = get("chapter"), slider = get("position");
   let history = null, index = 0, timer = null, running = false, zoom = null;
   let syntaxSource = null;
@@ -49,6 +50,8 @@
 
   function controls(disabled) {
     [code, mode, chapter, get("stdin"), get("run")].forEach(el => { el.disabled = disabled; });
+    if (get("example")) get("example").disabled = disabled;
+    if (get("stop")) get("stop").disabled = !disabled;
     get("typed").disabled = disabled || chapter.value !== "4" || mode.value !== "environment";
   }
 
@@ -159,7 +162,7 @@
     get("run").textContent = "Running…";
     state("Tracing…", "tracing");
     try {
-      const response = await fetch("/api/trace", {
+      const response = await request("/api/trace", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ source: code.value, chapter: Number(chapter.value), mode: mode.value, stdin: get("stdin").value, typed: get("typed").checked })
       });
@@ -170,7 +173,7 @@
       render();
       state(result.error ? "Stopped" : "Trace ready", result.error ? "error" : "");
     } catch (error) {
-      get("message").textContent = "Could not trace the program. Is sicpfuf still running?";
+      get("message").textContent = "Could not trace the program.";
       get("error").hidden = false;
       get("error").textContent = error.message;
       state("Disconnected", "error");
@@ -242,10 +245,10 @@
     let text = "";
     if (frame) {
       const entry = step.frames.find(f => f.id === frame.dataset.frame);
-      if (entry) text = `${entry.id} · ${entry.call}\nEnclosing: ${entry.parent}\n\n` + entry.bindings.map(b => b.name + " = " + b.value).join("\n");
+      if (entry) text = `${entry.id} · ${entry.call}\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}Enclosing: ${entry.parent}\n\n` + entry.bindings.map(b => b.name + " = " + b.value).join("\n");
     } else if (fn) {
       const entry = step.functions.find(f => f.id === fn.dataset.function);
-      if (entry) text = `${entry.id} (${entry.params.join(", ")})\n${entry.source}\nRemembers: ${entry.env}`;
+      if (entry) text = `${entry.id} (${entry.params.join(", ")})\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}${entry.source}\nRemembers: ${entry.env}`;
     }
     get("inspection").textContent = text;
     get("inspection").hidden = !text;
@@ -264,21 +267,26 @@
     }
   });
   window.addEventListener("pagehide", pause);
-  render();
-  controls(true);
-  fetch("/api/session").then(response => {
-    if (!response.ok) throw new Error("Could not load the program.");
-    return response.json();
-  }).then(session => {
+  window.addEventListener("sicpfuf:status", event => {
+    if (running) { get("message").textContent = event.detail; state(event.detail, "tracing"); }
+  });
+  function loadSession(session) {
     code.value = session.source;
-    mode.value = session.mode;
+    mode.value = session.mode || "environment";
     chapter.value = session.chapter;
     get("typed").checked = Boolean(session.typed);
-    get("filename").textContent = session.filename;
+    get("filename").textContent = session.filename || session.title || "Untitled";
     mode.dispatchEvent(new Event("change"));
-    run();
-  }).catch(error => {
+    return run();
+  }
+  window.addEventListener("sicpfuf:example", event => { if (!running) loadSession(event.detail); });
+  render();
+  controls(true);
+  request("/api/session").then(response => {
+    if (!response.ok) throw new Error("Could not load the program.");
+    return response.json();
+  }).then(loadSession).catch(error => {
     controls(false);
-    get("message").textContent = error.message + " Start sicpfuf --ui again.";
+    get("message").textContent = error.message + " Reload to try again.";
   });
 })();

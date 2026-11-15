@@ -14,8 +14,10 @@ def model_lines(step, mode, error=None):
         if mode == "substitution":
             lines.extend(["EXPRESSION", step.get("expression") or "Step forward to begin."])
         else:
-            for frame in sorted(step["frames"], key=lambda frame: not frame["current"]):
-                lines.append(frame["id"] + ("  [current]" if frame["current"] else ""))
+            for frame in sorted(step["frames"], key=lambda frame: (not frame["current"], not frame.get("reachable", True))):
+                lines.append(frame["id"] + ("  [current]" if frame["current"] else
+                             "  [unreachable]" if not frame.get("reachable", True) else
+                             "  [waiting]" if frame.get("on_stack") else ""))
                 lines.append("  " + frame["call"])
                 lines.append("  enclosing -> " + frame["parent"])
                 lines.extend("  " + b["name"] + " = " + b["value"] for b in frame["bindings"])
@@ -23,7 +25,8 @@ def model_lines(step, mode, error=None):
             if step["functions"]:
                 lines.append("FUNCTION OBJECTS")
                 for fn in step["functions"]:
-                    lines.append(fn["id"] + "(" + ", ".join(fn["params"]) + ") -> " + fn["env"])
+                    lines.append(fn["id"] + "(" + ", ".join(fn["params"]) + ") -> " + fn["env"] +
+                                 ("  [unreachable]" if not fn.get("reachable", True) else ""))
                     lines.append("  " + fn["source"])
         lines.extend(["", "OUTPUT", step["output"] or "No output yet."])
     if error:
@@ -118,6 +121,7 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
                 offset = min(offset, max(0, len(rows) - body_height))
                 for row, text in enumerate(rows[offset:offset + body_height]):
                     put(row + 3, divider + 2, text, right_width,
+                        curses.A_DIM if "[unreachable]" in text else
                         curses.A_BOLD if "[current]" in text or text in ("ERROR", "EXPRESSION", "OUTPUT") else 0)
                 error = history.get("error") if history else None
                 limit = error and "Trace stopped at" in error

@@ -180,7 +180,9 @@ def environment(snapshot, label=None, interactive=False):
     for env, lines in rows:
         if interactive:
             key = "global env" if env.kind == "program" else f"E{env.serial}"
-            parts.append(f'<g data-frame="{key}" tabindex="0" role="button" aria-label="Inspect {key}">')
+            dead = id(env) in getattr(snapshot, "unreachable_frames", ())
+            state = ' class="unreachable" data-reachable="false"' if dead else ' data-reachable="true"'
+            parts.append(f'<g data-frame="{key}"{state} tabindex="0" role="button" aria-label="Inspect {key}{" (unreachable)" if dead else ""}">')
         if env.kind == "program":
             title, call = "global env", ""
         else:
@@ -224,7 +226,8 @@ def environment(snapshot, label=None, interactive=False):
         arrivals[id(parent)] = j + 1
         land = max(py + 8, py + ph - 9 - 7 * j)
         lane = FRAME_X - 14 - 11 * (j % 7)
-        parts.append(f'<path class="line" d="M{FRAME_X},{ey + 12} H{lane} V{land} H{FRAME_X - 2}" '
+        dead = interactive and id(env) in getattr(snapshot, "unreachable_frames", ())
+        parts.append(f'<path class="line{" unreachable" if dead else ""}" d="M{FRAME_X},{ey + 12} H{lane} V{land} H{FRAME_X - 2}" '
                      f'marker-end="url(#arrow)"/>')
     # function objects: beside the frame they were created in
     placed = []
@@ -245,7 +248,9 @@ def environment(snapshot, label=None, interactive=False):
         fy = max(anchor, fy + 78) if fy else max(anchor, 40)
         cx = fn_x
         if interactive:
-            parts.append(f'<g data-function="fn#{serial}" tabindex="0" role="button" aria-label="Inspect function {serial}">')
+            dead = serial in getattr(snapshot, "unreachable_functions", ())
+            state = ' class="unreachable" data-reachable="false"' if dead else ' data-reachable="true"'
+            parts.append(f'<g data-function="fn#{serial}"{state} tabindex="0" role="button" aria-label="Inspect function {serial}{" (unreachable)" if dead else ""}">')
         parts.append(f'<circle class="box" cx="{cx}" cy="{fy}" r="11"/><circle class="box" cx="{cx + 22}" cy="{fy}" r="11"/>'
                      f'<circle class="dot" cx="{cx}" cy="{fy}" r="3"/><circle class="dot" cx="{cx + 22}" cy="{fy}" r="3"/>')
         params = ", ".join(f.params + (["*" + f.vararg] if f.vararg else []))
