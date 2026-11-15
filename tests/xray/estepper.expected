@@ -8,12 +8,12 @@ Assigned c = function object fn#2 in the global frame
 Called next(): the new frame would have no bindings, so the body runs in environment E1
 Looked up x: not in frame E1, found in the global frame: 10
 Assigned count = 10 in frame E1 (nonlocal)
-Returned 10 from E1
+Returned 10 from the call of next
     output: 10
 Called next(): the new frame would have no bindings, so the body runs in environment E1
 Looked up x: not in frame E1, found in the global frame: 10
 Assigned count = 20 in frame E1 (nonlocal)
-Returned 20 from E1
+Returned 20 from the call of next
     output: 20
 Defined loop: function object fn#3, created in the global environment
 Called loop(2, 0): new frame E2, whose enclosing environment is the global environment

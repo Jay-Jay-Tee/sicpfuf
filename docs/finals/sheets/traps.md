@@ -63,7 +63,7 @@ x = 5
 print(0 < x < 10)
 ```
 ```text
-FeatureNotSupportedError: chained comparisons (a < b < c) is not part of Python §1-§4
+FeatureNotSupportedError: Python §1-§4 does not have this: chained comparisons (a < b < c)
 ```
 
 **Fix:** `0 < x and x < 10`.
@@ -91,7 +91,7 @@ width = 3,
 print(width)
 ```
 ```text
-FeatureNotSupportedError: tuples are not part of Python §1-§4
+FeatureNotSupportedError: Python §1-§4 does not have this: tuples
 ```
 
 **Fix:** delete the comma. For two values use `pair(a, b)` (§2).
@@ -182,7 +182,7 @@ def helper(x):
     return x + offset
 ```
 ```text
-NameNotFoundError: the name 'offset' is not declared anywhere
+NameNotFoundError: the name 'offset' is not found in the current or enclosing environment(s)
 ```
 
 **Fix:** declare it (`offset = 1`) or pass it as a parameter. Watch for typos in rarely used branches.
@@ -416,7 +416,7 @@ xs = [1, 2, 3]
 xs.append(4)
 ```
 ```text
-FeatureNotSupportedError: attribute access (a.b) is not part of Python §1-§4
+FeatureNotSupportedError: Python §1-§4 does not have this: attribute access (a.b)
 ```
 
 **Fix:** allocate the size you need first (`[None] * n`), then fill by index. Count first if you do not know the size (two-pass filter).

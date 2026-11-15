@@ -197,11 +197,11 @@ Defined bump_mine: function object fn#2, created in environment E1
 Defined bump_global: function object fn#3, created in environment E1
 Called bump_mine(): the new frame would have no bindings, so the body runs in environment E1
 Assigned x = 11 in frame E1 (nonlocal)
-Returned None from E1
+Returned None from the call of bump_mine
 Called bump_global(): the new frame would have no bindings, so the body runs in environment E1
 Looked up x: not in frame E1, found in the global frame: 0
 Assigned x = 100 in the global frame (global)
-Returned None from E1
+Returned None from the call of bump_global
 Returned 11 from E1
     output: 11 100
 ```

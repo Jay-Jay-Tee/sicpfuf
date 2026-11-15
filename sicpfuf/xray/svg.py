@@ -53,7 +53,7 @@ class BoxDrawing:
         texts, widths, kids = [], [], []
         for i, item in enumerate(v):
             pointer = type(item) is list
-            text = "" if pointer or (is_pair and i == 1 and item is None) else atom_text(item)
+            text = "" if pointer or (is_pair and item is None) else atom_text(item)
             texts.append(text)
             widths.append(self.cell_width(text))
             kids.append(item if pointer else None)
@@ -88,7 +88,7 @@ class BoxDrawing:
             if v:
                 if kids[i] is not None:
                     self.parts.append(f'<circle class="dot" cx="{cx + w / 2:.1f}" cy="{y + CELL_H / 2:.1f}" r="3.5"/>')
-                elif is_pair and i == 1 and v[1] is None:
+                elif is_pair and v[i] is None:
                     self.parts.append(f'<line class="line" x1="{cx:.1f}" y1="{y + CELL_H:.1f}" '
                                       f'x2="{cx + w:.1f}" y2="{y:.1f}"/>')
                 else:
@@ -182,7 +182,8 @@ def environment(snapshot, label=None):
             title, call = "global env", ""
         else:
             title = f"E{env.serial}"
-            call = f"{env.name}({', '.join(short(a_, 14) for a_ in (env.args or []))})"
+            saved = env.args or []
+            call = f"{env.name}({', '.join(saved) if snapshot.interp.diagrams else ', '.join(short(a_, 14) for a_ in saved)})"
         parts.append(f'<text x="{FRAME_X}" y="{y + 14}" font-weight="bold">{title}</text>')
         if call:
             room = int((frame_w + 90) / (CHAR_W * 0.86)) - len(title) - 2     # stop before the function column

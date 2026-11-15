@@ -343,7 +343,7 @@ sicpfuf hint: in Python §1 and §2 a name gets its value ONCE and keeps it. Tha
     NameNotFoundError at line 1
         print(1 if True else bonus_points)
                              ^
-    NameNotFoundError: the name 'bonus_points' is not declared anywhere
+    NameNotFoundError: the name 'bonus_points' is not found in the current or enclosing environment(s)
     sicpfuf hint: every name must be declared somewhere: by `name = ...`, by `def name(...)`, as a parameter, or by `from module import name`.
     ```
 

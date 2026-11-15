@@ -341,7 +341,7 @@ that take functions.
     NameNotFoundError at line 2
         show(heart)
         ^
-    NameNotFoundError: the name 'show' is not declared anywhere
+    NameNotFoundError: the name 'show' is not found in the current or enclosing environment(s)
     sicpfuf hint: every name must be declared somewhere: by `name = ...`, by `def name(...)`, as a parameter, or by `from module import name`.
     ```
 

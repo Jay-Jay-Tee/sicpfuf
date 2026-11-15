@@ -31,7 +31,7 @@ from .chapters import check_program
 from .env import Environment
 from .errors import SicpError
 from .parser import parse
-from .values import Closure, Builtin, TailCall, type_name, a
+from .values import Closure, Builtin, TailCall, type_name, a, short
 
 # ------------------------------------------------------------- signals
 BREAK = "<break>"
@@ -120,6 +120,7 @@ class Interpreter:
         self.closure_count = 0
         self.sources = {}              # filename → list of source lines
         self.hook = None               # x-ray tools plug in here (see xray/calltree.py)
+        self.diagrams = False          # True when environment diagrams may be drawn (show_env, --env)
         self.loading_library = False
         self.modules = {}
 
@@ -146,6 +147,8 @@ class Interpreter:
     def load_source(self, source, filename="<sicpfuf>"):
         """text → checked tree. Raises SicpSyntaxError if it is not a valid program."""
         self.sources[filename] = source.replace("\r\n", "\n").split("\n")
+        if "show_env" in source:
+            self.diagrams = True       # remember each call's arguments as text, before they can change
         tree = parse(source, filename)
         known = self.lib.names(self) | set(self.program_env.vars)      # (names from --with FILE count too)
         check_program(tree, self.chapter, known, self.lib.module_exports(),
@@ -167,6 +170,11 @@ class Interpreter:
             tree = parse(source, f"<{name} library>")
             mark_library(tree)
             self.exec_block(tree.body, self.library_env)
+            # Library functions look names up through YOUR program's frame first, as in Source
+            # Academy: if a program defines its own `reverse`, the library's `map` uses it.
+            for value in self.library_env.vars.values():
+                if type(value) is Closure and value.env is self.library_env:
+                    value.env = self.program_env
         finally:
             self.loading_library = False
 
@@ -271,6 +279,9 @@ class Interpreter:
     def exec_AnnAssign(self, node, env):       # x: int = 5   (typed §4: the type is checked before running)
         env.assign(node.target.id, self.eval(node.value, env))
 
+    def exec_TypeAlias(self, node, env):       # type Rat = ...   (typed §4: only the checker reads it)
+        return None
+
     def check_index(self, seq, index, node):
         if type(index) is not int:
             raise SicpError("TypeError", f"list indices must be integers, not {type_name(index)}", node.line)
@@ -318,7 +329,7 @@ class Interpreter:
         name = node.target.id
         for i in range(*args):
             self.steps += 1
-            env.assign(name, i)
+            self.assign_loop_variable(env, name, i)
             r = self.exec_block(node.body, env)
             if r is not None:
                 if r is BREAK:
@@ -327,6 +338,9 @@ class Interpreter:
                     continue
                 return r
         return None
+
+    def assign_loop_variable(self, env, name, value):
+        env.assign(name, value)
 
     # ================================================================ definitions
     def exec_FunctionDef(self, node, env):
@@ -542,7 +556,7 @@ class Interpreter:
                 self.frame_count += 1
                 env.serial = self.frame_count
             env.call_line = node.line if node is not None else 0
-            env.args = args
+            env.args = [short(x, 20) for x in args] if self.diagrams else args
         return env
 
     def call_closure(self, func, args, node):

@@ -61,16 +61,18 @@ class StepHook:
         else:
             text = f"the new frame would have no bindings, so the body runs in {parent}"
         if tail:
-            self.envs[-1] = env
+            self.envs[-1] = (env, func)
             s.note(f"Tail call {call}: {text}")
         else:
-            self.envs.append(env)
+            self.envs.append((env, func))
             s.note(f"Called {call}: {text}")
 
     def leave(self, result):
-        env = self.envs.pop()
-        if env is not None:
-            self.stepper.note(f"Returned {self.stepper.show(result)} from {frame_name(env)}")
+        entry = self.envs.pop()
+        if entry is not None:
+            env, func = entry
+            where = frame_name(env) if env.serial else f"the call of {func.name}"
+            self.stepper.note(f"Returned {self.stepper.show(result)} from {where}")
 
     def failed(self, error):
         self.envs.pop()
@@ -83,6 +85,27 @@ class EnvStepper(Interpreter):
         self.at_line_start = True
         super().__init__(*args, **kwargs)
         self.hook = StepHook(self)
+        self.watch_mutators()
+
+    def watch_mutators(self):
+        """Report set_head / set_tail too: they change a pair, not a binding."""
+        from ..values import Builtin
+        for name in ("set_head", "set_tail"):
+            old = self.builtins_env.vars.get(name)
+            if old is None:
+                continue
+
+            def changed(p, value, old=old, name=name):
+                result = old.fn(p, value)
+                part = "head" if name == "set_head" else "tail"
+                self.note(f"Changed the {part} of a pair to {self.show(value)} ({name}): "
+                          f"every name that points at this pair sees the change")
+                return result
+            self.builtins_env.vars[name] = Builtin(name, changed, 2, 2)
+
+    def assign_loop_variable(self, env, name, value):
+        env.assign(name, value)
+        self.note(f"Assigned {name} = {self.show(value)} in {frame_of(frame_name(env.target_env(name)))} (for loop)")
 
     def show(self, v):
         if type(v) is Closure and not v.prelude:

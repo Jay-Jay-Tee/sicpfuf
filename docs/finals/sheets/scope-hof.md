@@ -61,7 +61,7 @@ def never_called():
     return missing + 1
 ```
 ```text
-NameNotFoundError: the name 'missing' is not declared anywhere
+NameNotFoundError: the name 'missing' is not found in the current or enclosing environment(s)
 ```
 
 ## Lambda expressions

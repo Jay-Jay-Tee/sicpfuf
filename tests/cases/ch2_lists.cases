@@ -141,3 +141,8 @@ print(member("x", llist("a", "b")), llist("a") == llist("b"), append(llist("a"),
 print(is_pair(llist()), is_llist(llist(None)), length(llist(None, None)))
 #### str repr of lists (§2)
 print(str(llist(1, "a")), repr(llist(1, "a")), str(None), repr(None), "x" + str(pair(1, 2)))
+#### library uses user definitions (§2)
+def reverse(xs):
+    return 42
+print(map(lambda x: x + 1, llist(1, 2)))
+print(filter(lambda x: x > 1, llist(1, 2, 3)))

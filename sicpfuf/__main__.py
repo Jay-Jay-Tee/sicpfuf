@@ -107,6 +107,8 @@ def run_program(source, filename, args):
         interp = EnvStepper(chapter, typed=args.typed)
     else:
         interp = Interpreter(chapter, typed=args.typed)
+    if args.env:
+        interp.diagrams = True
     interp.out_dir = args.out
     interp.out_stem = args.stem
     code = 0

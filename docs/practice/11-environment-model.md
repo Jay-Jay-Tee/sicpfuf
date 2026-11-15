@@ -260,7 +260,7 @@ print(outer(), level)
     global env
         level: 1
         outer: fn#1
-    E1: outer()                   enclosing environment: global env    <-- current environment
+    E1: outer()                   enclosing environment: global env    <-- current environment (running inner(), whose own frame is empty, so not drawn)
         level: 5
         inner: fn#2
     function objects

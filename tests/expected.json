@@ -619,6 +619,10 @@
   "error": "TypeError@2",
   "stdout": ""
  },
+ "ch2_lists/library uses user definitions": {
+  "error": "",
+  "stdout": "42\n42\n"
+ },
  "ch2_lists/list ops on strings": {
   "error": "",
   "stdout": "None False ['a', ['b', None]]\n"

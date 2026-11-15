@@ -59,9 +59,10 @@ class Snapshot:
     def __init__(self, interp, current=None):
         self.interp = interp
         self.stack = [real_frame(e) for e in interp.envs if e is not None]
-        self.current = real_frame(current if current is not None else
-                                  (interp.envs[-1] if interp.envs and interp.envs[-1] is not None
-                                   else interp.program_env))
+        raw = current if current is not None else \
+            (interp.envs[-1] if interp.envs and interp.envs[-1] is not None else interp.program_env)
+        self.current = real_frame(raw)
+        self.empty_call = raw.name if raw is not self.current and raw.kind == "function" else None
         self.frames = {}                # id(env) → env   (function frames to draw)
         self.functions = {}             # serial → closure
         self.refs = {}                  # id(list) → how many bindings point straight at it
@@ -142,11 +143,14 @@ class Snapshot:
             if env.kind == "program":
                 head = "global env"
             else:
-                args = ", ".join(short(x, 20) for x in (env.args or []))
+                saved = env.args or []           # (saved as text at the call when diagrams are on)
+                args = ", ".join(saved) if self.interp.diagrams else ", ".join(short(x, 20) for x in saved)
                 head = f"E{env.serial}: {env.name}({args})"
                 head = f"{head:<28}  enclosing environment: {frame_name(env.parent)}"
             if env is self.current and (len(frames) > 1 or env.kind != "program"):
                 head += "    <-- current environment"
+                if self.empty_call:
+                    head += f" (running {self.empty_call}(), whose own frame is empty, so not drawn)"
             elif any(env is s for s in self.stack):
                 head += "    (waiting)"
             out.append(head)

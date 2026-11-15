@@ -103,16 +103,16 @@ Draw `llist(llist(), 4, pair(5, 6))`.
     print(llist(llist(), 4, pair(5, 6)))
     ```
     ```text title="Output"
-    [None|•]-->[4|•]-->[•|/]
-                        |
-                        v
-                        [5|6]
+    [/|•]-->[4|•]-->[•|/]
+                     |
+                     v
+                     [5|6]
     [None, [4, [[5, 6], None]]]
     ```
 
     ![Box-and-pointer diagram: three pairs in a row; the first has None in its head, the second holds 4, the third points down to a pair holding 5 and 6](../assets/figures/practice-05-empty-element-data-1.svg)
 
-    `llist()` is `None`, so the first element is `None` in the **head** half of the first box (on paper a slash there means the same). The last box has a slash in its **tail** half: that is the end of the llist. Do not confuse the two: the empty element is data, the slash in the tail is the end marker. `pair(5, 6)` is one box with both values inside.
+    `llist()` is `None`, so the **head** half of the first box gets a slash: the first element is the empty llist. The last box has a slash in its **tail** half: that is the end of the llist. Both slashes mean `None`, but they play different roles: the slash in the head is an element (data), the slash in the tail is the end marker. `pair(5, 6)` is one box with both values inside.
 
 ## 6. Draw it: sharing ★★
 

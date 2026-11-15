@@ -417,6 +417,13 @@ def show(value):
             else "<built-in function>" if is_built_in_function(value)
             else value)
 
+# print(a, b, ...) of the evaluated language: show each value, then print them all.
+def print_values(*values):
+    shown = [None] * len(values)
+    for i in range(len(values)):
+        shown[i] = show(values[i])
+    return print(*shown)
+
 # To add a built-in: add one line here.
 built_in_functions = llist(
     llist("head", head),
@@ -425,7 +432,7 @@ built_in_functions = llist(
     llist("llist", llist),
     llist("is_none", is_none),
     llist("is_pair", is_pair),
-    llist("print", lambda x: print(show(x))),
+    llist("print", print_values),
     llist("error", error),
     llist("abs", abs),
     llist("math_sqrt", math_sqrt),

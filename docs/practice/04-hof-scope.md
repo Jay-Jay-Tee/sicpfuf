@@ -161,7 +161,7 @@ print(g(3))
 
 ??? success "Answer"
     ```text
-    NameNotFoundError: the name 'x' is not declared anywhere
+    NameNotFoundError: the name 'x' is not found in the current or enclosing environment(s)
     ```
 
     The brackets end the lambda after `x * 2`. The predicate `x > 0` is now outside the lambda, where no `x` is declared, so the program is rejected before it runs.

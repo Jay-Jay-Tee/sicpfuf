@@ -108,7 +108,7 @@ print(measure(quick, 20))
     ```text
     [measure] remembered(20): 2,556 calls, 28,116 steps, at most 20 waiting at once
     1278
-    [measure] remembered(20): 1 calls, 10 steps, at most 1 waiting at once
+    [measure] remembered(20): 1 call, 10 steps, at most 1 waiting at once
     1278
     ```
     `quick` only remembers the result of the **outer** call. Inside, `tiles` calls the plain `tiles`, which knows nothing about the table, so the first call does all the exponential work (the second one is a table hit: 1 call). The recursion must go **through** the memoized function:

@@ -55,8 +55,8 @@ class Checker:
     # ------------------------------------------------------------------ errors
     def unsupported(self, feature, node):
         where = f"Python §{self.chapter}" if feature in EARLY_ONLY else "Python §1-§4"
-        raise SicpSyntaxError(f"{feature} are not part of {where}" if feature.endswith("s")
-                              else f"{feature} is not part of {where}",
+        message = RULE_MESSAGES.get(feature, f"{where} does not have this: {feature}")
+        raise SicpSyntaxError(message,
                               self.filename, node.line, node.col,
                               kind=f"Feature not supported in this sublanguage: {feature}",
                               hint=FEATURE_HINTS.get(feature))
@@ -168,6 +168,11 @@ class Checker:
         self.declare(s.target.id, s.target)
         self.expr(s.value)
 
+    def s_TypeAlias(self, s):                    # type Rat = Pair[int, int]
+        if not self.typed:
+            self.unsupported("type statements", s)
+        # (the type itself is checked by xray/typecheck.py; it is not a value)
+
     def s_AugAssign(self, s):
         self.unsupported(f"augmented assignment ({s.op}=)", s)
 
@@ -252,6 +257,8 @@ class Checker:
         if params.vararg and self.chapter < 3:
             self.unsupported("rest parameters (*name)", node)
         if not self.typed:
+            if getattr(node, "type_params", None):
+                self.unsupported("type parameters", node)
             for p in params.args:
                 if p.annotation is not None:
                     self.unsupported("type annotations", p)
@@ -327,7 +334,8 @@ class Checker:
             "or by `from module import name`.")
         if close is None and e.id in LATER_NAMES and self.chapter < LATER_NAMES[e.id]:
             hint = f"'{e.id}' only exists from Python §{LATER_NAMES[e.id]} on. This program runs as §{self.chapter}."
-        self.fail("NameNotFoundError", f"the name '{e.id}' is not declared anywhere", e, hint)
+        self.fail("NameNotFoundError", f"the name '{e.id}' is not found in the current or enclosing "
+                  f"environment(s)", e, hint)
 
     def e_ListExpr(self, e):
         if self.chapter < 3:
@@ -410,6 +418,12 @@ EXPRESSION_FEATURES = {
     "DictComp": "dictionary comprehensions", "GeneratorExp": "generator expressions",
     "Attribute": "attribute access (a.b)", "Slice": "slices (a[i:j])",
     "FString": "f-strings", "FormattedValue": "f-strings",
+}
+
+# features that are really RULES (they read badly as "X is not part of ...")
+RULE_MESSAGES = {
+    "for loops must use range() — e.g. for i in range(n)":
+        "a for loop can only go over range(...), as in: for i in range(n):",
 }
 
 # features that a LATER chapter does have (the message names your chapter, not "§1-§4")

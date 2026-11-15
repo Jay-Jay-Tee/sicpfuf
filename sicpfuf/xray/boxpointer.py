@@ -8,7 +8,7 @@ sicpfuf/xray/boxpointer.py — BOX-AND-POINTER diagrams, drawn with text.
 A pair is a box with two halves: the HEAD on the left, the TAIL on the right.
     * a number, string, boolean or function is written inside its half
     * •  means "this half points at another box": follow the arrow
-    * /  in a tail means None, the empty linked list (the end of the line)
+    * /  means None, the empty linked list (in a tail: the end of the line)
 
 Tails go to the RIGHT, heads go DOWN:
 
@@ -86,8 +86,10 @@ class Diagram:
         # 1. what is written in each slot, and which slots need an arrow going DOWN
         slots, down = [], []
         for i, item in enumerate(v):
-            if is_pair and i == 1:                  # the TAIL of a pair: goes right, or is / for None
-                slots.append("/" if item is None else "•" if type(item) is list else atom_text(item))
+            if is_pair and item is None:            # None in a pair box (the empty llist) is a slash
+                slots.append("/")
+            elif is_pair and i == 1:                # the TAIL of a pair goes right
+                slots.append("•" if type(item) is list else atom_text(item))
             elif type(item) is list:
                 slots.append("•")
                 down.append(i)

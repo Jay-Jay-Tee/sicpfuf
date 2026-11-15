@@ -95,6 +95,10 @@ def measure(interp, node, f, args):
         used = interp.max_seen - depth
         interp.max_seen = max(deepest, interp.max_seen)
     shown = ", ".join(short(x, 20) for x in args)
-    interp.write(f"[measure] {f.name}({shown}): {interp.calls - calls:,} calls, {interp.steps - steps:,} steps, "
+    interp.write(f"[measure] {f.name}({shown}): {plural(interp.calls - calls, 'call')}, {plural(interp.steps - steps, 'step')}, "
                  f"at most {used:,} waiting at once\n")
     return result
+
+
+def plural(n, word):
+    return f"{n:,} {word}" + ("" if n == 1 else "s")

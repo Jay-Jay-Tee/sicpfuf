@@ -296,7 +296,7 @@ and `xs`. A llist cannot be walked with `for` (no `range` fits it), so use `whil
     ```
     ```text title="Output"
     [measure] llist_sum_rec([1, [2, [3, [4, [...): 501 calls, 7,006 steps, at most 501 waiting at once
-    [measure] llist_sum_loop([1, [2, [3, [4, [...): 1 calls, 7,009 steps, at most 1 waiting at once
+    [measure] llist_sum_loop([1, [2, [3, [4, [...): 1 call, 7,009 steps, at most 1 waiting at once
     ```
 
 ## Lambdas made in a loop

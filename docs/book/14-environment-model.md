@@ -300,7 +300,7 @@ global env
     name: 'Ann'
     rename: fn#1
     student: @1 ['Cy', 19]
-E1: rename(['Cy', 19], 'Cy')  enclosing environment: global env    <-- current environment
+E1: rename(['Bo', 19], 'Cy')  enclosing environment: global env    <-- current environment
     person: @1 ['Cy', 19]
     name: '?'
 function objects

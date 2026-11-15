@@ -180,7 +180,7 @@ print(careful(0))
 
 ??? success "Answer"
     ```text
-    NameNotFoundError: the name 'undefined_helper' is not declared anywhere
+    NameNotFoundError: the name 'undefined_helper' is not found in the current or enclosing environment(s)
     ```
 
     Not even `start` is printed. Every name must be declared somewhere in the program, and this is checked **before** the program runs, so it does not matter that the branch would never be evaluated.

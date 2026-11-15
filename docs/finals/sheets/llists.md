@@ -22,7 +22,7 @@ Rules for box-and-pointer diagrams:
 
 1. One box with two halves per pair: head on the left, tail on the right. Count the `pair` calls (`llist(a, b, c)` makes 3) to know how many boxes to draw.
 2. Small values (numbers, strings, booleans) are written inside the half.
-3. A pair (or function) inside a half is an **arrow** to that box. A `None` tail is a diagonal slash.
+3. A pair (or function) inside a half is an **arrow** to that box. `None` in either half is a diagonal slash (in the tail it marks the end of the llist).
 4. A llist is drawn as a horizontal chain; a llist inside a head hangs below it.
 5. If the same pair is used twice, draw ONE box with two arrows into it. Never copy a box.
 

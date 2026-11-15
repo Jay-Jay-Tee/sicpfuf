@@ -210,7 +210,7 @@ for ch in "abc":
     print(ch)
 ```
 ```text
-FeatureNotSupportedError: for loops must use range() — e.g. for i in range(n) is not part of Python §1-§4
+FeatureNotSupportedError: a for loop can only go over range(...), as in: for i in range(n):
 ```
 
 ### Conveniences that §1 to §4 leave out
@@ -237,7 +237,7 @@ count = 0
 count += 1
 ```
 ```text
-FeatureNotSupportedError: augmented assignment (+=) is not part of Python §1-§4
+FeatureNotSupportedError: Python §1-§4 does not have this: augmented assignment (+=)
 ```
 
 ## Running course programs outside the course tools
