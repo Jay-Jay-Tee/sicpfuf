@@ -76,6 +76,8 @@ def chapter_of(source, flag):
 def format_error(interp, e, filename):
     lines = interp.sources.get(filename)
     if isinstance(e, SicpSyntaxError):
+        if hasattr(e, "report"):                  # type errors (xray/typecheck.py): all of them
+            return e.report(lines)
         return format_syntax_error(e, lines)
     if isinstance(e, SicpError):
         return format_runtime_error(e, lines)
@@ -115,10 +117,7 @@ def run_program(source, filename, args):
     try:
         if args.prelude:
             load_prelude(interp, args.prelude)
-        tree = interp.load_source(source, filename)
-        if args.typed:
-            from .xray import typecheck
-            typecheck.check(interp, tree, filename)
+        tree = interp.load_source(source, filename, typecheck=args.typed)     # --typed: types first
         if args.subst:
             from .xray import stepper
             stepper.run(interp, tree, filename, limit=args.max_steps)

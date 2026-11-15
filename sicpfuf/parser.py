@@ -242,6 +242,9 @@ class Parser:
 
     def expr_or_assign(self):
         t = self.tok
+        if (t.type == NAME and t.value == "type" and self.peek().type == NAME
+                and self.peek(2).type == OP and self.peek(2).value in ("=", "[")):
+            return self.type_alias()
         first = self.expr_list(allow_star=True)
 
         # x: int = 5   (type annotations are parsed and then ignored, just like at runtime in Python)
@@ -394,6 +397,7 @@ class Parser:
     def def_stmt(self):
         t = self.next()
         name = self.expect_name("a function name")
+        type_params = self.type_params()                     # def f[A](x: A) -> A   (typed §4)
         self.expect_op("(", "expected '(' after the function name")
         params = self.params(closing=")")
         self.expect_op(")")
@@ -406,14 +410,36 @@ class Parser:
         finally:
             self.func_depth -= 1
             self.loop_depth = saved_loop
-        node = self.mk(N.FunctionDef, t, name, params, body, [], returns)
+        node = self.mk(N.FunctionDef, t, name, params, body, [], returns, type_params)
         analyze_function(node, self.filename)          # work out locals/globals (scopes.py)
         return node
+
+    def type_params(self):
+        """`[A, B]` after a function or type alias name: the TYPE PARAMETERS of a generic
+        definition (Python §4 Typed). chapters.py rejects them in the other languages."""
+        names = []
+        if self.match_op("["):
+            while True:
+                names.append(self.expect_name("a type parameter name"))
+                if not self.match_op(",") or self.check_op("]"):
+                    break
+            self.expect_op("]")
+        return names
+
+    def type_alias(self):
+        """`type Name = T` or `type Name[T] = ...`. `type` is a SOFT keyword: only this shape
+        makes it one, so `type = 3` is still an ordinary assignment."""
+        t = self.next()                                   # the name 'type'
+        name = self.expect_name("a type name")
+        params = self.type_params()
+        self.expect_op("=")
+        return self.mk(N.TypeAlias, t, name, params, self.expression())
 
     def params(self, closing):
         """Parameter list for def (closing=')') or lambda (closing=':')."""
         t = self.tok
         args, kwonly, vararg, kwarg = [], [], None, None
+        vararg_annotation = None
         seen_default = False
         names = set()
 
@@ -436,7 +462,7 @@ class Parser:
                 if self.check(NAME):
                     vararg = self.expect_name()
                     add_name(vararg, tok)
-                    self.skip_annotation(closing)
+                    vararg_annotation = self.skip_annotation(closing)     # *xs: int (typed §4)
                 else:
                     vararg = ""                 # bare `*` → following params are keyword-only
             else:
@@ -453,7 +479,9 @@ class Parser:
                 (kwonly if vararg is not None else args).append(p)
             if not self.match_op(","):
                 break
-        return self.mk(N.Params, t, args, vararg or None, kwonly, kwarg)
+        node = self.mk(N.Params, t, args, vararg or None, kwonly, kwarg)
+        node.vararg_annotation = vararg_annotation
+        return node
 
     def skip_annotation(self, closing):
         """`x: int` in a def's parameter list. Returns the annotation expression (or None)."""

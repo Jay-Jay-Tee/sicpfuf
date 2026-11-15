@@ -1,0 +1,41 @@
+--- stderr ---
+StaticTypeError at line 3
+    return head(xs) + total(tail(xs))
+                ^
+StaticTypeError: head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+sicpfuf hint: a linked list (LList) or a stream can be None: the EMPTY list. Test it first, as in `0 if is_none(xs) else head(xs)` or `if is_none(xs): return ...`: after that test the checker knows that xs is a pair.
+
+StaticTypeError at line 3
+    return head(xs) + total(tail(xs))
+                                 ^
+StaticTypeError: tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+
+StaticTypeError at line 5
+    def describe(n: int) -> str:
+                            ^
+StaticTypeError: Function with declared return type "str" must return value on all code paths. The value can be None: test for that first, for example with is_none(...)
+sicpfuf hint: some way through the function reaches its end without a `return`, and then it returns None. Add the missing `else:` branch or a final `return`.
+
+StaticTypeError at line 9
+    f = lambda x: x
+    ^
+StaticTypeError: The type of f cannot be determined: declare it, as in f: list[int] = []
+sicpfuf hint: a lambda gets the types of its parameters from WHERE IT IS USED: a declared variable (`f: Callable[[int], int] = lambda x: x + 1`) or a parameter of the function it is passed to. An empty list needs a declared type: `xs: list[int] = []`.
+
+StaticTypeError at line 9
+    f = lambda x: x
+               ^
+StaticTypeError: The type of the parameter x cannot be determined: a lambda gets its parameter types from where it is used, for example f: Callable[[int], int] = lambda x: ...
+
+StaticTypeError at line 9
+    f = lambda x: x
+                  ^
+StaticTypeError: The type of what this lambda returns cannot be determined
+
+StaticTypeError at line 10
+    print(total(llist(1, 2)) + "!")
+          ^
+StaticTypeError: Operator "+" not supported for types "int" and "str"
+sicpfuf hint: the operator does not work for these types: numbers and strings don't mix (use str(n)), and True and False are not numbers.
+
+7 type errors: the program was not run.

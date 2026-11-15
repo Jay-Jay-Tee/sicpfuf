@@ -1154,5 +1154,684 @@
  "ch4_mce/tokenize": {
   "error": "",
   "stdout": "['x', ['=', ['1', ['+', ['2', None]]]]]\n[ 'def',\n['f', ['(', ['x', [')', [':', ['\\n', ['', ['return', ['x', ['', None]]]]]]]]]]]\n"
+ },
+ "ch4_typed/and or narrowing": {
+  "error": "",
+  "stdout": "True False True\n",
+  "types": []
+ },
+ "ch4_typed/argument count": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 Argument missing for parameter \"y\"",
+   "4 Expected 2 positional arguments",
+   "5 Arguments missing for parameters \"x\", \"y\""
+  ]
+ },
+ "ch4_typed/argument type": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 f expects x to be int, but got str",
+   "4 f expects x to be int, but got float",
+   "5 f expects x to be int, but got bool",
+   "6 f expects x to be int, but got None. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/array inc": {
+  "error": "",
+  "stdout": "[0, 1, 2]\n",
+  "types": []
+ },
+ "ch4_typed/bank account": {
+  "error": "",
+  "stdout": "70 75\n",
+  "types": []
+ },
+ "ch4_typed/build list in loop": {
+  "error": "",
+  "stdout": "llist(3, 2, 1, 0)\n",
+  "types": []
+ },
+ "ch4_typed/call before def": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 \"f\" is not defined"
+  ]
+ },
+ "ch4_typed/callable variable call": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Argument of type \"str\" cannot be assigned to parameter of type \"int\"",
+   "2 Expected 1 positional argument",
+   "2 Expected 1 more positional argument"
+  ]
+ },
+ "ch4_typed/captured reassigned": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Operator \"+\" not supported for types \"int | str\" and \"int\""
+  ]
+ },
+ "ch4_typed/cascade unknown": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Operator \"+\" not supported for types \"int\" and \"str\"",
+   "2 The type of this argument cannot be determined",
+   "3 The type of z cannot be determined: declare it, as in z: list[int] = []"
+  ]
+ },
+ "ch4_typed/conditions must be bool": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 A condition must be a bool, but this is an int",
+   "3 A condition must be a bool, but this is a str",
+   "4 A condition must be a bool, but this is an int",
+   "6 A condition must be a bool, but this is an int",
+   "7 A condition must be a bool, but this is an int",
+   "9 A condition must be a bool, but this is a LList[int]"
+  ]
+ },
+ "ch4_typed/count change": {
+  "error": "",
+  "stdout": "292\n",
+  "types": []
+ },
+ "ch4_typed/currying": {
+  "error": "",
+  "stdout": "3\n",
+  "types": []
+ },
+ "ch4_typed/declaration without value": {
+  "error": "Feature: declarations without a value@1",
+  "stdout": "",
+  "types": []
+ },
+ "ch4_typed/declared type": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"str\" is not assignable to declared type \"int\"",
+   "3 Type \"int\" is not assignable to declared type \"str\"",
+   "4 Type \"int\" is not assignable to declared type \"bool\"",
+   "5 Type \"float\" is not assignable to declared type \"int\"",
+   "7 Type \"str\" is not assignable to declared type \"int | None\""
+  ]
+ },
+ "ch4_typed/elif returns": {
+  "error": "",
+  "stdout": "negative zero\n",
+  "types": []
+ },
+ "ch4_typed/error noreturn": {
+  "error": "",
+  "stdout": "3\n",
+  "types": []
+ },
+ "ch4_typed/factorial": {
+  "error": "",
+  "stdout": "120\n",
+  "types": []
+ },
+ "ch4_typed/fast expt": {
+  "error": "",
+  "stdout": "1024\n",
+  "types": []
+ },
+ "ch4_typed/fib iterative": {
+  "error": "",
+  "stdout": "832040\n",
+  "types": []
+ },
+ "ch4_typed/floats and ints": {
+  "error": "",
+  "stdout": "3.5 1.75\n3\n",
+  "types": []
+ },
+ "ch4_typed/for each and build": {
+  "error": "",
+  "stdout": "1\n2\n[2, [3, None]]\n[1, [3, None]]\n[1, [2, None]]\n",
+  "types": []
+ },
+ "ch4_typed/function types": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 Type \"(x: int, y: int) -> int\" is not assignable to declared type \"(int) -> int\"",
+   "4 Type \"(x: int, y: int) -> int\" is not assignable to declared type \"int\"",
+   "7 ap expects h to be (int) -> int, but got (x: int, y: int) -> int",
+   "8 ap expects h to be (int) -> int, but got int",
+   "9 ap expects h to be (int) -> int, but got () -> int"
+  ]
+ },
+ "ch4_typed/generic identity": {
+  "error": "",
+  "stdout": "3 s 5 hi!!\n",
+  "types": []
+ },
+ "ch4_typed/generic map": {
+  "error": "",
+  "stdout": "llist(1, 4, 9)\nllist('a!', 'b!')\n",
+  "types": []
+ },
+ "ch4_typed/generic results": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 Type \"str\" is not assignable to declared type \"int\"",
+   "6 Type \"str\" is not assignable to declared type \"int\""
+  ]
+ },
+ "ch4_typed/hanoi": {
+  "error": "",
+  "stdout": "move A to C\nmove A to B\nmove C to B\n",
+  "types": []
+ },
+ "ch4_typed/head of llist": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)",
+   "4 head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)",
+   "6 tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/higher-order compose": {
+  "error": "",
+  "stdout": "4\n5\n",
+  "types": []
+ },
+ "ch4_typed/index a pair": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 A pair cannot be indexed (Pair[int, int]): use head(...) and tail(...)",
+   "4 A pair cannot be indexed (Pair[int, LList]): use head(...) and tail(...)",
+   "4 Object of type \"None\" is not subscriptable"
+  ]
+ },
+ "ch4_typed/insertion sort": {
+  "error": "",
+  "stdout": "llist(1, 2, 3)\n",
+  "types": []
+ },
+ "ch4_typed/is None narrowing": {
+  "error": "",
+  "stdout": "9 3\n",
+  "types": []
+ },
+ "ch4_typed/is_number narrowing": {
+  "error": "StaticTypeError@7",
+  "stdout": "",
+  "types": [
+   "7 Type \"str\" is not assignable to return type \"int\""
+  ]
+ },
+ "ch4_typed/is_pair narrowing union": {
+  "error": "",
+  "stdout": "",
+  "types": []
+ },
+ "ch4_typed/lambda against declared type": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Type \"(x: int) -> int\" is not assignable to declared type \"(int) -> str\"",
+   "2 Operator \"+\" not supported for types \"int\" and \"str\"",
+   "3 filter expects pred to be (A) -> bool, but got (x: int) -> int"
+  ]
+ },
+ "ch4_typed/lambda from declared type": {
+  "error": "",
+  "stdout": "81\n",
+  "types": []
+ },
+ "ch4_typed/lambda in list": {
+  "error": "",
+  "stdout": "2\n",
+  "types": []
+ },
+ "ch4_typed/lambda without context": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 The type of f cannot be determined: declare it, as in f: list[int] = []",
+   "1 The type of the parameter x cannot be determined: a lambda gets its parameter types from where it is used, for example f: Callable[[int], int] = lambda x: ...",
+   "1 The type of what this lambda returns cannot be determined",
+   "2 The type of this argument cannot be determined",
+   "2 The type of the parameter y cannot be determined: a lambda gets its parameter types from where it is used, for example f: Callable[[int], int] = lambda y: ...",
+   "2 The type of what this lambda returns cannot be determined"
+  ]
+ },
+ "ch4_typed/lambda wrong ret": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 keep expects pred to be (int) -> bool, but got (x: int) -> int"
+  ]
+ },
+ "ch4_typed/len of llist": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 len expects obj to be Sized, but got LList[int]"
+  ]
+ },
+ "ch4_typed/length of llist": {
+  "error": "",
+  "stdout": "3\n",
+  "types": []
+ },
+ "ch4_typed/library higher-order": {
+  "error": "",
+  "stdout": "llist('1', '2', '3', '4', '5')\nllist(2, 4)\n15 10 3\n",
+  "types": []
+ },
+ "ch4_typed/list of lists": {
+  "error": "",
+  "stdout": "4\n",
+  "types": []
+ },
+ "ch4_typed/lists errors": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Type \"list[int]\" is not assignable to declared type \"list[str]\"",
+   "3 Operator \"+\" not supported for types \"int\" and \"str\"",
+   "4 No overloads for \"__setitem__\" match the provided arguments",
+   "4 __setitem__ expects value to be int, but got str",
+   "5 Type \"list[int]\" is not assignable to declared type \"str\""
+  ]
+ },
+ "ch4_typed/llist element types": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"LList[int]\" is not assignable to declared type \"LList[str]\"",
+   "3 Type \"Pair[str, None]\" is not assignable to declared type \"LList[int]\"",
+   "4 Type \"LList[int]\" is not assignable to declared type \"LList[str]\"",
+   "4 append expects ys to be LList[A], but got LList[str]"
+  ]
+ },
+ "ch4_typed/llist of strings ops": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Operator \"+\" not supported for types \"str\" and \"int\"",
+   "2 head expects p to be Pair[H, T], but got LList[str]. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/loop changes type": {
+  "error": "StaticTypeError@5",
+  "stdout": "",
+  "types": [
+   "5 Type \"float\" is not assignable to declared type \"int\""
+  ]
+ },
+ "ch4_typed/make counter nonlocal": {
+  "error": "",
+  "stdout": "2\n",
+  "types": []
+ },
+ "ch4_typed/map pairs": {
+  "error": "",
+  "stdout": "llist(3, 7)\n6\n",
+  "types": []
+ },
+ "ch4_typed/memo list": {
+  "error": "TypeError@4",
+  "stdout": "",
+  "types": []
+ },
+ "ch4_typed/merge sort": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)",
+   "2 tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)",
+   "4 tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/missing annotation nested": {
+  "error": "MissingTypeAnnotation@2",
+  "stdout": "",
+  "types": [
+   "2 parameter 'y' of function 'inner' needs a type, as in 'y: int'"
+  ]
+ },
+ "ch4_typed/missing param annotation": {
+  "error": "MissingTypeAnnotation@1",
+  "stdout": "",
+  "types": [
+   "1 parameter 'n' of function 'g' needs a type, as in 'n: int'"
+  ]
+ },
+ "ch4_typed/missing return annotation": {
+  "error": "MissingTypeAnnotation@1",
+  "stdout": "",
+  "types": [
+   "1 function 'g' needs a return type, as in 'def g(...) -> int:'"
+  ]
+ },
+ "ch4_typed/missing return path": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Function with declared return type \"int\" must return value on all code paths. The value can be None: test for that first, for example with is_none(...)",
+   "4 Function with declared return type \"int\" must return value on all code paths. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/mixed branches": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"int | str\" is not assignable to return type \"int\"",
+   "5 Type \"int | str\" is not assignable to return type \"int\""
+  ]
+ },
+ "ch4_typed/mixed list": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 The type of g cannot be determined: declare it, as in g: list[int] = []"
+  ]
+ },
+ "ch4_typed/mutual recursion": {
+  "error": "",
+  "stdout": "True True\n",
+  "types": []
+ },
+ "ch4_typed/none assigned": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Type \"None\" is not assignable to declared type \"int\". The value can be None: test for that first, for example with is_none(...)",
+   "3 Operator \"+\" not supported for \"None\"",
+   "5 Operator \"-\" not supported for \"None\""
+  ]
+ },
+ "ch4_typed/none return used": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 Operator \"+\" not supported for types \"None\" and \"int\""
+  ]
+ },
+ "ch4_typed/nonlocal and global types": {
+  "error": "StaticTypeError@5",
+  "stdout": "",
+  "types": [
+   "5 Type \"str\" is not assignable to declared type \"int\"",
+   "11 Type \"str\" is not assignable to declared type \"int\""
+  ]
+ },
+ "ch4_typed/not callable": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Object of type \"int\" is not callable",
+   "3 Object of type \"str\" is not callable"
+  ]
+ },
+ "ch4_typed/not of non-bool in while": {
+  "error": "StaticTypeError@3",
+  "stdout": "",
+  "types": [
+   "3 A condition must be a bool, but this is a LList[int]"
+  ]
+ },
+ "ch4_typed/operators": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Operator \"+\" not supported for types \"int\" and \"str\"",
+   "2 Operator \"-\" not supported for types \"str\" and \"str\"",
+   "3 Operator \"-\" not supported for type \"str\"",
+   "4 Operator \"<\" not supported for types \"int\" and \"str\"",
+   "5 Operator \"+\" not supported for types \"None\" and \"int\"",
+   "6 Operator \"+\" not supported for types \"bool\" and \"int\""
+  ]
+ },
+ "ch4_typed/optional int": {
+  "error": "",
+  "stdout": "0.5 nothing\n",
+  "types": []
+ },
+ "ch4_typed/pair mutation": {
+  "error": "",
+  "stdout": "2 b\n",
+  "types": []
+ },
+ "ch4_typed/pair of functions": {
+  "error": "",
+  "stdout": "12\n",
+  "types": []
+ },
+ "ch4_typed/power and math": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"int | float\" is not assignable to return type \"int\"",
+   "3 Type \"float\" is not assignable to declared type \"int\"",
+   "4 Type \"float\" is not assignable to declared type \"int\"",
+   "5 Type \"float\" is not assignable to declared type \"int\""
+  ]
+ },
+ "ch4_typed/power of literal": {
+  "error": "",
+  "stdout": "1024 0.5 1.4142135623730951 2 3 2\n",
+  "types": []
+ },
+ "ch4_typed/python lists": {
+  "error": "",
+  "stdout": "6 [10, 1, 2] 0\n",
+  "types": []
+ },
+ "ch4_typed/queue with pairs": {
+  "error": "",
+  "stdout": "llist(1, 2)\n",
+  "types": []
+ },
+ "ch4_typed/reassign parameter": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"str\" is not assignable to declared type \"int\""
+  ]
+ },
+ "ch4_typed/recursion wrong arg": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 f expects n to be int, but got float"
+  ]
+ },
+ "ch4_typed/reduce with wrong result": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"int\" is not assignable to declared type \"str\""
+  ]
+ },
+ "ch4_typed/return in loop": {
+  "error": "StaticTypeError@6",
+  "stdout": "",
+  "types": [
+   "6 Function with declared return type \"int\" must return value on all code paths. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/return type": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"int\" is not assignable to return type \"str\"",
+   "4 Type \"float\" is not assignable to return type \"int\"",
+   "6 Type \"int\" is not assignable to return type \"None\"",
+   "8 Type \"None\" is not assignable to return type \"int\". The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/reverse with accumulator": {
+  "error": "",
+  "stdout": "llist(3, 2, 1)\n",
+  "types": []
+ },
+ "ch4_typed/run time error after check": {
+  "error": "IndexError",
+  "stdout": "",
+  "types": []
+ },
+ "ch4_typed/set_tail wrong": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 set_tail expects v to be T, but got int"
+  ]
+ },
+ "ch4_typed/sieve": {
+  "error": "",
+  "stdout": "llist(2, 3, 5, 7, 11)\n",
+  "types": []
+ },
+ "ch4_typed/sqrt newton": {
+  "error": "",
+  "stdout": "1.4142156862745097\n",
+  "types": []
+ },
+ "ch4_typed/stream lambda wrong": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"Pair[int, () -> int]\" is not assignable to return type \"Stream[int]\""
+  ]
+ },
+ "ch4_typed/streams": {
+  "error": "",
+  "stdout": "llist(2, 4, 6, 8)\n13\n",
+  "types": []
+ },
+ "ch4_typed/streams errors": {
+  "error": "StaticTypeError@4",
+  "stdout": "",
+  "types": [
+   "4 Type \"Pair[int, Stream[int]]\" is not assignable to return type \"Stream[int]\"",
+   "6 Type \"Stream[int]\" is not assignable to declared type \"Stream[str]\"",
+   "7 stream_tail expects s to be Pair[H, () -> T], but got Stream[int]. The value can be None: test for that first, for example with is_none(...)"
+  ]
+ },
+ "ch4_typed/string building loop": {
+  "error": "",
+  "stdout": "012\n",
+  "types": []
+ },
+ "ch4_typed/string literal times": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 Type \"LiteralString\" is not assignable to declared type \"int\"",
+   "3 Type \"str\" is not assignable to declared type \"int\""
+  ]
+ },
+ "ch4_typed/strings": {
+  "error": "",
+  "stdout": "Hello, Ada! 11 42!\n",
+  "types": []
+ },
+ "ch4_typed/strings idx": {
+  "error": "",
+  "stdout": "h 5 True h!\n",
+  "types": []
+ },
+ "ch4_typed/sum with if is_none": {
+  "error": "",
+  "stdout": "10\n",
+  "types": []
+ },
+ "ch4_typed/tree alias": {
+  "error": "",
+  "stdout": "3\n",
+  "types": []
+ },
+ "ch4_typed/tree of llists": {
+  "error": "",
+  "stdout": "llist(1, 2, 3)\n",
+  "types": []
+ },
+ "ch4_typed/type alias errors": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 Type \"Pair[int, str]\" is not assignable to declared type \"Rat\"",
+   "4 Type \"int\" is not assignable to return type \"str\""
+  ]
+ },
+ "ch4_typed/type alias rational": {
+  "error": "",
+  "stdout": "5 6\n",
+  "types": []
+ },
+ "ch4_typed/typing import": {
+  "error": "Feature: imports of types from typing (Callable, Pair, LList and Stream are predeclared, and there is no Any)@1",
+  "stdout": "",
+  "types": []
+ },
+ "ch4_typed/undeclared locals": {
+  "error": "",
+  "stdout": "big\n7\n",
+  "types": []
+ },
+ "ch4_typed/undefined names": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 \"foo\" is not defined",
+   "3 \"y\" is unbound"
+  ]
+ },
+ "ch4_typed/untyped chapter rejects type parameters": {
+  "error": "Feature: type parameters@1",
+  "stdout": ""
+ },
+ "ch4_typed/untyped chapter rejects type statements": {
+  "error": "Feature: type statements@1",
+  "stdout": ""
+ },
+ "ch4_typed/while consume": {
+  "error": "",
+  "stdout": "1\n2\n3\n",
+  "types": []
+ },
+ "ch4_typed/while counting": {
+  "error": "",
+  "stdout": "5050\n",
+  "types": []
+ },
+ "ch4_typed/while loop llist": {
+  "error": "",
+  "stdout": "3\n",
+  "types": []
+ },
+ "ch4_typed/wrong arg to library": {
+  "error": "StaticTypeError@1",
+  "stdout": "",
+  "types": [
+   "1 length expects xs to be LList[A], but got int",
+   "2 map expects xs to be LList[A], but got int",
+   "3 enum_llist expects end to be int, but got str",
+   "4 llist_ref expects n to be int, but got str"
+  ]
+ },
+ "ch4_typed/wrong branch narrowing": {
+  "error": "StaticTypeError@2",
+  "stdout": "",
+  "types": [
+   "2 head expects p to be Pair[H, T], but got None. The value can be None: test for that first, for example with is_none(...)",
+   "4 head expects p to be Pair[H, T], but got None. The value can be None: test for that first, for example with is_none(...)"
+  ]
  }
 }

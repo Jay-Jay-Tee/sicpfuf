@@ -304,6 +304,14 @@ class FunctionDef(Stmt):
     body: List[Stmt]
     decorators: List[Expr]
     returns: Optional[Expr] = None      # def f() -> int   (only typed §4 uses these)
+    type_params: List[str] = field(default_factory=list)    # def f[A, B](...)  (typed §4)
+
+
+@dataclass
+class TypeAlias(Stmt):          # type Rat = Pair[int, int]    type Tree[T] = ...   (typed §4 only)
+    name: str
+    params: List[str]           # the type parameters, ['T']
+    value: Expr                 # the type, parsed as an ordinary expression
 
 
 @dataclass

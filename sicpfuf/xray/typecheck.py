@@ -49,6 +49,8 @@ THE BIG IDEAS IN THIS FILE
      head(pair(1, "a")) has H = int, T = str, so the call has type int. (section 5)
 """
 
+import re
+
 from .. import nodes as N
 from ..errors import SicpSyntaxError
 from ..parser import parse
@@ -104,6 +106,14 @@ class Unknown(Type):
 
     def key(self):
         return ("unknown", self.report)
+
+
+class AnyT(Type):
+    """What the checker knows of the parts of an `object` after is_pair(x) or is_list(x):
+    anything at all. (It is no type a program can write; messages show it as object.)"""
+
+    def key(self):
+        return ("any",)
 
 
 class Never(Type):
@@ -188,7 +198,7 @@ class Alias(Type):
 INT, FLOAT, COMPLEX, STR, BOOL = Prim("int"), Prim("float"), Prim("complex"), Prim("str"), Prim("bool")
 NONE, OBJECT, LITSTR, RANGE = Prim("None"), Prim("object"), Prim("LiteralString"), Prim("range")
 STRLIT = StrLit()
-UNK, UNMODELED, NEVER, UNBOUND = Unknown(True), Unknown(False), Never(), Unbound()
+UNK, UNMODELED, NEVER, UNBOUND, ANY = Unknown(True), Unknown(False), Never(), Unbound(), AnyT()
 NUMBERS = ("int", "float", "complex")
 
 # What an alias means: name → (its type parameters, its definition). LList and Stream are
@@ -301,6 +311,8 @@ def show(t):
         return "Unknown"
     if isinstance(t, Never):
         return "Never"
+    if isinstance(t, AnyT):
+        return "Any"
     if isinstance(t, TVar):
         return t.name
     if isinstance(t, PairT):
@@ -476,14 +488,26 @@ PREDICATES = {
     "is_list": lambda m: isinstance(m, ListT),
 }
 PREDICATE_TYPES = {"is_none": NONE, "is_boolean": BOOL, "is_integer": INT, "is_string": STR,
-                   "is_number": Union([INT, FLOAT, COMPLEX]), "is_pair": PairT(UNMODELED, UNMODELED),
-                   "is_function": FuncT([], OBJECT, any_params=True), "is_list": ListT(UNMODELED)}
+                   "is_number": Union([INT, FLOAT, COMPLEX]), "is_pair": PairT(ANY, ANY),
+                   "is_function": FuncT([], OBJECT, any_params=True), "is_list": ListT(ANY)}
 GUARDS = {"is_float": FLOAT, "is_complex": COMPLEX}
 
 # Python's own builtins that Python §4 has: their types (typeshed's, simplified) are
 # worked out in Checker.builtin_call.
 TYPESHED = {"print", "len", "abs", "max", "min", "round", "input", "repr", "str", "complex",
             "int", "float", "bool", "range"}
+
+OVERLOADED = {"tail", "stream_tail"}
+
+
+class Solution(dict):
+    """What each type variable of a call is: {A: int, ...}. `fixed`: the variables that an
+    invariant position (inside a Pair or a list) decided, which another argument cannot widen."""
+
+    def __init__(self):
+        super().__init__()
+        self.fixed = set()
+
 
 LIST_INDEX = "slice[SupportsIndex | None, SupportsIndex | None, SupportsIndex | None]"
 
@@ -549,6 +573,9 @@ class StaticTypeErrors(SicpSyntaxError):
 
 def hint_for(message):
     """The usual cause of each kind of type error, in plain words."""
+    if "must return value on all code paths" in message:
+        return ("some way through the function reaches its end without a `return`, and then it returns "
+                "None. Add the missing `else:` branch or a final `return`.")
     if message.endswith(NONE_HINT[2:]) or "for \"None\"" in message or '"None" is not subscriptable' in message:
         return ("a linked list (LList) or a stream can be None: the EMPTY list. Test it first, as in "
                 "`0 if is_none(xs) else head(xs)` or `if is_none(xs): return ...`: after that test the "
@@ -556,9 +583,6 @@ def hint_for(message):
     if message.startswith("A condition must be a bool"):
         return ("conditions (if, while, ... if ... else ..., not, and, or) must be exactly True or False. "
                 "Write the comparison out: `if n != 0:` or `if not is_none(xs):`.")
-    if "must return value on all code paths" in message:
-        return ("some way through the function reaches its end without a `return`, and then it returns "
-                "None. Add the missing `else:` branch or a final `return`.")
     if "cannot be determined" in message:
         return ("a lambda gets the types of its parameters from WHERE IT IS USED: a declared variable "
                 "(`f: Callable[[int], int] = lambda x: x + 1`) or a parameter of the function it is passed "
@@ -601,7 +625,7 @@ class Scope:
         self.globals = set()
         self.nonlocals = set()
         self.declared = {}              # name → its DECLARED type (annotation, parameter, def)
-        self.inferred = {}              # name → the types assigned to it (if not declared)
+        self.rhs = {}                   # name → the expressions assigned to it, in the code
         self.count = {}                 # name → how many times it is bound
         self.tvars = dict(parent.tvars) if parent else {}   # type parameters in scope
 
@@ -625,6 +649,7 @@ class Checker:
         self.jobs = []                      # function bodies, checked after the code around them
         self.loops = []                     # for break/continue: [break states, continue states]
         self.defining = None                # the alias being defined (for `bare`)
+        self.computing, self.assigned_cache = set(), {}
         self.prelude = self.read_prelude()
 
     # ------------------------------------------------------------- diagnostics
@@ -633,7 +658,8 @@ class Checker:
             line, col = where
         else:
             line, col = start(where)
-        d = Diagnostic(line, col, show_aliases(message), unknown)
+        message = re.sub(r"([\[,] ?)Any\b", r"\1object", show_aliases(message))
+        d = Diagnostic(line, col, message, unknown)
         (self.captures[-1].diags if self.captures else self.diags).append(d)
 
     def capture(self):
@@ -729,7 +755,7 @@ class Checker:
         """Can a value of type s go where type d is wanted?"""
         if s.key() == d.key():
             return True
-        if isinstance(s, (Unknown, Never)) or isinstance(d, Unknown) or d == OBJECT:
+        if isinstance(s, (Unknown, Never, AnyT)) or isinstance(d, (Unknown, AnyT)) or d == OBJECT:
             return True
         seen = set() if seen is None else seen
         if isinstance(s, Alias) or isinstance(d, Alias):
@@ -757,7 +783,7 @@ class Checker:
             return self.same(s.elem, d.elem, seen)
         if isinstance(s, FuncT) and isinstance(d, FuncT):
             if s.tparams:                       # a generic function: be lenient
-                s = subst(s, {}, UNMODELED)
+                s = subst(s, {v: UNMODELED for v in s.tparams})
             if d.any_params:
                 return self.assignable(s.ret, d.ret, seen)
             if s.any_params:
@@ -793,7 +819,9 @@ class Checker:
             a = unbare(widen(a))
             if p not in m:
                 m[p] = a
-            elif not invariant and not self.assignable(a, m[p]):
+                if invariant:
+                    m.fixed.add(p)
+            elif not invariant and p not in m.fixed and not self.assignable(a, m[p]):
                 # a plain parameter: `llist(1, "a")` makes A = int | str
                 m[p] = a if self.assignable(m[p], a) else union([m[p], a])
             return
@@ -813,7 +841,7 @@ class Checker:
             return
         if isinstance(p, Union):
             for x in p.members:
-                if self.assignable(a, subst(x, {}, UNMODELED)) and not contains(x, lambda y: isinstance(y, TVar)):
+                if not contains(x, lambda y: isinstance(y, TVar) and y in tv) and self.assignable(a, x):
                     return                      # it fits an arm without variables
             for x in p.members:
                 if type(x) is type(a) or isinstance(x, TVar):
@@ -867,11 +895,35 @@ class Checker:
             return snap[name]
         if name in s.declared:
             return s.declared[name]
-        if s.inferred.get(name):
-            return union(widen(t) for t in s.inferred[name])
+        if s.rhs.get(name):
+            return self.all_assigned(s, name, snap)
         if name in CONSTANTS or name in self.prelude:
             return CONSTANTS.get(name) or self.prelude[name]
         return UNMODELED
+
+    def all_assigned(self, s, name, snap):
+        """The union of the types of ALL the values a name of scope s is given (wherever
+        they are in s: also the ones further down, which have not been checked yet)."""
+        k = (id(s), name)
+        if k in self.computing:
+            return UNMODELED
+        if k not in self.assigned_cache:
+            self.computing.add(k)
+            saved = (self.scope, self.state)
+            types = []
+            try:
+                for value in s.rhs[name]:
+                    if isinstance(value, Type):
+                        types.append(value)
+                        continue
+                    self.scope, self.state = s, dict(snap or {})
+                    with self.capture():
+                        types.append(widen(self.infer(value)))
+            finally:
+                self.scope, self.state = saved
+                self.computing.discard(k)
+            self.assigned_cache[k] = union(types)
+        return self.assigned_cache[k]
 
     def declared_type(self, name):
         """The declared type of a name that is assigned here (and the scope it belongs to)."""
@@ -968,7 +1020,7 @@ class Checker:
                 bad.append(m)
         if not bad:
             return union(results)
-        if all(b == NONE for b in bad):
+        if all(b == NONE for b in bad) and len(members(t)) > 1:
             self.diag(e, f'Operator "{e.op}" not supported for "None"')
         else:
             self.diag(e, f'Operator "{e.op}" not supported for type "{show(t)}"')
@@ -1002,7 +1054,7 @@ class Checker:
                     results.append(t)
         if not failed:
             return union(results)
-        if all(a == NONE for a, _ in failed) and NONE not in members(right):
+        if all(a == NONE for a, _ in failed) and NONE not in members(right) and len(members(left)) > 1:
             self.diag(e, f'Operator "{op}" not supported for "None"')
         else:
             self.diag(e, f'Operator "{op}" not supported for types "{show(left)}" and "{show(right)}"')
@@ -1041,6 +1093,18 @@ class Checker:
         if op == "*" and ((isinstance(a, ListT) and b == INT) or (a == INT and isinstance(b, ListT))):
             return a if isinstance(a, ListT) else b
         return None
+
+    def e_Attribute(self, e, expected):
+        """x.attr: not part of Python §4 (chapters.py rejects it after the types are checked),
+        but Pyright already complains when a number or a pair has no such attribute."""
+        t = self.infer(e.value)
+        for m in members(t):
+            name = ("Pair" if isinstance(m, PairT) else m.name if isinstance(m, Prim) and
+                    m.name in ("int", "float", "bool", "complex") else None)
+            if name and e.attr not in ("real", "imag", "conjugate"):
+                self.diag((e.line, e.col), f'Cannot access attribute "{e.attr}" for class "{name}"')
+                return UNK
+        return UNMODELED
 
     def e_Subscript(self, e, expected):
         t = self.infer(e.value)
@@ -1142,16 +1206,17 @@ class Checker:
     def apply(self, ft, e, expected):
         """Check a call of a function of type ft, and give the type of its result."""
         args = e.args
+        unknown_vars = {v: UNK for v in ft.tparams}
         if any(isinstance(a, N.Starred) for a in args) or ft.any_params:
             for a in args:
                 self.infer(a.value if isinstance(a, N.Starred) else a)
-            return unbare(subst(ft.ret, {}, UNK))
+            return unbare(subst(ft.ret, unknown_vars))
         n = len(ft.params)
         if len(args) > n and ft.vararg is None:
             self.diag(args[n], f"Expected {n} positional argument{'' if n == 1 else 's'}")
             for a in args:
                 self.infer(a)
-            return unbare(subst(ft.ret, {}, UNK))
+            return unbare(subst(ft.ret, unknown_vars))
         if len(args) < ft.required:
             missing = [name for name, _ in ft.params[len(args):ft.required]]
             if ft.named:
@@ -1165,28 +1230,29 @@ class Checker:
             self.diag(e, msg)
             for a in args:
                 self.infer(a)
-            return unbare(subst(ft.ret, {}, UNK))
+            return unbare(subst(ft.ret, unknown_vars))
         slots = []
         for i, a in enumerate(args):
             name, p = ft.params[i] if i < n else ft.vararg
             slots.append((a, p, name))
         if ft.tparams:
             tv = set(ft.tparams)
-            if expected is not None and not isinstance(expected, Unknown):
+            if expected is not None and not isinstance(expected, Unknown) and ft.name not in OVERLOADED:
                 # first try with what the context wants: llist() where an LList[int] is wanted
-                m0 = {}
+                m0 = Solution()
                 self.solve(ft.ret, expected, m0, tv, True)
                 if m0:
                     with self.capture() as box:
                         result = self.match_args(ft, slots, m0, tv)
                     if not box.diags and self.assignable(result, expected):
                         return result
-            return self.match_args(ft, slots, {}, tv)
+            return self.match_args(ft, slots, Solution(), tv)
         return self.match_args(ft, slots, None, set())
 
     def match_args(self, ft, slots, m, tv):
         # lambdas last: they need the types that the other arguments tell
         order = [s for s in slots if not isinstance(s[0], N.Lambda)] + [s for s in slots if isinstance(s[0], N.Lambda)]
+        failed = False
         for arg, p, pname in order:
             pm = subst(p, m) if m else p
             open_vars = [v for v in tv if v not in (m or {})]
@@ -1197,8 +1263,9 @@ class Checker:
             t = self.infer(arg, exp)
             if m is not None:
                 self.solve(p, t, m, tv)
-            target = subst(p, m, UNMODELED) if m is not None else p
+            target = subst(p, {v: m.get(v, UNMODELED) for v in tv}) if m is not None else p
             if not self.assignable(t, target):
+                failed = True
                 if ft.name:
                     msg = f"{ft.name} expects {pname} to be {show(p)}, but got {show(t)}"
                 else:
@@ -1208,7 +1275,12 @@ class Checker:
                 self.diag(arg, msg)
             elif partly_unknown(t):
                 self.diag(arg, "The type of this argument cannot be determined", unknown=True)
-        return unbare(subst(ft.ret, m or {}, UNK))
+        if failed and ft.name in OVERLOADED:
+            return UNK                  # (in the prelude tail and stream_tail are overloaded)
+        result = unbare(subst(ft.ret, {v: (m or {}).get(v, UNK) for v in tv}))
+        if ft.name == "tail" and isinstance(result, AnyT):
+            return Alias("LList", [ANY])    # (the first overload of tail in the prelude)
+        return result
 
     def builtin_call(self, name, e):
         """Python's own builtins (their types are typeshed's, simplified)."""
@@ -1291,6 +1363,16 @@ class Checker:
             return out[0], out[1]
         t = self.infer(e)
         self.check_condition(t, e)
+        if isinstance(e, N.Name) and not isinstance(t, Unknown):
+            # (an error, but Pyright still narrows it: `if xs:` is never None inside)
+            yes, no = union(m for m in members(t) if m != NONE), \
+                union(m for m in members(t) if not isinstance(m, (PairT, FuncT)))
+            out = []
+            for nt in (yes, no):
+                s2 = dict(st)
+                s2[e.id] = nt if not isinstance(nt, Never) else t
+                out.append(None if isinstance(nt, Never) else s2)
+            return out[0], out[1]
         return st, (dict(st) if st is not None else None)
 
     def join(self, states):
@@ -1365,7 +1447,7 @@ class Checker:
 
     def assign(self, target, value):
         name = target.id
-        declared, owner = self.declared_type(name)
+        declared, _ = self.declared_type(name)
         t = self.infer(value, declared)
         narrowed = t
         if declared is not None:
@@ -1377,8 +1459,6 @@ class Checker:
                 narrowed = declared
             elif isinstance(t, Unknown) and not t.report:
                 narrowed = declared
-        elif not self.silent:
-            owner.inferred.setdefault(name, []).append(t)
         if partly_unknown(narrowed) and not (isinstance(value, N.ListExpr) and not value.elts):
             self.diag(target, f"The type of {name} cannot be determined: declare it, as in "
                               f"{name}: list[int] = []", unknown=True)
@@ -1464,8 +1544,6 @@ class Checker:
             st = dict(self.state)
             if name:
                 st[name] = elem
-                if not self.silent:
-                    self.declared_type(name)[1].inferred.setdefault(name, []).append(elem)
             return st, dict(self.state)
         self.loop(enter, s.body)
 
@@ -1492,6 +1570,8 @@ class Checker:
                     for t in targets:
                         if isinstance(t, N.Name):
                             scope.count[t.id] = scope.count.get(t.id, 0) + 1
+                            if s.value is not None:
+                                scope.rhs.setdefault(t.id, []).append(s.value)
                     if isinstance(s, N.AnnAssign) and isinstance(s.target, N.Name):
                         if s.target.id not in scope.declared:
                             scope.declared[s.target.id] = self.to_type(s.annotation)
@@ -1502,6 +1582,7 @@ class Checker:
                 elif isinstance(s, N.For):
                     if isinstance(s.target, N.Name):
                         scope.count[s.target.id] = 2
+                        scope.rhs.setdefault(s.target.id, []).append(INT)
                     walk(s.body)
                 elif isinstance(s, (N.If, N.While)):
                     walk(s.body)

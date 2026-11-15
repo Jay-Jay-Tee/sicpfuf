@@ -1,0 +1,664 @@
+#### factorial (§4 typed)
+def factorial(n: int) -> int:
+    return 1 if n == 0 else n * factorial(n - 1)
+print(factorial(5))
+#### fib iterative (§4 typed)
+def fib(n: int) -> int:
+    a: int = 0
+    b: int = 1
+    for i in range(n):
+        t: int = a + b
+        a = b
+        b = t
+    return a
+print(fib(30))
+#### floats and ints (§4 typed)
+def average(x: float, y: float) -> float:
+    return (x + y) / 2
+print(average(3, 4), average(1.5, 2))
+r: float = 7 // 2
+print(r)
+#### strings (§4 typed)
+def greet(name: str) -> str:
+    return "Hello, " + name + "!"
+print(greet("Ada"), len(greet("Ada")), str(42) + "!")
+#### length of llist (§4 typed)
+def length2(xs: LList[int]) -> int:
+    return 0 if is_none(xs) else 1 + length2(tail(xs))
+print(length2(llist(1, 2, 3)))
+#### sum with if is_none (§4 typed)
+def sum_list(xs: LList[int]) -> int:
+    if is_none(xs):
+        return 0
+    return head(xs) + sum_list(tail(xs))
+print(sum_list(llist(1, 2, 3, 4)))
+#### is None narrowing (§4 typed)
+def sum_list(xs: LList[int]) -> int:
+    return 0 if xs is None else head(xs) + sum_list(tail(xs))
+def count(xs: LList[str]) -> int:
+    if xs is not None:
+        return 1 + count(tail(xs))
+    else:
+        return 0
+print(sum_list(llist(4, 5)), count(llist("a", "b", "c")))
+#### generic map (§4 typed)
+def map_llist[A, B](f: Callable[[A], B], xs: LList[A]) -> LList[B]:
+    return None if is_none(xs) else pair(f(head(xs)), map_llist(f, tail(xs)))
+print_llist(map_llist(lambda x: x * x, llist(1, 2, 3)))
+print_llist(map_llist(lambda s: s + "!", llist("a", "b")))
+#### library higher-order (§4 typed)
+xs: LList[int] = enum_llist(1, 5)
+ys: LList[str] = map(lambda x: str(x), xs)
+evens: LList[int] = filter(lambda x: x % 2 == 0, xs)
+total: int = reduce(lambda x, acc: x + acc, 0, xs)
+print_llist(ys)
+print_llist(evens)
+print(total, length(append(xs, xs)), llist_ref(xs, 2))
+#### make counter nonlocal (§4 typed)
+def make_counter() -> Callable[[], int]:
+    count: int = 0
+    def inc() -> int:
+        nonlocal count
+        count = count + 1
+        return count
+    return inc
+c: Callable[[], int] = make_counter()
+c()
+print(c())
+#### lambda from declared type (§4 typed)
+square: Callable[[int], int] = lambda x: x * x
+compose: Callable[[Callable[[int], int], Callable[[int], int]], Callable[[int], int]] = lambda f, g: lambda x: f(g(x))
+print(compose(square, square)(3))
+#### currying (§4 typed)
+def adder(x: int) -> Callable[[int], int]:
+    return lambda y: x + y
+print(adder(1)(2))
+#### type alias rational (§4 typed)
+type Rat = Pair[int, int]
+def make_rat(n: int, d: int) -> Rat:
+    return pair(n, d)
+def numer(r: Rat) -> int:
+    return head(r)
+def denom(r: Rat) -> int:
+    return tail(r)
+def add_rat(a: Rat, b: Rat) -> Rat:
+    return make_rat(numer(a) * denom(b) + numer(b) * denom(a), denom(a) * denom(b))
+r: Rat = add_rat(make_rat(1, 2), make_rat(1, 3))
+print(numer(r), denom(r))
+#### streams (§4 typed)
+def from_n(n: int) -> Stream[int]:
+    return pair(n, lambda: from_n(n + 1))
+s: Stream[int] = from_n(1)
+t: Stream[int] = stream_map(lambda x: x * 2, s)
+print_llist(eval_stream(t, 4))
+print(stream_ref(integers_from(10), 3))
+#### while loop llist (§4 typed)
+def last(xs: Pair[int, LList[int]]) -> int:
+    ys: LList[int] = xs
+    while not is_none(ys):
+        if is_none(tail(ys)):
+            return head(ys)
+        ys = tail(ys)
+    return 0
+print(last(pair(1, llist(2, 3))))
+#### build list in loop (§4 typed)
+xs: LList[int] = None
+for i in range(4):
+    xs = pair(i, xs)
+print_llist(xs)
+#### python lists (§4 typed)
+nums: list[int] = [3, 1, 2]
+total: int = 0
+for i in range(len(nums)):
+    total = total + nums[i]
+nums[0] = 10
+empty: list[str] = []
+print(total, nums, len(empty))
+#### pair mutation (§4 typed)
+p: Pair[int, str] = pair(1, "a")
+set_head(p, 2)
+set_tail(p, "b")
+print(head(p), tail(p))
+#### generic identity (§4 typed)
+def ident[A](x: A) -> A:
+    return x
+def twice[A](f: Callable[[A], A], x: A) -> A:
+    return f(f(x))
+print(ident(3), ident("s"), twice(lambda x: x + 1, 3), twice(lambda s: s + "!", "hi"))
+#### optional int (§4 typed)
+def safe_div(a: int, b: int) -> float | None:
+    return None if b == 0 else a / b
+def show(x: float | None) -> str:
+    return "nothing" if x is None else str(x)
+print(show(safe_div(1, 2)), show(safe_div(1, 0)))
+#### and or narrowing (§4 typed)
+def starts_positive(xs: LList[int]) -> bool:
+    return not is_none(xs) and head(xs) > 0
+def empty_or_zero(xs: LList[int]) -> bool:
+    return is_none(xs) or head(xs) == 0
+print(starts_positive(llist(1)), starts_positive(None), empty_or_zero(llist(0)))
+#### error noreturn (§4 typed)
+def check_positive(x: int) -> int:
+    if x > 0:
+        return x
+    error("not positive")
+print(check_positive(3))
+#### mutual recursion (§4 typed)
+def is_even(n: int) -> bool:
+    return True if n == 0 else is_odd(n - 1)
+def is_odd(n: int) -> bool:
+    return False if n == 0 else is_even(n - 1)
+print(is_even(10), is_odd(7))
+#### elif returns (§4 typed)
+def sign(x: int) -> str:
+    if x > 0:
+        return "positive"
+    elif x < 0:
+        return "negative"
+    else:
+        return "zero"
+print(sign(-3), sign(0))
+#### power of literal (§4 typed)
+a: int = 2 ** 10
+b: float = 2 ** -1
+c: float = math_sqrt(2)
+d: int = math_floor(2.5)
+print(a, b, c, d, abs(-3), max(1, 2))
+#### tree alias (§4 typed)
+type Tree[T] = Pair[T, LList[Tree[T]]]
+def leaf(v: int) -> Tree[int]:
+    return pair(v, None)
+def size(t: Tree[int]) -> int:
+    return 1 + reduce(lambda c, acc: size(c) + acc, 0, tail(t))
+print(size(pair(1, llist(leaf(2), leaf(3)))))
+#### run time error after check (§4 typed)
+def f(xs: list[int]) -> int:
+    return xs[5]
+print(f([1, 2]))
+
+#### missing param annotation (§4 typed)
+def g(n) -> int:
+    return n
+#### missing return annotation (§4 typed)
+def g(n: int):
+    return n
+#### missing annotation nested (§4 typed)
+def outer(x: int) -> int:
+    def inner(y):
+        return y
+    return inner(x)
+#### declaration without value (§4 typed)
+x: int
+print(1)
+#### typing import (§4 typed)
+from typing import Callable
+def f(x: int) -> int:
+    return x
+#### argument type (§4 typed)
+def f(x: int) -> int:
+    return x
+f("a")
+f(1.5)
+f(True)
+f(None)
+#### argument count (§4 typed)
+def f(x: int, y: int) -> int:
+    return x
+f(1)
+f(1, 2, 3)
+f()
+#### return type (§4 typed)
+def f(x: int) -> str:
+    return x
+def g(x: int) -> int:
+    return x / 2
+def k(x: int) -> None:
+    return x
+def h(x: int) -> int:
+    return
+#### missing return path (§4 typed)
+def f(x: int) -> int:
+    if x > 0:
+        return 1
+def h(x: int) -> int:
+    if x > 0:
+        return 1
+    elif x < 0:
+        return 2
+#### operators (§4 typed)
+a = 1 + "a"
+b = "a" - "b"
+d = -"a"
+e = 1 < "a"
+f = None + 1
+g = True + 1
+#### declared type (§4 typed)
+x: int = 3
+x = "a"
+z: str = 5
+w: bool = 1
+v: int = 3.5
+u: int | None = None
+u = "s"
+#### undefined names (§4 typed)
+print(foo)
+def g() -> int:
+    print(y)
+    y = 1
+    return y
+#### call before def (§4 typed)
+print(f(1))
+def f(n: int) -> int:
+    return n
+#### not callable (§4 typed)
+x: int = 3
+x(1)
+"a"(2)
+#### head of llist (§4 typed)
+xs = llist(1, 2, 3)
+print(head(xs))
+def w(xs: LList[int]) -> int:
+    return head(xs)
+def m(xs: LList[int]) -> LList[int]:
+    return tail(xs)
+#### wrong branch narrowing (§4 typed)
+def bad(xs: LList[int]) -> int:
+    return head(xs) if xs is None else 0
+def bad2(xs: LList[int]) -> bool:
+    return is_none(xs) and head(xs) > 0
+#### llist element types (§4 typed)
+xs: LList[int] = llist(1, 2, 3)
+ys: LList[str] = xs
+bad: LList[int] = pair("a", None)
+v: LList[str] = append(xs, llist("a"))
+#### lambda against declared type (§4 typed)
+bad: Callable[[int], str] = lambda x: x * x
+print(map(lambda x: x + "a", llist(1, 2)))
+w: LList[int] = filter(lambda x: x, llist(1, 2))
+#### lambda without context (§4 typed)
+f = lambda x: x
+print(lambda y: y)
+#### conditions must be bool (§4 typed)
+if 1:
+    pass
+x = 1 if "s" else 3
+while 0:
+    pass
+y = not 5
+z = 1 and True
+def f(xs: LList[int]) -> int:
+    if xs:
+        return 1
+    return 0
+#### function types (§4 typed)
+def add(x: int, y: int) -> int:
+    return x + y
+f: Callable[[int], int] = add
+g: int = add
+def ap(h: Callable[[int], int], v: int) -> int:
+    return h(v)
+ap(add, 1)
+ap(3, 1)
+ap(lambda: 3, 1)
+#### callable variable call (§4 typed)
+def t(f: Callable[[int], int]) -> int:
+    return f("a") + f(1, 2) + f()
+#### lists errors (§4 typed)
+w: list[str] = [1]
+xs: list[int] = [1, 2, 3]
+print(xs[0] + "a")
+xs[0] = "s"
+m: str = xs
+#### index a pair (§4 typed)
+p = pair(1, 2)
+print(p[0])
+def f(xs: LList[int]) -> int:
+    return xs[0]
+#### reduce with wrong result (§4 typed)
+xs: LList[int] = llist(1, 2)
+q: str = reduce(lambda x, acc: x + acc, 0, xs)
+#### streams errors (§4 typed)
+def ones() -> Stream[int]:
+    return pair(1, lambda: ones())
+def bad(n: int) -> Stream[int]:
+    return pair(n, ones())
+s: Stream[int] = ones()
+v: Stream[str] = stream_map(lambda x: x * 2, s)
+print(head(stream_tail(s)))
+#### nonlocal and global types (§4 typed)
+def make() -> Callable[[], int]:
+    c: int = 0
+    def inc() -> int:
+        nonlocal c
+        c = "x"
+        return 1
+    return inc
+y: int = 2
+def setg() -> None:
+    global y
+    y = "s"
+#### loop changes type (§4 typed)
+total: int = 0
+for i in range(10):
+    total = total + i
+while total > 0:
+    total = total - 1.5
+#### power and math (§4 typed)
+def ex(b: int, n: int) -> int:
+    return b ** n
+b: int = 2 ** -1
+c: int = math_sqrt(4)
+d: int = max(1, 2.5)
+#### none assigned (§4 typed)
+x: int = print(1)
+def f(x: int | None) -> int:
+    return x + 1
+def g(x: int | None) -> int:
+    return -x
+#### generic results (§4 typed)
+def ident[A](x: A) -> A:
+    return x
+n: int = ident("a")
+def first[A, B](p: Pair[A, B]) -> A:
+    return head(p)
+d: int = first(pair("a", 1))
+#### type alias errors (§4 typed)
+type Rat = Pair[int, int]
+bad: Rat = pair(1, "a")
+def numer(r: Rat) -> str:
+    return head(r)
+#### len of llist (§4 typed)
+xs: LList[int] = llist(1)
+print(len(xs))
+#### cascade unknown (§4 typed)
+y = 1 + "a"
+print(y)
+z = y
+#### mixed list (§4 typed)
+g = [1, "a"]
+h: list[int | str] = [1, "a"]
+#### captured reassigned (§4 typed)
+count = 0
+f = lambda: count + 1
+count = "s"
+#### string literal times (§4 typed)
+v: int = "a" * 2
+s: str = "a"
+x: int = s + "b"
+#### set_tail wrong (§4 typed)
+p: Pair[int, str] = pair(1, "a")
+set_tail(p, 3)
+#### reassign parameter (§4 typed)
+def f(x: int) -> int:
+    x = "a"
+    return 1
+#### is_number narrowing (§4 typed)
+def f(x: int | str) -> int:
+    if is_number(x):
+        return x
+    return 0
+def g(x: int | str) -> int:
+    if is_string(x):
+        return x
+    return 0
+#### insertion sort (§4 typed)
+def insert(x: int, xs: LList[int]) -> LList[int]:
+    if is_none(xs):
+        return llist(x)
+    elif x <= head(xs):
+        return pair(x, xs)
+    else:
+        return pair(head(xs), insert(x, tail(xs)))
+def insertion_sort(xs: LList[int]) -> LList[int]:
+    return None if is_none(xs) else insert(head(xs), insertion_sort(tail(xs)))
+print_llist(insertion_sort(llist(3, 1, 2)))
+#### merge sort (§4 typed)
+def take(xs: LList[int], n: int) -> LList[int]:
+    return None if n == 0 else pair(head(xs), take(tail(xs), n - 1))
+def drop(xs: LList[int], n: int) -> LList[int]:
+    return xs if n == 0 else drop(tail(xs), n - 1)
+def merge(xs: LList[int], ys: LList[int]) -> LList[int]:
+    if is_none(xs):
+        return ys
+    elif is_none(ys):
+        return xs
+    elif head(xs) < head(ys):
+        return pair(head(xs), merge(tail(xs), ys))
+    else:
+        return pair(head(ys), merge(xs, tail(ys)))
+def merge_sort(xs: LList[int]) -> LList[int]:
+    if is_none(xs) or is_none(tail(xs)):
+        return xs
+    mid: int = length(xs) // 2
+    return merge(merge_sort(take(xs, mid)), merge_sort(drop(xs, mid)))
+print_llist(merge_sort(llist(5, 2, 4, 1)))
+#### count change (§4 typed)
+def cc(amount: int, kinds: int) -> int:
+    if amount == 0:
+        return 1
+    elif amount < 0 or kinds == 0:
+        return 0
+    else:
+        return cc(amount, kinds - 1) + cc(amount - first_denomination(kinds), kinds)
+def first_denomination(kinds: int) -> int:
+    return 1 if kinds == 1 else 5 if kinds == 2 else 10 if kinds == 3 else 25 if kinds == 4 else 50
+print(cc(100, 5))
+#### sqrt newton (§4 typed)
+def sqrt_iter(guess: float, x: float) -> float:
+    return guess if good_enough(guess, x) else sqrt_iter(improve(guess, x), x)
+def improve(guess: float, x: float) -> float:
+    return (guess + x / guess) / 2
+def good_enough(guess: float, x: float) -> bool:
+    return abs(guess * guess - x) < 0.001
+def sqrt(x: float) -> float:
+    return sqrt_iter(1, x)
+print(sqrt(2))
+#### fast expt (§4 typed)
+def fast_expt(b: int, n: int) -> int:
+    if n == 0:
+        return 1
+    elif n % 2 == 0:
+        return fast_expt(b, n // 2) ** 2
+    else:
+        return b * fast_expt(b, n - 1)
+print(fast_expt(2, 10))
+#### bank account (§4 typed)
+def make_account(balance: int) -> Callable[[str, int], int]:
+    def dispatch(m: str, amount: int) -> int:
+        nonlocal balance
+        if m == "withdraw":
+            balance = balance - amount
+        elif m == "deposit":
+            balance = balance + amount
+        return balance
+    return dispatch
+acc = make_account(100)
+print(acc("withdraw", 30), acc("deposit", 5))
+#### sieve (§4 typed)
+def integers_from2(n: int) -> Stream[int]:
+    return pair(n, lambda: integers_from2(n + 1))
+def is_divisible(x: int, y: int) -> bool:
+    return x % y == 0
+def sieve(s: Stream[int]) -> Stream[int]:
+    if is_none(s):
+        return None
+    return pair(head(s), lambda: sieve(stream_filter(lambda x: not is_divisible(x, head(s)), stream_tail(s))))
+primes: Stream[int] = sieve(integers_from2(2))
+print_llist(eval_stream(primes, 5))
+#### memo list (§4 typed)
+def fib(n: int) -> int:
+    memo: list[int] = []
+    for i in range(n + 1):
+        memo = memo + [0]
+    def f(k: int) -> int:
+        if k < 2:
+            return k
+        if memo[k] != 0:
+            return memo[k]
+        r: int = f(k - 1) + f(k - 2)
+        memo[k] = r
+        return r
+    return f(n)
+print(fib(20))
+#### hanoi (§4 typed)
+def hanoi(n: int, a: str, b: str, c: str) -> None:
+    if n == 0:
+        return None
+    hanoi(n - 1, a, c, b)
+    print("move " + a + " to " + b)
+    hanoi(n - 1, c, b, a)
+hanoi(2, "A", "B", "C")
+#### queue with pairs (§4 typed)
+type Queue = Pair[LList[int], LList[int]]
+def make_queue() -> Queue:
+    return pair(None, None)
+def is_empty(q: Queue) -> bool:
+    return is_none(head(q))
+def enqueue(q: Queue, x: int) -> None:
+    item: LList[int] = pair(x, None)
+    if is_none(head(q)):
+        set_head(q, item)
+        set_tail(q, item)
+    else:
+        last: LList[int] = tail(q)
+        if not is_none(last):
+            set_tail(last, item)
+        set_tail(q, item)
+q: Queue = make_queue()
+enqueue(q, 1)
+enqueue(q, 2)
+print_llist(head(q))
+#### while counting (§4 typed)
+def sum_to(n: int) -> int:
+    i: int = 0
+    s: int = 0
+    while i <= n:
+        s = s + i
+        i = i + 1
+    return s
+print(sum_to(100))
+#### undeclared locals (§4 typed)
+def f(n: int) -> int:
+    x = n * 2
+    y = x + 1
+    if y > 3:
+        z = "big"
+    else:
+        z = "small"
+    print(z)
+    return y
+print(f(3))
+#### list of lists (§4 typed)
+grid: list[list[int]] = [[1, 2], [3, 4]]
+print(grid[1][0] + 1)
+row: list[int] = grid[0]
+#### reverse with accumulator (§4 typed)
+def rev(xs: LList[int], acc: LList[int]) -> LList[int]:
+    return acc if is_none(xs) else rev(tail(xs), pair(head(xs), acc))
+print_llist(rev(llist(1, 2, 3), None))
+#### tree of llists (§4 typed)
+def count_leaves(t: LList[int]) -> int:
+    return 0 if is_none(t) else 1 + count_leaves(tail(t))
+def flatten(xss: LList[LList[int]]) -> LList[int]:
+    return None if is_none(xss) else append(head(xss), flatten(tail(xss)))
+print_llist(flatten(llist(llist(1, 2), llist(3))))
+#### higher-order compose (§4 typed)
+def compose[A, B, C](f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
+    return lambda x: f(g(x))
+inc: Callable[[int], int] = lambda x: x + 1
+h = compose(lambda y: str(y), inc)
+print(h(3))
+def repeated(f: Callable[[int], int], n: int) -> Callable[[int], int]:
+    return f if n == 1 else compose(f, repeated(f, n - 1))
+print(repeated(inc, 5)(0))
+#### for each and build (§4 typed)
+build_llist(lambda i: i * i, 4)
+for_each(lambda x: print(x), llist(1, 2))
+print(member(2, llist(1, 2, 3)))
+print(remove(2, llist(1, 2, 3)))
+print(llist_to_string(llist(1, 2)))
+#### string building loop (§4 typed)
+s: str = ""
+for i in range(3):
+    s = s + str(i)
+print(s)
+#### while consume (§4 typed)
+xs: LList[int] = llist(1, 2, 3)
+while not is_none(xs):
+    print(head(xs))
+    xs = tail(xs)
+#### mixed branches (§4 typed)
+def f(c: bool) -> int:
+    return 1 if c else "a"
+def g(c: bool) -> int:
+    x = 1 if c else "a"
+    return x
+#### lambda wrong ret (§4 typed)
+def keep(pred: Callable[[int], bool], xs: LList[int]) -> LList[int]:
+    return filter(pred, xs)
+keep(lambda x: x + 1, llist(1))
+keep(lambda x: x > 0, llist(1))
+#### map pairs (§4 typed)
+ps: LList[Pair[int, int]] = llist(pair(1, 2), pair(3, 4))
+sums: LList[int] = map(lambda p: head(p) + tail(p), ps)
+print_llist(sums)
+print(reduce(lambda x, y: x + y, 0, map(lambda x: x * 2, llist(1, 2))))
+#### strings idx (§4 typed)
+s: str = "hello"
+print(s[0], len(s), s == "hello", s[0] + "!")
+#### array inc (§4 typed)
+arr: list[int] = [0, 0, 0]
+for i in range(len(arr)):
+    arr[i] = arr[i] + i
+print(arr)
+#### return in loop (§4 typed)
+def find(xs: list[int], v: int) -> int:
+    for i in range(len(xs)):
+        if xs[i] == v:
+            return i
+    return -1
+def find2(xs: list[int], v: int) -> int:
+    for i in range(len(xs)):
+        if xs[i] == v:
+            return i
+#### pair of functions (§4 typed)
+p: Pair[Callable[[int], int], Callable[[int], int]] = pair(lambda x: x + 1, lambda x: x * 2)
+print(head(p)(3) + tail(p)(4))
+#### llist of strings ops (§4 typed)
+names: LList[str] = llist("a", "b")
+print(head(names) + 1)
+#### wrong arg to library (§4 typed)
+print(length(5))
+print(map(lambda x: x, 5))
+print(enum_llist(1, "a"))
+print(llist_ref(llist(1, 2), "x"))
+#### lambda in list (§4 typed)
+fs: list[Callable[[int], int]] = [lambda x: x + 1, lambda x: x * 2]
+print(fs[0](1))
+#### none return used (§4 typed)
+def p(x: int) -> None:
+    print(x)
+y: int = p(1) + 1
+#### recursion wrong arg (§4 typed)
+def f(n: int) -> int:
+    return 0 if n == 0 else f(n - 1.0)
+#### is_pair narrowing union (§4 typed)
+def f(x: int | Pair[int, int]) -> int:
+    return head(x) if is_pair(x) else x
+#### stream lambda wrong (§4 typed)
+def bad(n: int) -> Stream[int]:
+    return pair(n, lambda: n + 1)
+#### not of non-bool in while (§4 typed)
+def f(xs: LList[int]) -> int:
+    n: int = 0
+    while xs:
+        n = n + 1
+        xs = tail(xs)
+    return n
+#### untyped chapter rejects type statements (§4)
+type R = int
+print(1)
+#### untyped chapter rejects type parameters (§4)
+def f[A](x):
+    return x
+print(f(1))

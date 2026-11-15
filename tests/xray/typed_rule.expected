@@ -1,0 +1,6 @@
+--- stderr ---
+Missing type annotation: parameter 'h' of function 'area' needs a type, as in 'h: int' (line 2, col 18)
+    def area(w: int, h) -> int:
+                     ^
+MissingTypeAnnotationError: parameter 'h' of function 'area' needs a type, as in 'h: int'
+sicpfuf hint: in Python §4 Typed every parameter of a def has a type, and so does what it returns: def area(w: int, h: int) -> int:
