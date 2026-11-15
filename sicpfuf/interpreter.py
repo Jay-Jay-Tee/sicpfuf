@@ -49,8 +49,13 @@ def complex_power(base, exponent):
         return z ** w
     angle = math.atan2(z.imag, z.real)
     log_radius = math.log(radius)
-    magnitude = math.exp(w.real * log_radius - w.imag * angle)
+    try:
+        magnitude = math.exp(w.real * log_radius - w.imag * angle)
+    except OverflowError:
+        magnitude = math.inf
     phase = w.imag * log_radius + w.real * angle
+    if not math.isfinite(phase):
+        return complex(math.nan, math.nan)
     return complex(magnitude * math.cos(phase), magnitude * math.sin(phase))
 
 # ------------------------------------------------------------- signals

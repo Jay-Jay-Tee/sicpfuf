@@ -20,6 +20,9 @@ class TerminalTests(unittest.TestCase):
         self.assertIn("enclosing -> global env", text)
         self.assertIn("FUNCTION OBJECTS", text)
         self.assertTrue(text.startswith("E1  [current]"))
+        program = '\n'.join(model_lines(step, 'environment', view='program'))
+        self.assertTrue(program.startswith('REMAINING PROGRAM'))
+        self.assertIn('E1 ⟦', program)
 
     def test_code_wraps_without_losing_long_lines(self):
         source = "def f(x):\n    return x if x == 0 else f(x - 1)\n"
@@ -31,7 +34,7 @@ class TerminalTests(unittest.TestCase):
         program = "def fib_iter(a, b, count):\n    return b if count == 0 else fib_iter(a + b, a, count - 1)\ndef fast_fib(n):\n    return fib_iter(1, 0, n)\nprint(fast_fib(10), fast_fib(20), fast_fib(100))\n"
         small = trace(program, 4, graphics=False)
         self.assertIn("250 steps", small["error"])
-        complete = trace(program, 4, graphics=False, max_steps=400)
+        complete = trace(program, 4, graphics=False, max_steps=4000)
         self.assertIsNone(complete["error"])
         self.assertEqual(complete["steps"][-1]["output"], "55 6765 354224848179261915075\n")
 

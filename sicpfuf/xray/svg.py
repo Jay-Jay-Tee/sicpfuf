@@ -274,3 +274,117 @@ def environment(snapshot, label=None, interactive=False):
 
 def short_text(text, width):
     return text if len(text) <= width else text[:width - 3] + "..."
+
+
+def reduction_environment(store, calls, functions):
+    """Draw the reducer's actual heap, including aliases and cyclic lists.
+
+    Every reference has one destination. Frames and heap cards have separate
+    columns, so adding code text cannot enlarge a selection over another frame.
+    """
+    parts, edges, positions = [], [], {}
+    frame_x, frame_w, heap_x, heap_w = 80, 260, 540, 340
+    frame_y = heap_y = 24
+
+    def group(attribute, key, dead, label):
+        state = ' class="unreachable" data-reachable="false"' if dead else ' data-reachable="true"'
+        parts.append(f'<g {attribute}="{key}"{state} tabindex="0" role="button" aria-label="{esc(label).replace(chr(34), "&quot;")}">')
+
+    def value_text(value):
+        return value.get('display', value.get('name', '(unassigned)'))
+
+    for frame in store['frames']:
+        key = 'global env' if frame['id'] == 'Global' else frame['id']
+        bindings = frame['bindings']
+        height = max(1, len(bindings)) * 25 + 26
+        positions[frame['id']] = (frame_x, frame_y + 25, frame_w, height)
+        group('data-frame', key, frame['isGarbage'], 'Inspect ' + key)
+        parts.append(f'<text x="{frame_x}" y="{frame_y + 14}" font-weight="bold">{esc(key)}</text>')
+        if frame['id'] in calls and frame['id'] != 'Global':
+            parts.append(f'<text class="small" x="{frame_x + 35}" y="{frame_y + 14}">{esc(short_text(calls[frame["id"]], 30))}</text>')
+        top = frame_y + 25
+        parts.append(f'<rect class="frame" x="{frame_x}" y="{top}" width="{frame_w}" height="{height}" rx="7"/>')
+        if frame['id'] == store['activeFrameId']:
+            parts.append(f'<rect x="{frame_x}" y="{top}" width="{frame_w}" height="{height}" rx="7" fill="none" stroke="#008577" stroke-width="4" pointer-events="none"/>')
+        for index, binding in enumerate(bindings):
+            y = top + 27 + index * 25
+            value = binding['value']
+            label = binding['name'] + ': '
+            if value['kind'] == 'ref':
+                x = frame_x + frame_w - 20
+                edges.append((x, y - 5, value['objectId'], frame['isGarbage'], None))
+                parts.append(f'<circle class="dot" cx="{x}" cy="{y - 5}" r="3.5"/>')
+            else:
+                label += value_text(value)
+            parts.append(f'<text x="{frame_x + 12}" y="{y}">{esc(short_text(label, 27))}</text>')
+        parts.append('</g>')
+        frame_y += height + 58
+
+    for item in store['heap']:
+        function = item['kind'] == 'function'
+        elements = item.get('elements', [])
+        height = 108 if function else 48 + max(1, (len(elements) + 3) // 4) * 40
+        positions[item['id']] = (heap_x, heap_y, heap_w, height)
+        info = functions.get(item['id'])
+        group('data-function' if function else 'data-object', info['id'] if function else item['id'],
+              item['isGarbage'], 'Inspect ' + item['id'])
+        label_x, label_y = (heap_x + 65, heap_y + 41) if function else (heap_x, heap_y + 13)
+        parts.append(f'<text class="small" x="{label_x}" y="{label_y}">{esc(item["id"] + " · " + (item.get("name", "lambda") if function else "list"))}</text>')
+        if function:
+            cy = heap_y + 36
+            for cx in (heap_x + 12, heap_x + 35):
+                parts.append(f'<circle class="box" cx="{cx}" cy="{cy}" r="11"/><circle class="dot" cx="{cx}" cy="{cy}" r="3"/>')
+            parts.append(f'<path class="line" d="M{heap_x + 12},{cy} V{cy + 18}" marker-end="url(#arrow)"/>')
+            parts.append(f'<text class="small" x="{heap_x}" y="{cy + 34}">parameters: {esc(short_text(", ".join(item["params"]), 42))}</text>')
+            code_lines = info['source'].splitlines()
+            code = (code_lines[1].strip() if len(code_lines) > 1 else code_lines[0]) if code_lines else ''
+            parts.append(f'<text class="small" x="{heap_x}" y="{cy + 51}">{esc(short_text(code, 42))}</text>')
+            edges.append((heap_x + 35, cy, item['envId'], item['isGarbage'], ('function', heap_y + 3)))
+        else:
+            if not elements:
+                parts.append(f'<rect class="box" x="{heap_x}" y="{heap_y + 27}" width="40" height="32"/>')
+                parts.append(f'<text class="small" x="{heap_x + 10}" y="{heap_y + 45}">[ ]</text>')
+            for index, value in enumerate(elements):
+                x, y = heap_x + index % 4 * 83, heap_y + 27 + index // 4 * 40
+                parts.append(f'<rect class="box" x="{x}" y="{y}" width="83" height="32"/>')
+                if value['kind'] == 'ref':
+                    parts.append(f'<circle class="dot" cx="{x + 41}" cy="{y + 16}" r="3.5"/>')
+                    edges.append((x + 41, y + 16, value['objectId'], item['isGarbage'], y + 36))
+                elif len(elements) == 2 and value.get('display') == 'None':
+                    parts.append(f'<path class="line" d="M{x},{y + 32} L{x + 83},{y}"/>')
+                else:
+                    parts.append(f'<text x="{x + 8}" y="{y + 21}">{esc(short_text(value_text(value), 8))}</text>')
+        parts.append('</g>')
+        heap_y += height + 26
+
+    arrows = []
+    for index, frame in enumerate(store['frames']):
+        if frame['parentId'] not in positions:
+            continue
+        x, y, _, _ = positions[frame['id']]
+        px, py, _, ph = positions[frame['parentId']]
+        lane = 64 - index % 5 * 10
+        arrows.append(f'<path class="line{" unreachable" if frame["isGarbage"] else ""}" d="M{x},{y + 12} H{lane} V{py + ph - 10} H{px}" marker-end="url(#arrow)"/>')
+    heap_kinds = {item['id']: item['kind'] for item in store['heap']}
+    for index, (x, y, target, dead, departure) in enumerate(edges):
+        if target not in positions:
+            continue
+        tx, ty, tw, th = positions[target]
+        if target in heap_kinds:
+            target_x = tx + (1 if heap_kinds[target] == 'function' else 0)
+            destination_y = ty + (36 if heap_kinds[target] == 'function' else 43)
+            if departure is not None:
+                # Leave a list cell through its own bottom, cross the row gap,
+                # then enter the actual first cell/circle of the target.
+                lane = heap_x - 30 - index % 5 * 9
+                path = f'M{x},{y} V{departure} H{lane} V{destination_y} H{target_x}'
+            else:
+                bend = (x + target_x) / 2
+                path = f'M{x},{y} C{bend},{y} {bend},{destination_y} {target_x},{destination_y}'
+        else:
+            target_x = tx + tw
+            destination_y = ty + min(35, th / 2)
+            lane = frame_x + frame_w + 45 + index % 4 * 8
+            path = f'M{x},{y} V{departure[1]} H{lane} V{destination_y} H{target_x}'
+        arrows.append(f'<path class="line{" unreachable" if dead else ""}" data-target="{target}" d="{path}" marker-end="url(#arrow)" pointer-events="none"/>')
+    return document(heap_x + heap_w + 80, max(frame_y, heap_y) + 12, parts + arrows)

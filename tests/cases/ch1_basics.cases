@@ -233,3 +233,11 @@ print(math_factorial(2.5))
 
 #### reference math perm rejects floats (§1)
 print(math_perm(2.5))
+
+#### complex power overflow follows reference polar result (§1)
+print(2j ** 2000, 2j ** -2000)
+
+#### complex power nonfinite phases produce complex nan (§1)
+a = 1j ** math_inf
+b = (1 + 2j) ** math_nan
+print(is_complex(a), a != a, is_complex(b), b != b)

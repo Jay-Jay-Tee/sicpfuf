@@ -56,8 +56,9 @@ class Val(N.Expr):
 class Fun(N.Expr):
     """The value of a function defined INSIDE another function (after substitution)."""
 
-    def __init__(self, name, params, body, group):
+    def __init__(self, name, params, body, group, display_name=None):
         self.name, self.params, self.body, self.group = name, params, body, group
+        self.display_name = name if display_name is None else display_name
 
 
 class Let(N.Expr):
@@ -72,6 +73,7 @@ class LetFun(N.Expr):
 
     def __init__(self, name, params, fbody, rest):
         self.name, self.params, self.fbody, self.rest = name, params, fbody, rest
+        self.display_name = name
 
 
 class Seq(N.Expr):
@@ -88,6 +90,51 @@ def const(value, line=0):
 
 
 ATOMS = (int, float, complex, str, bool, type(None))
+
+
+def free_names(term):
+    """Names a substitution could accidentally capture under a new binder."""
+    if isinstance(term, N.Name):
+        return {term.id}
+    if isinstance(term, (N.Constant, Val, Fun)):
+        return set()  # runtime values and closed function objects are opaque
+    if isinstance(term, N.Lambda):
+        return free_names(term.body) - {param.name for param in term.params.args}
+    if isinstance(term, Let):
+        return free_names(term.value) | (free_names(term.body) - {term.name})
+    if isinstance(term, LetFun):
+        return ((free_names(term.fbody) - set(term.params) - {term.name}) |
+                (free_names(term.rest) - {term.name}))
+    result = set()
+    for value in vars(term).values():
+        if isinstance(value, N.Node):
+            result.update(free_names(value))
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, N.Node):
+                    result.update(free_names(item))
+    return result
+
+
+def tree_names(term):
+    """All names, including binders, when choosing a fresh spelling."""
+    if isinstance(term, (N.Constant, Val, Fun)):
+        return set()
+    result = {term.id} if isinstance(term, N.Name) else set()
+    if isinstance(term, N.Lambda):
+        result.update(param.name for param in term.params.args)
+    if isinstance(term, (Let, LetFun)):
+        result.add(term.name)
+    if isinstance(term, LetFun):
+        result.update(term.params)
+    for value in vars(term).values():
+        if isinstance(value, N.Node):
+            result.update(tree_names(value))
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, N.Node):
+                    result.update(tree_names(item))
+    return result
 
 
 def block_term(stmts):
@@ -125,13 +172,14 @@ class Stepper:
         self.interp = interp
         self.limit = limit
         self.printed = 0
-        self.functions = {}             # name → (parameter names, body as one expression)
+        self.functions = {}             # binding → (parameters, body, original function name)
         self.globals = {}               # name → value (a tree), for  name = ...  at the top level
         self.imported = {}              # name → value, for  from module import name
         self.wrappers = {}              # id(function tree) → (tree, stand-in for library functions)
         self.unwrap = {}                # id(stand-in) → function tree
         self.silent = False
         self.last_line = None
+        self.fresh_counter = 0
         interp._eval[Val] = lambda node, env: node.value
 
     # ---------------------------------------------------------------- showing
@@ -205,13 +253,14 @@ class Stepper:
             return t.value
         if cls is N.Name:
             if t.id in self.functions:
-                return self.stand_in(("global", t.id), t, t.id, len(self.functions[t.id][0]))
+                params, _, name = self.functions[t.id]
+                return self.stand_in(("global", t.id), t, name, len(params))
             if t.id in self.imported:
                 return self.imported[t.id]
             return self.interp.program_env.lookup(t.id, t.line)
         if cls is N.Lambda:
             return self.stand_in(id(t), t, "(anonymous)", len(t.params.args))
-        return self.stand_in(id(t), t, t.name, len(t.params))
+        return self.stand_in(id(t), t, t.display_name, len(t.params))
 
     def stand_in(self, key, tree, name, n_params):
         """A library function such as map can't call a tree. So we give it a stand-in that,
@@ -243,6 +292,29 @@ class Stepper:
         return t
 
     # ---------------------------------------------------------------- substitution
+    def fresh_name(self, name, term, mapping):
+        used = tree_names(term) | set(mapping) | self.interp.program_env.visible_names()
+        used.update(self.functions)
+        used.update(self.globals)
+        used.update(self.imported)
+        for value in mapping.values():
+            used.update(tree_names(value))
+        while True:
+            self.fresh_counter += 1
+            candidate = f'{name}_{self.fresh_counter}'
+            if candidate not in used:
+                replacement = N.Name(candidate)
+                replacement.line = term.line
+                return replacement
+
+    def avoid_capture(self, body, names, mapping, context):
+        inner = without(mapping, names)
+        captures = set()
+        for value in inner.values():
+            captures.update(free_names(value))
+        renaming = {name: self.fresh_name(name, context, inner) for name in names if name in captures}
+        return self.subst(body, renaming), [renaming[name].id if name in renaming else name for name in names], inner
+
     def subst(self, t, m):
         """t with every free occurrence of the names in m replaced by their values."""
         if not m:
@@ -266,12 +338,30 @@ class Stepper:
         elif cls is N.Call:
             new.func, new.args = self.subst(t.func, m), [self.subst(x, m) for x in t.args]
         elif cls is N.Lambda:                       # the lambda's own parameters SHADOW outer names
-            new.body = self.subst(t.body, without(m, [p.name for p in t.params.args]))
+            body, names, inner = self.avoid_capture(t.body, [p.name for p in t.params.args], m, t)
+            new.params = copy.copy(t.params)
+            new.params.args = [copy.copy(param) for param in t.params.args]
+            for param, name in zip(new.params.args, names):
+                param.name = name
+            new.body = self.subst(body, inner)
         elif cls is Let:
-            new.value, new.body = self.subst(t.value, m), self.subst(t.body, without(m, [t.name]))
+            body, names, inner = self.avoid_capture(t.body, [t.name], m, t)
+            new.name, new.value, new.body = names[0], self.subst(t.value, m), self.subst(body, inner)
         elif cls is LetFun:
-            new.fbody = self.subst(t.fbody, without(m, [t.name] + t.params))
-            new.rest = self.subst(t.rest, without(m, [t.name]))
+            inner = without(m, [t.name])
+            captures = set()
+            for value in inner.values():
+                captures.update(free_names(value))
+            fbody, rest = t.fbody, t.rest
+            if t.name in captures:
+                replacement = self.fresh_name(t.name, t, inner)
+                new.name = replacement.id
+                rest = self.subst(rest, {t.name: replacement})
+                if t.name not in t.params:
+                    fbody = self.subst(fbody, {t.name: replacement})
+            fbody, new.params, body_mapping = self.avoid_capture(fbody, t.params, inner, t)
+            new.fbody = self.subst(fbody, body_mapping)
+            new.rest = self.subst(rest, inner)
         elif cls is Seq:
             new.first, new.rest = self.subst(t.first, m), self.subst(t.rest, m)
         else:
@@ -334,7 +424,7 @@ class Stepper:
         if cls is LetFun:                           # local functions next to each other may call each other
             group, node = {}, t
             while type(node) is LetFun:
-                group[node.name] = Fun(node.name, node.params, node.fbody, group)
+                group[node.name] = Fun(node.name, node.params, node.fbody, group, node.display_name)
                 node = node.rest
             self.silent = True
             return self.subst(node, group)
@@ -362,12 +452,12 @@ class Stepper:
         f, args = t.func, t.args
         cls = type(f)
         if cls is N.Name and f.id in self.functions:
-            params, body = self.functions[f.id]
-            name, m = f.id, {}
+            params, body, name = self.functions[f.id]
+            m = {}
         elif cls is N.Lambda:
             params, body, name, m = [p.name for p in f.params.args], f.body, "(anonymous)", {}
         elif cls is Fun:
-            params, body, name, m = f.params, f.body, f.name, dict(f.group)
+            params, body, name, m = f.params, f.body, f.display_name, dict(f.group)
         else:                                       # a primitive or library function: just do it
             fn = self.real(f)
             if type(fn) is not Builtin and type(fn) is not Closure:
@@ -406,7 +496,7 @@ class Stepper:
     def statement(self, s):
         cls = type(s)
         if cls is N.FunctionDef:
-            self.functions[s.name] = ([p.name for p in s.params.args], block_term(s.body))
+            self.functions[s.name] = ([p.name for p in s.params.args], block_term(s.body), s.name)
             self.globals.pop(s.name, None)
         elif cls is N.Assign:
             name = s.targets[0].id

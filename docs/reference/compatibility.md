@@ -6,6 +6,44 @@ sicpfuf is an independent study interpreter. Its reference behaviour is Source A
 Python implementation, **py-slang**. Differential tests compare output and errors on concrete
 programs; they are evidence about those cases, not proof that every program behaves identically.
 
+The runtime reference is pinned at
+[`c0a8dfd9`](https://github.com/source-academy/py-slang/tree/c0a8dfd9d6b1c4f6a59d1778e7e7380fa9b9f918).
+The frontend's handling of retained frames was inspected at
+[`8e8d2f39`](https://github.com/source-academy/frontend/tree/8e8d2f39cad45f8e89292cb116959e840c5467a3).
+
+## Reproducible checks
+
+| Check | Result |
+|---|---|
+| Generated operators across §1–§4 | 3964/3964 exact output and error kinds |
+| Deterministic builtin probes | 4709/4769 exact; differences recorded below |
+| Directed syntax/scope probes | 380/396 exact; 12 require the module host and 4 hit an upstream evaluator failure |
+| Environment histories | 59 programs, 1424 states; 58 match every compared field, one active-frame display discrepancy |
+| Checked documentation | 753 snippets run; 506 eligible plain snippets also compared live with py-slang, no discrepancies |
+| Supplied final-paper probes | 44/44 outputs match the reference and independent predictions |
+
+The [conformance harness](https://github.com/Jay-Jay-Tee/sicpfuf/tree/main/tests/conformance)
+keeps the fixtures, reference revision, regeneration commands and every discrepancy.
+These sweeps compare exact stdout and normalized error kinds. They do not establish exact
+wording and columns for all errors. The main differential suite separately checks error lines
+and typed diagnostic messages.
+
+The builtin discrepancies are 20 cases where upstream `str` ignores undocumented extra
+arguments, and 40 floating-point output differences in `atan`, `atan2`, `erfc`, `gamma`,
+`lgamma`, `log1p`, `sinh` and `tan`. Native math and JavaScript/mathjs need not print identical
+last digits; some approximation differences are larger than one unit in the last place.
+Those differences remain failures in the raw comparison report. sicpfuf keeps the documented
+`str(x)` interface. Four `assert` probes encounter an upstream evaluator crash; twelve imports
+cannot be assessed by a headless CSE oracle without its Conductor module host.
+
+A separate zero-base probe also exposes an upstream complex-power quirk: `0j ** 0`
+returns `0j` there. sicpfuf keeps the zero-exponent result `(1+0j)`. The generated
+operator universe above uses a nonzero complex sample, so its perfect match does
+not include this separate discrepancy.
+Complex NaN text also differs: sicpfuf prints Python's `(nan+nanj)` where the
+reference prints `(NaNNaNj)`. Non-finite complex arithmetic is handled without
+leaking a native math exception.
+
 ## Official language specifications
 
 This review compared chapter boundaries, syntax restrictions, operator rules and library
@@ -26,19 +64,37 @@ program in Source Academy and record the discrepancy rather than silently changi
 
 ## Steppers
 
-The [official environment-stepper specification](https://docs.sourceacademy.org/python/python_4_estepper.pdf)
-defines individual reductions with frames and shared objects. sicpfuf instead records environment
-events: definitions, calls, lookups across frames, assignments, mutations and returns. One event
-is not necessarily one expression reduction. The visual UI and terminal histories retain
-previously seen frames and functions; unreachable ones are greyed out (labelled in the terminal).
-A returned frame stays reachable when a live closure retains it. There is currently no
-“clear unreachable” control. The standalone `show_env()` snapshot still shows only reachable
-frames. See the
-[official guide](https://docs.sourceacademy.org/python/e-stepper/) when comparing interfaces.
+The browser and terminal E-steppers now rewrite the remaining program according to the
+[environment-stepper rules](https://github.com/source-academy/py-slang/blob/c0a8dfd9d6b1c4f6a59d1778e7e7380fa9b9f918/docs/specs/python_4_estepper_rules.tex).
+Each contraction has a before and after state. **Program** shows that remaining code;
+**Diagram** shows frames, functions and lists. Repeated object numbers identify shared objects,
+including cycles. Library applications are atomic. Empty call frames are omitted, and tail
+calls replace their caller's environment block.
 
-The substitution stepper uses applicative order in Python §1–§2 and has no normal-order mode.
-The public Python §2 stepper PDF could not be retrieved during this review, so full rule-by-rule
-conformance to it is not established.
+The 59-program oracle check compares the program tree, bindings, lexical parents, object
+identity, list contents, output and reachability at every state. It reconstructs the
+reference frontend's retained history before comparing garbage. Node IDs, source formatting,
+tooltips, explanation wording and pixel layout are outside this comparison.
+
+One reference display discrepancy remains intentional: while reducing the RHS function call
+in `a[f(0)] = f(1)`, upstream labels Global as active because its display visits the target first.
+sicpfuf labels the function frame that is actually executing. All other state fields in that
+history are compared too.
+
+Unreachable frames and objects stay visible in grey, or labelled in the terminal. A returned
+frame stays reachable when a live closure retains it. There is no “clear unreachable” control.
+The standalone `show_env()` snapshot shows reachable frames only, and still renders pairs/lists
+as text inside frames. The compact `--estep` command remains an environment **event log**;
+it does not print the UI's complete reduction states.
+
+The substitution recorder uses applicative order in Python §1–§2 and has no normal-order mode.
+Eight scope probes match both the reference runtime and its actual substitution
+reducer; local binders are renamed when necessary to preserve lexical scope.
+It still differs from the official whole-program substitution reducer: it presents expressions
+and collapses some declaration/library steps. Its step numbering must not be treated as an
+exact reproduction of Source Academy's. The canonical
+[substitution specification](https://github.com/source-academy/py-slang/blob/c0a8dfd9d6b1c4f6a59d1778e7e7380fa9b9f918/docs/specs/python_2_stepper_rules.tex)
+is available in the checked reference; a failed PDF download does not prevent inspecting it.
 
 ## Modules
 
@@ -69,9 +125,11 @@ Known limits include unchecked imported-module types, unchecked evaluator-suppor
 no `Callable[..., T]` ellipsis syntax, and some wording differences in difficult generic
 inference diagnostics. Columns are not part of the differential comparison.
 
-A separate public Python Typed PDF could not be retrieved. This comparison uses the available
-py-slang implementation and course material. The JavaScript **Source §4 Typed** specification
-is not a substitute for Python §4 Typed.
+This comparison uses the canonical
+[Python §4 Typed specification](https://github.com/source-academy/py-slang/blob/c0a8dfd9d6b1c4f6a59d1778e7e7380fa9b9f918/docs/specs/python_4_typed.tex)
+and its included grammar/type rules, together with py-slang's real checker. The reference
+checkout has 48 TeX specification files, including both stepper rule sets. Having those files
+available is not a claim that every possible typed program is covered by the tests.
 
 `--typed` selects §4, overriding a file's chapter header. Other explicit chapter flags and
 `--subst` are rejected with it. The interactive prompt has no typed mode; the CLI reports this
@@ -79,13 +137,15 @@ rather than silently starting an untyped session.
 
 ## Local UI and native Python
 
-The UI runs a fresh local subprocess for each trace. Default limits are 400 events, 15,000 interpreter
+The UI runs a fresh local subprocess for each trace. Default limits are 400 states, 15,000 interpreter
 operations and 10 seconds. Optional program input supplies one line per `input()` call;
 browser “Cancel” input is not emulated. `--typed` is supported in the §4 environment UI and
 terminal stepper; errors are reported before execution. Other CLI x-ray flags remain separate.
-Use `--max-steps 1000` to change the event limit (2–5000), or press + in the terminal to
+Use `--max-steps 1000` to change the state limit (2–5000), or press + in the terminal to
 increase it and retrace. The operation and time limits still apply.
-Retained diagram history is also bounded to 50,000 frame/function entries across its snapshots.
+Retained environment history is also bounded to 250,000 frame/heap entries across its snapshots.
+Finer reductions produce longer histories than the old event recorder; increase the limit for
+longer examples. Large traces can still hit the history or execution-time bound.
 
 The [website stepper](../playground.md) uses the same UI and interpreter inside a browser worker.
 Examples have build-checked histories, so opening one needs no Python download. Edited code
@@ -98,3 +158,18 @@ Its frames are text rather than the graphical SVG view available in `--ui`.
 Native Python differs from the course language in truthiness, available syntax and tail calls;
 see [the final chapter](../book/20-big-picture.md). The [course map](../book/course-map.md)
 separately records which lecture, sheet and assessment material was available for review.
+
+## Supplied finals and course coverage
+
+All 73 questions in the three supplied finals have a private evidence record: execution probes,
+analytic review, or both. The 44 executable probes include exact supplied programs and original
+candidate implementations, with separate reasoning for complexity, resources and compiler
+chains. No official final-answer PDFs were supplied. Some supplied versions are repaired or
+adapted, and one question has equivalent alternatives, so these are independent checks rather
+than certification of an official historical key. Paper text, extracted programs and the answer
+ledger remain outside the public repository.
+
+The textbook's course map records the available lectures, studios and reflections and the
+missing materials. It does not establish complete coverage of unseen sheets, every slide figure,
+or full official worked solutions. Browser DOM/SVG and actual Pyodide histories are tested;
+pixel layout has not been verified in a live browser in this environment.

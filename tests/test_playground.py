@@ -34,7 +34,7 @@ class PlaygroundTests(unittest.TestCase):
         self.assertIn("[1, None]", binding(before, "global env", "xs"))
         self.assertIn("[9, None]", binding(after, "global env", "xs"))
         self.assertEqual(binding(after, "global env", "xs"), binding(after, "global env", "ys"))
-        self.assertNotEqual(before["data"][0]["svg"], after["data"][0]["svg"])
+        self.assertNotEqual(before["diagram"], after["diagram"])
 
     def test_closure_keeps_its_creation_frame(self):
         result = trace("def make(x):\n    return lambda y: x + y\nf = make(2)\nprint(f(3))\n")
@@ -76,6 +76,17 @@ class PlaygroundTests(unittest.TestCase):
         self.assertFalse(frames["E1"]["on_stack"])
         self.assertFalse(frames["E2"]["reachable"])
 
+    def test_immediately_applied_lambda_is_drawn_and_retained(self):
+        result = trace("print((lambda x: x)(3))\n", 2)
+        allocation = next(step for step in result["steps"] if step["message"].startswith("Created a function object"))
+        self.assertEqual(allocation["functions"][0]["env"], "global env")
+        self.assertTrue(allocation["functions"][0]["reachable"])
+        final = result["steps"][-1]
+        self.assertEqual(final["functions"][0]["params"], ["x"])
+        self.assertFalse(final["functions"][0]["reachable"])
+        self.assertIn('data-function="fn#1"', final["diagram"])
+        self.assertEqual(binding(final, "E1", "x"), "3")
+
     def test_errors_preserve_output_and_history(self):
         result = trace("print(7)\nx = 1 / 0\n")
         self.assertIn("ZeroDivisionError", result["error"])
@@ -84,9 +95,11 @@ class PlaygroundTests(unittest.TestCase):
         syntax = trace("def f(:\n")
         self.assertIn("SyntaxError", syntax["error"])
 
-    def test_loops_are_bounded_even_without_trace_events(self):
+    def test_pass_loops_have_reductions_and_are_bounded(self):
         result = trace("while True:\n    pass\n")
-        self.assertIn("15,000 operations", result["error"])
+        self.assertIn("250 steps", result["error"])
+        self.assertTrue(any(step.get('phase') == 'afterMarker' and 'pass' in step['message']
+                            for step in result['steps']))
         self.assertLessEqual(len(result["steps"]), 250)
 
     def test_many_events_are_bounded(self):
@@ -139,6 +152,17 @@ class PlaygroundTests(unittest.TestCase):
         self.assertEqual(result["steps"][-1]["output"], "3\n9\n")
         before = next(s for s in result["steps"] if s["expression"] == "print(4 + 5)")
         self.assertEqual(before["output"], "3\n")
+
+    def test_substitution_does_not_capture_free_names(self):
+        fixture = Path(__file__).parent / 'conformance/substitution-scope.json'
+        for case in json.loads(fixture.read_text())['cases']:
+            for mode in ('substitution', 'environment'):
+                with self.subTest(case=case['id'], mode=mode):
+                    result = trace(case['source'], 2, mode)
+                    self.assertIsNone(result['error'])
+                    output = result['steps'][-1]['output']
+                    self.assertEqual(output, case['expected']['output'])
+                    self.assertEqual(output, case['expected']['substitution_output'])
 
     def test_substitution_refuses_state_and_is_bounded(self):
         self.assertIn("e-stepper", trace("x = 1\n", 3, "substitution")["error"])

@@ -1,0 +1,96 @@
+{
+  "upstream": {
+    "repository": "https://github.com/source-academy/py-slang",
+    "revision": "c0a8dfd9d6b1c4f6a59d1778e7e7380fa9b9f918"
+  },
+  "cases": [
+    {
+      "id": "substitution-scope/lambda",
+      "source": "x = 2\ndef wrap(f):\n    return lambda x: f(x)\ng = wrap(lambda _: x)\nprint(g(3))\n",
+      "chapter": 2,
+      "stepper": "substitution",
+      "expected": {
+        "output": "2\n",
+        "error": null,
+        "substitution_output": "2\n"
+      }
+    },
+    {
+      "id": "substitution-scope/local-binding",
+      "source": "x = 2\ndef wrap(f):\n    x = 3\n    return f(0)\nprint(wrap(lambda _: x))\n",
+      "chapter": 2,
+      "stepper": "substitution",
+      "expected": {
+        "output": "2\n",
+        "error": null,
+        "substitution_output": "2\n"
+      }
+    },
+    {
+      "id": "substitution-scope/local-function-parameter",
+      "source": "x = 2\ndef wrap(f):\n    def call(x):\n        return f(x)\n    return call(3)\nprint(wrap(lambda _: x))\n",
+      "chapter": 2,
+      "stepper": "substitution",
+      "expected": {
+        "output": "2\n",
+        "error": null,
+        "substitution_output": "2\n"
+      }
+    },
+    {
+      "id": "substitution-scope/local-function-name",
+      "source": "f = 2\ndef wrap(h):\n    def f(x):\n        return h(x)\n    return f(3)\nprint(wrap(lambda _: f))\n",
+      "chapter": 2,
+      "stepper": "substitution",
+      "expected": {
+        "output": "2\n",
+        "error": null,
+        "substitution_output": "2\n"
+      }
+    },
+    {
+      "id": "substitution-scope/fresh-name-collision",
+      "chapter": 2,
+      "stepper": "substitution",
+      "source": "x = 2\nx_1 = 99\ndef wrap(f):\n    return lambda x: f(x)\ng = wrap(lambda _: x)\nprint(g(3), x_1)\n",
+      "expected": {
+        "output": "2 99\n",
+        "error": null,
+        "substitution_output": "2 99\n"
+      }
+    },
+    {
+      "id": "substitution-scope/function-name-and-parameter",
+      "chapter": 2,
+      "stepper": "substitution",
+      "source": "f = 2\ndef wrap(h):\n    def f(f):\n        return h(f)\n    return f(3)\nprint(wrap(lambda _: f))\n",
+      "expected": {
+        "output": "2\n",
+        "error": null,
+        "substitution_output": "2\n"
+      }
+    },
+    {
+      "id": "substitution-scope/returned-function-name",
+      "source": "f = 2\ndef wrap(h):\n    def f(x):\n        return h(x)\n    return f\nprint(wrap(lambda _: f))\n",
+      "chapter": 2,
+      "stepper": "substitution",
+      "expected": {
+        "output": "<function f>\n",
+        "error": null,
+        "substitution_output": "<function f>\n"
+      }
+    },
+    {
+      "id": "substitution-scope/global-function-alias-name",
+      "source": "def f(x):\n    return x\ng = f\nprint(g)\n",
+      "chapter": 2,
+      "stepper": "substitution",
+      "expected": {
+        "output": "<function f>\n",
+        "error": null,
+        "substitution_output": "<function f>\n"
+      }
+    }
+  ]
+}

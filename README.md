@@ -46,7 +46,7 @@ You need Python 3.9 or newer, nothing else.
     python3 -m sicpfuf --tui my_program.py --typed   # Python §4 Typed in the terminal
 
 `--tui` uses the terminal directly: arrows or n/p step, Space plays, r reloads the saved file,
-1–4 changes chapter, Tab switches model, t toggles Typed in §4, and q quits. Press i to enter
+1–4 changes chapter, Tab switches model, v switches Program/Frames, t toggles Typed in §4, and q quits. Press i to enter
 program input; Ctrl-G saves that input and retraces. It needs curses support (included with the
 macOS/Linux Python used here). It displays frames and bindings as terminal text, not SVG graphics.
 
@@ -54,7 +54,9 @@ macOS/Linux Python used here). It displays frames and bindings as terminal text,
 Use `--no-browser` to open the printed URL yourself, or `--port 8765` to choose a port.
 The browser UI includes syntax colours, a current-frame binding inspector, diagram zoom,
 and adjustable playback speed. Arrow keys step and Space plays when the editor is not focused.
-Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 400 events
+In the E-stepper, **Program** shows the remaining code before and after each reduction;
+**Diagram** shows frames, function objects and shared/cyclic lists.
+Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 400 steps
 (adjust with `--max-steps 1000`, up to 5000; press + in the terminal to increase and retrace),
 15,000 interpreter operations, and 10 seconds. Python §4 Typed is available with `--typed` in
 either interface, and with the Typed checkbox in the browser. Type errors prevent execution.

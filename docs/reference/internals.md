@@ -146,6 +146,7 @@ All of them plug into the same interpreter:
 | Tool | File | How |
 |---|---|---|
 | `--estep` | [`xray/estepper.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/sicpfuf/xray/estepper.py) | an interpreter that writes one line for each environment-model rule it applies |
+| interactive E-stepper | [`xray/reduction.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/sicpfuf/xray/reduction.py), `reduction_trace.py` | rewrites the remaining program and store; the ordinary interpreter supplies primitive operations and atomic library applications |
 | `show_env`, `--env` | [`xray/envdiagram.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/sicpfuf/xray/envdiagram.py) | walks the frames still reachable from the current one and lists their bindings and function objects |
 | `trace`, `measure`, `--trace` | [`xray/calltree.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/sicpfuf/xray/calltree.py) | a "hook" that the trampoline tells about every call, tail call and return |
 | `draw_data` | [`xray/boxpointer.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/sicpfuf/xray/boxpointer.py) | lays out pairs with tails to the right and heads downwards, labelling boxes it meets twice |
@@ -160,6 +161,6 @@ sicpfuf is only useful if it behaves like the course's own implementation, py-sl
 - `examples/*.py` must run, and print what py-slang prints.
 - Every program on this site is run by [`tests/check_docs.py`](https://github.com/Jay-Jay-Tee/sicpfuf/blob/main/tests/check_docs.py), and the output shown on the page must be exactly what sicpfuf prints. With `--oracle`, every plain program is also run in py-slang and must print the same.
 
-sicpfuf's error *messages* are its own (with the hints), but the first line, the kind of error and its line number, is meant to match py-slang. If the two ever disagree on what a program does, py-slang is right and sicpfuf has a bug.
+sicpfuf's error *messages* are its own (with the hints), but the first line, the kind of error and its line number, is meant to match py-slang. A disagreement needs a reproducible case: compare it with both the published specification and the reference runtime. The [compatibility review](compatibility.md) records known runtime quirks and differences.
 
 *In the course: L11B–L12A (the metacircular evaluator is the same idea, written in Python §4) · SICPy 4.1.*

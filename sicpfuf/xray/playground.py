@@ -7,11 +7,7 @@ an earlier picture. The UI runs this in an isolated local subprocess.
 import io
 
 from ..errors import SicpError, SicpSyntaxError, format_syntax_error, format_runtime_error
-from ..values import Closure
 from ..interpreter import Interpreter
-from .envdiagram import Snapshot, frame_name, fn_name
-from .estepper import EnvStepper
-from . import svg
 from .stepper import Stepper
 
 
@@ -19,121 +15,12 @@ class TraceLimit(Exception):
     pass
 
 
-class BrowserStepper(EnvStepper):
-    def __init__(self, chapter=3, typed=False, graphics=True, max_steps=250):
-        self.recording = False
-        self.history = []
-        self.line = 0
-        self.operations = 0
-        self.graphics = graphics
-        self.max_steps = max_steps
-        self.seen_frames = {}
-        self.seen_functions = {}
-        self.history_objects = 0
-        super().__init__(chapter=chapter, out=io.StringIO(), max_depth=80, typed=typed)
-        self.diagrams = True
-        self.recording = True
-
-    def visit_node(self, method, node, env):
-        if self.recording:
-            self.operations += 1
-            if self.operations > 15000:
-                raise TraceLimit("Execution stopped after 15,000 operations. Try a smaller input.")
-        previous = self.line
-        if not node.lib:
-            self.line = node.line
-        try:
-            return method(node, env)
-        finally:
-            self.line = previous
-
-    def exec(self, node, env):
-        return self.visit_node(super().exec, node, env)
-
-    def eval(self, node, env):
-        return self.visit_node(super().eval, node, env)
-
-    def write(self, text):
-        if self.out.tell() + len(text) > 16000:
-            raise TraceLimit("Output stopped at 16,000 characters. Try printing less.")
-        self.out.write(text)
-        if self.recording:
-            self.capture("Program output")
-
-    def note(self, text):
-        if self.recording:
-            self.capture(text)
-
-    def capture(self, message, line=None):
-        if len(self.history) >= self.max_steps:
-            raise TraceLimit(f"Trace stopped at {self.max_steps} steps. Increase --max-steps to see more.")
-        snapshot = Snapshot(self)
-        # Reachability is measured before adding historical objects. Keeping a
-        # frame for teaching must not itself make its closure cycle reachable.
-        live_frames, live_functions = set(snapshot.frames), set(snapshot.functions)
-        self.seen_frames.update(snapshot.frames)
-        self.seen_functions.update(snapshot.functions)
-        snapshot.frames.update(self.seen_frames)
-        snapshot.functions.update(self.seen_functions)
-        snapshot.unreachable_frames = set(snapshot.frames) - live_frames
-        snapshot.unreachable_functions = set(snapshot.functions) - live_functions
-        self.history_objects += len(snapshot.frames) + len(snapshot.functions)
-        if self.history_objects > 50000:
-            raise TraceLimit("Trace stopped: diagram history is too large. Try a smaller input.")
-        on_stack = {id(env) for env in snapshot.stack}
-        frames = []
-        data = []
-        seen = set()
-        for env in sorted(snapshot.frames.values(), key=lambda e: e.serial):
-            names = list(env.vars)
-            if env.scope is not None:
-                names += sorted(env.scope.local_names - env.vars.keys())
-            bindings = []
-            for name in names:
-                value = env.vars.get(name)
-                function = fn_name(value) if type(value) is Closure and not value.prelude else None
-                bindings.append({"name": name, "value": snapshot.value_text(value)
-                                 if name in env.vars else "(unassigned)", "function": function})
-                if self.graphics and type(value) is list and id(value) not in seen and len(data) < 6:
-                    seen.add(id(value))
-                    data.append({"label": frame_name(env) + "." + name,
-                                 "svg": svg.box_pointer(value)})
-            frames.append({"id": frame_name(env), "parent": frame_name(env.parent),
-                           "call": env.name + "(" + ", ".join(env.args or []) + ")"
-                           if env.kind == "function" else "Whole program",
-                           "current": env is snapshot.current, "reachable": id(env) in live_frames,
-                           "on_stack": id(env) in on_stack, "bindings": bindings})
-        functions = [{"id": fn_name(f), "params": f.params + (["*" + f.vararg] if f.vararg else []),
-                      "line": f.node.line, "source": snapshot.source(f.node.line),
-                      "env": frame_name(f.env), "reachable": f.serial in live_functions}
-                     for f in sorted(snapshot.functions.values(), key=lambda f: f.serial)]
-        self.history.append({"message": message, "line": self.line if line is None else line,
-                             "frames": frames, "functions": functions, "data": data,
-                             "diagram": svg.environment(snapshot, interactive=True) if self.graphics else None,
-                             "output": self.out.getvalue()})
-
-
 def trace(source, chapter=3, mode="environment", typed=False, graphics=True, max_steps=250):
-    """Return a bounded, JSON-safe trace; retain useful history on user errors."""
+    """Return bounded histories from the selected execution model."""
     if mode == "substitution":
         return substitution_trace(source, chapter, max_steps)
-    interp = BrowserStepper(chapter, typed=typed, graphics=graphics, max_steps=max_steps)
-    error = None
-    interp.capture("Ready. Step forward to start the program.")
-    try:
-        tree = interp.load_source(source, typecheck=typed)
-        interp.run_tree(tree)
-        interp.capture("Program finished.")
-    except (SicpError, SicpSyntaxError) as exc:
-        lines = source.splitlines()
-        error = (exc.report(lines) if hasattr(exc, "report") else
-                 format_syntax_error(exc, lines) if isinstance(exc, SicpSyntaxError)
-                 else format_runtime_error(exc, lines))
-        if len(interp.history) < max_steps:
-            interp.capture("Program stopped: " + str(exc), line=exc.line or 0)
-    except (TraceLimit, RecursionError) as exc:
-        error = str(exc)
-    return {"steps": interp.history, "error": error}
+    from .reduction_trace import trace as environment_trace
+    return environment_trace(source, chapter, typed, graphics, max_steps)
 
 
 class SubstitutionInterpreter(Interpreter):

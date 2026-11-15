@@ -43,13 +43,21 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   get('zoom-fit').click();
   assert.equal(get('zoom-fit').textContent, 'Fit');
   get('next').click();
+  assert.equal(get('event-kind').textContent, 'BEFORE');
+  get('next').click();
   assert.match(get('message').textContent, /Defined square/);
+  get('view-program').click();
+  assert.equal(get('diagram').hidden, true);
+  assert.equal(get('program-view').hidden, false);
+  assert.match(get('remaining-program').textContent, /print\(square\(/);
+  get('view-diagram').click();
+  assert.equal(get('program-view').hidden, true);
   const frame = get('diagram').querySelector('[data-frame]');
   frame.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
   assert.equal(get('inspection').hidden, false);
-  assert.match(get('inspection').textContent, /square = fn#1/);
+  assert.match(get('inspection').textContent, /square = #1/);
   assert.equal(get('inspection-panel').hidden, false);
-  assert.match(get('bindings').textContent, /squarefn#1/);
+  assert.match(get('bindings').textContent, /square#1/);
   get('clear-inspection').click();
   assert.equal(get('inspection-panel').hidden, true);
   get('play').click();
@@ -61,14 +69,14 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   [...timers.values()][0]();
   get('play').click();
   assert.equal(timers.size, 0);
-  while (!/Called square/.test(get('message').textContent) && !get('next').disabled) get('next').click();
+  while ((get('event-kind').textContent !== 'AFTER' || !/Called square/.test(get('message').textContent)) && !get('next').disabled) get('next').click();
   assert.equal(get('frame-name').textContent, 'E1');
   assert.equal(get('bindings').textContent, 'x3');
   const fn = get('diagram').querySelector('[data-function]');
   fn.focus();
   assert.equal(w.getComputedStyle(fn).outline, 'none');
   fn.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-  assert.match(get('inspection').textContent, /fn#1/);
+  assert.match(get('inspection').textContent, /#1/);
   const position = get('position').value;
   get('code').dispatchEvent(new w.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
   assert.equal(get('position').value, position); // editing arrows never step
@@ -96,6 +104,7 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   get('run').click(); await wait();
   assert.match(get('error').textContent, /StaticTypeError/);
   assert.equal(get('run-state').textContent, 'Stopped');
+  assert.equal(get('event-kind').textContent, 'STOPPED');
   assert.equal(get('output').textContent, 'No output yet.');
   assert.equal(get('position').value, get('position').max);
   get('code').value = 'x: int = 3\nprint(x * x)\n';

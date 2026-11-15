@@ -56,14 +56,22 @@ for (const example of examples) {
   // Compare the entire browser history with the build's CPython history.
   assert.deepEqual(JSON.parse(JSON.stringify(result)), example.trace, example.title);
 }
+const scopeProbes = JSON.parse(readFileSync(new URL('./conformance/substitution-scope.json', import.meta.url), 'utf8'));
+for (const entry of scopeProbes.cases) {
+  const result = await run(entry.source, 2, 'substitution');
+  assert.equal(result.error, null, entry.id);
+  assert.equal(result.steps.at(-1).output, entry.expected.substitution_output, entry.id);
+}
 assert.equal((await run("value = 21\nprint(value * 2)\n" )).steps.at(-1).output, "42\n");
 assert.equal((await run("print(1 + 2)\n", 1)).steps.at(-1).output, "3\n");
+assert.equal((await run('a = 1j ** math_inf\nprint(is_complex(a), a != a)\n', 1)).steps.at(-1).output, 'True True\n');
+assert.equal((await run('print(2j ** 2000, 2j ** -2000)\n', 1)).steps.at(-1).output, '(inf-infj) 0j\n');
 assert.ok((await run("xs = [1, 2]\n", 1)).error, "chapter 1 must reject lists");
 assert.match((await run("print(value)\n")).error, /value/); // each run starts fresh
 const failure = await run("print(7)\nx = 1 / 0\n");
 assert.match(failure.error, /ZeroDivisionError/);
 assert.equal(failure.steps.at(-1).output, "7\n");
-assert.match((await run("while True:\n    pass\n")).error, /15,000 operations/);
+assert.match((await run("while True:\n    pass\n")).error, /400 steps/);
 assert.equal((await run("print(123)\n")).steps.at(-1).output, "123\n");
 assert.equal((await run("print((2 + 3) * 4)\n", 1, "substitution")).steps.at(-1).output, "20\n");
 assert.ok((await run("x = 1\n", 3, "substitution")).error);

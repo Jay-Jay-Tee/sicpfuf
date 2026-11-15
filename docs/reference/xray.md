@@ -40,6 +40,27 @@ What the program prints goes to the normal output. Error reports and the x-ray r
 
 With neither, the program runs as §4. A `-v` on the command line wins over the first line.
 
+## Interactive steppers: `--ui` and `--tui`
+
+```sh
+python3 -m sicpfuf --ui program.py
+python3 -m sicpfuf --tui program.py
+python3 -m sicpfuf --ui program.py --typed --max-steps 1000
+```
+
+The browser UI opens a local session. The terminal UI uses arrows or n/p to step,
+Space to play, r to reload and q to quit; + increases the limit and retraces.
+Press v to switch the terminal between the remaining program and its frames.
+In the E-stepper each reduction has a before and after state. **Program** shows the
+remaining code, with the changed part highlighted; **Diagram** shows frames, functions
+and shared lists. Grey objects are unreachable and remain available for inspection.
+Select a function to inspect its parameters, body and creation environment.
+
+The default is 400 states. `--max-steps` accepts 2–5000; histories and execution time
+are bounded too. Typed checking requires §4 and prevents execution on a type error.
+These interactive histories differ from the compact `--estep` event log below.
+See [compatibility](compatibility.md) for exact reference checks and remaining differences.
+
 ## The substitution model: `--subst`
 
 For Python §1 and §2 only. Each line starting with `->` is one step of the substitution model with **applicative order reduction**:
@@ -48,6 +69,9 @@ For Python §1 and §2 only. Each line starting with `->` is one step of the sub
 - a conditional expression: evaluate the predicate, then keep one branch;
 - an application of a primitive function (`print`, `head`, `math_sqrt`, …): do it in one step;
 - an application of a compound function: replace it by the function's return expression, with each parameter replaced by its argument.
+
+When a substitution would capture a free name, the stepper gives a local binder a
+fresh spelling such as `x_1`. The renaming preserves lexical scope.
 
 ```python title="§2 · --subst"
 def sum_llist(xs):

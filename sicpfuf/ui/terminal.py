@@ -8,11 +8,13 @@ import time
 from . import DEFAULT_SOURCE, DEFAULT_TYPED_SOURCE, run_trace
 
 
-def model_lines(step, mode, error=None):
+def model_lines(step, mode, error=None, view='frames'):
     lines = []
     if step:
         if mode == "substitution":
             lines.extend(["EXPRESSION", step.get("expression") or "Step forward to begin."])
+        elif view == 'program':
+            lines.extend(['REMAINING PROGRAM', step.get('program') or 'Step forward to begin.'])
         else:
             for frame in sorted(step["frames"], key=lambda frame: (not frame["current"], not frame.get("reachable", True))):
                 lines.append(frame["id"] + ("  [current]" if frame["current"] else
@@ -20,12 +22,13 @@ def model_lines(step, mode, error=None):
                              "  [waiting]" if frame.get("on_stack") else ""))
                 lines.append("  " + frame["call"])
                 lines.append("  enclosing -> " + frame["parent"])
-                lines.extend("  " + b["name"] + " = " + b["value"] for b in frame["bindings"])
+                lines.extend("  " + b["name"] + " = " + (b['objectId'] + ('' if b.get('function') else ' ' + b['value'])
+                             if b.get('objectId') else b['value']) for b in frame["bindings"])
                 lines.append("")
             if step["functions"]:
                 lines.append("FUNCTION OBJECTS")
                 for fn in step["functions"]:
-                    lines.append(fn["id"] + "(" + ", ".join(fn["params"]) + ") -> " + fn["env"] +
+                    lines.append(fn.get('objectId', fn['id']) + "(" + ", ".join(fn["params"]) + ") -> " + fn["env"] +
                                  ("  [unreachable]" if not fn.get("reachable", True) else ""))
                     lines.append("  " + fn["source"])
         lines.extend(["", "OUTPUT", step["output"] or "No output yet."])
@@ -61,6 +64,7 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
         nonlocal source, chapter, mode, typed, max_steps
         source = (DEFAULT_TYPED_SOURCE if typed else DEFAULT_SOURCE) if source is None else source
         index, offset, playing, last_tick = 0, 0, False, 0.0
+        program_view = False
         program_input = ""
         status = ""
         try:
@@ -116,7 +120,8 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
                     put(row, divider, "|", 1, curses.A_DIM)
                 right_width = max(1, width - divider - 4)
                 rows = []
-                for text in model_lines(step, mode, history.get("error") if history else None):
+                for text in model_lines(step, mode, history.get("error") if history else None,
+                                        view='program' if program_view else 'frames'):
                     rows.extend(textwrap.wrap(text, right_width, replace_whitespace=False) or [""])
                 offset = min(offset, max(0, len(rows) - body_height))
                 for row, text in enumerate(rows[offset:offset + body_height]):
@@ -129,7 +134,7 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
                            error.splitlines()[0] if error else step["message"] if step else "No steps recorded.")
                 put(height - 4, 1, status or message, width - 2, curses.A_BOLD if error else 0)
                 put(height - 2, 1, "←/p Back  →/n Next  Space Play  r Reload  ↑↓ Scroll  q Quit", width - 2, curses.A_REVERSE)
-                put(height - 1, 1, "1–4 Chapter  Tab Model  t Typed  i Input  + More steps  Home/End Jump", width - 2, curses.A_DIM)
+                put(height - 1, 1, "1–4 Chapter  Tab Model  v Program/Frames  t Typed  i Input  + More steps  Home/End Jump", width - 2, curses.A_DIM)
             screen.refresh()
             key = screen.getch()
             count = len(history["steps"]) if history else 0
@@ -158,6 +163,8 @@ def start(source=None, filename=None, chapter=2, mode="environment", typed=False
             elif key == ord("+"):
                 max_steps = min(5000, max_steps * 2)
                 history = reload_trace()
+            elif key == ord('v'):
+                program_view, offset = not program_view, 0
             elif key == ord("i") and height >= 12 and width >= 64:
                 from curses.textpad import Textbox
                 playing = False

@@ -5,6 +5,8 @@
   const code = get("code"), mode = get("mode"), chapter = get("chapter"), slider = get("position");
   let history = null, index = 0, timer = null, running = false, zoom = null;
   let syntaxSource = null;
+  let programView = false;
+  const bindingText = binding => binding.objectId ? binding.objectId + (binding.function ? "" : " " + binding.value) : binding.value;
   const keywords = new Set("and as assert async await break class continue def del elif else except False finally for from global if import in is lambda None nonlocal not or pass raise return True try type while with yield".split(" "));
 
   // Colour only: the actual parser and type checker remain in Python. All source
@@ -88,7 +90,7 @@
     get("inspection-panel").hidden = true;
     const environment = mode.value === "environment";
     get("model-title").textContent = environment ? "Environment model" : "Substitution model";
-    get("event-kind").textContent = !step ? "READY" : index === 0 ? "START" : index === steps.length - 1 ? (history.error ? "STOPPED" : "FINISHED") : "STEP";
+    get("event-kind").textContent = !step ? "READY" : history.error && index === steps.length - 1 ? "STOPPED" : index === 0 ? "START" : index === steps.length - 1 ? "FINISHED" : step.phase === "beforeMarker" ? "BEFORE" : step.phase === "afterMarker" ? "AFTER" : "STEP";
     get("frame-panel").hidden = !environment;
     get("diagram-toolbar").hidden = !environment;
     get("frame-panel").parentElement.classList.toggle("substitution", !environment);
@@ -100,12 +102,23 @@
     if (current) for (const binding of current.bindings) {
       const row = document.createElement("div"), name = document.createElement("dt"), value = document.createElement("dd");
       name.textContent = binding.name;
-      value.textContent = binding.value;
+      value.textContent = bindingText(binding);
       row.append(name, value);
       get("bindings").append(row);
     }
     get("frame-hint").textContent = current && current.bindings.length ? "Select a frame or closure to inspect it." : "No bindings in this frame yet.";
-    get("diagram").hidden = !environment;
+    get("diagram").hidden = !environment || programView;
+    get("program-view").hidden = !environment || !programView;
+    get("zoom-controls").hidden = programView;
+    const programText = step && step.program || "Run your code to see its reductions.";
+    get("remaining-program").replaceChildren();
+    if (step && step.focus) {
+      const [start, end] = step.focus, mark = document.createElement("mark"), characters = Array.from(programText);
+      mark.className = step.phase === "beforeMarker" ? "before-reduction" : "after-reduction";
+      mark.textContent = characters.slice(start, end).join("");
+      get("remaining-program").append(document.createTextNode(characters.slice(0, start).join("")), mark, document.createTextNode(characters.slice(end).join("")));
+    } else get("remaining-program").textContent = programText;
+    get("program-phase").textContent = step && step.phase === "beforeMarker" ? "Before reduction" : step && step.phase === "afterMarker" ? "After reduction" : "";
     get("reduction").hidden = environment;
     get("diagram").replaceChildren();
     if (environment && step && step.diagram) {
@@ -185,6 +198,14 @@
   }
 
   get("run").addEventListener("click", run);
+  for (const [id, showProgram] of [["view-diagram", false], ["view-program", true]]) {
+    get(id).addEventListener("click", () => {
+      programView = showProgram;
+      get("view-diagram").setAttribute("aria-pressed", String(!programView));
+      get("view-program").setAttribute("aria-pressed", String(programView));
+      render();
+    });
+  }
   get("back").addEventListener("click", () => { pause(); move(index - 1); });
   get("next").addEventListener("click", () => { pause(); move(index + 1); });
   slider.addEventListener("input", () => { pause(); move(Number(slider.value)); });
@@ -239,29 +260,32 @@
   });
   get("typed").addEventListener("change", invalidate);
   get("diagram").addEventListener("click", event => {
-    const frame = event.target.closest("[data-frame]"), fn = event.target.closest("[data-function]");
+    const frame = event.target.closest("[data-frame]"), fn = event.target.closest("[data-function]"), object = event.target.closest("[data-object]");
     const step = history && history.steps[index];
     if (!step) return;
     let text = "";
     if (frame) {
       const entry = step.frames.find(f => f.id === frame.dataset.frame);
-      if (entry) text = `${entry.id} · ${entry.call}\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}Enclosing: ${entry.parent}\n\n` + entry.bindings.map(b => b.name + " = " + b.value).join("\n");
+      if (entry) text = `${entry.id} · ${entry.call}\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}Enclosing: ${entry.parent}\n\n` + entry.bindings.map(b => b.name + " = " + bindingText(b)).join("\n");
     } else if (fn) {
       const entry = step.functions.find(f => f.id === fn.dataset.function);
-      if (entry) text = `${entry.id} (${entry.params.join(", ")})\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}${entry.source}\nRemembers: ${entry.env}`;
+      if (entry) text = `${entry.objectId || entry.id} (${entry.params.join(", ")})\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}${entry.source}\nRemembers: ${entry.env}`;
+    } else if (object) {
+      const entry = step.store && step.store.heap.find(item => item.id === object.dataset.object);
+      if (entry) text = `${entry.id} · list\n${entry.isGarbage ? "Unreachable · retained for inspection\n" : ""}` + entry.elements.map((item, i) => `${i}: ${item.objectId || item.display || item.name || "(unassigned)"}`).join("\n");
     }
     get("inspection").textContent = text;
     get("inspection").hidden = !text;
     get("inspection-panel").hidden = !text;
     get("diagram").querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
-    if (text) (frame || fn).classList.add("selected");
+    if (text) (frame || fn || object).classList.add("selected");
   });
   get("clear-inspection").addEventListener("click", () => {
     get("inspection").hidden = get("inspection-panel").hidden = true;
     get("diagram").querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
   });
   get("diagram").addEventListener("keydown", event => {
-    if ((event.key === "Enter" || event.key === " ") && event.target.closest("[data-frame], [data-function]")) {
+    if ((event.key === "Enter" || event.key === " ") && event.target.closest("[data-frame], [data-function], [data-object]")) {
       event.preventDefault();
       event.target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     }

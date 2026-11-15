@@ -19,6 +19,14 @@
   "error": "",
   "stdout": "(-1+0j) (5+5j) (1+2j) 5.0 (0.5+1j) (1+0j)\n"
  },
+ "ch1_basics/complex power nonfinite phases produce complex nan": {
+  "error": "",
+  "stdout": "True True True True\n"
+ },
+ "ch1_basics/complex power overflow follows reference polar result": {
+  "error": "",
+  "stdout": "(inf-infj) 0j\n"
+ },
  "ch1_basics/complex power uses reference polar evaluation": {
   "error": "",
   "stdout": "(-3+4.000000000000002j)\n(-6.960664459571899+2.7296244647840076j)\n(-0.22251715680177267+0.10070913113607541j)\n"
