@@ -1028,11 +1028,38 @@ def last(xs: LList[int]) -> int:
 
 ??? solution "Solution"
 
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def last(xs: LList[int]) -> int:
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+                    ^
+    StaticTypeError: head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+    sicpfuf hint: a linked list (LList) or a stream can be None: the EMPTY list. Test it first, as in `0 if is_none(xs) else head(xs)` or `if is_none(xs): return ...`: after that test the checker knows that xs is a pair.
+
+    StaticTypeError at line 2
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+                                        ^
+    StaticTypeError: tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+
+    StaticTypeError at line 2
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+                                                            ^
+    StaticTypeError: tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+
+    3 type errors: the program was not run.
+    ```
+
+
     **(a)** At `head(xs)` (and `tail(xs)`): `xs` has type `LList[int]`, which includes `None`, and `head` and `tail` need a pair. Nothing in the function has tested `xs` with `is_none`, so the checker cannot narrow the type to a pair. (The test `is_none(tail(xs))` says something about the tail, not about `xs`.) The program is rejected before it runs, and it would indeed fail on the empty llist.
 
     **(b)** Test `xs` first. The empty llist has no last element, so the return type must allow `None`. A type parameter `T` makes it generic:
 
-    ```python
+    ```python title="§4 · --typed"
     def last[T](xs: LList[T]) -> T | None:
         if is_none(xs):
             return None

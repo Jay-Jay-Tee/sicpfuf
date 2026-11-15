@@ -5,7 +5,7 @@
 Easiest first. Try each problem on paper before you open the answer.
 
 !!! note "How the answers on this page are checked"
-    sicpfuf's own checker for Python §4 Typed (`--typed`) was not finished when this page was written, so the **annotated** programs here are illustrations, not run. Their answers follow the checking rules of the lectures (below). Where it helps, the same function **without** annotations is run in plain Python §4, to show where things go wrong when nobody checks first. The message-passing problems at the end are ordinary Python §3 and are run.
+    Programs labelled **§4 · --typed** are checked automatically with sicpfuf's type checker. Accepted programs run; for rejected programs, the displayed diagnostics are compared with the checker's output. Where it helps, the same function **without** annotations is run in plain Python §4, to show where things go wrong when nobody checks first. The message-passing problems at the end are ordinary Python §3 and are also run.
 
 !!! tip "The rules you need"
     1. Every parameter and every return type is annotated: `def f(x: int) -> int:`. Annotated assignment: `name: T = value`.
@@ -28,6 +28,23 @@ def half(n: int) -> int:
 ```
 
 ??? success "Answer"
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def half(n: int) -> int:
+        return n / 2
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return n / 2
+               ^
+    StaticTypeError: Type "float" is not assignable to return type "int"
+    sicpfuf hint: what a `return` gives back must fit the return type written after `->` in the def.
+
+    1 type error: the program was not run.
+    ```
+
     It is **rejected** at the return statement: `n / 2` has type `float` (the `/` operator always gives a float, even for `4 / 2`), and a `float` is not assignable to the declared return type `int` (`int` is a subtype of `float`, not the reverse).
 
     Fix 1, keep the result whole: `return n // 2`. Fix 2, admit the truth: `def half(n: int) -> float:`.
@@ -60,6 +77,26 @@ def describe2(count: int) -> str:
 Which one is rejected, and when would the problem show up without a checker?
 
 ??? success "Answer"
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def describe(count: int) -> str:
+        return "some" if count > 0 else "none"
+
+    def describe2(count: int) -> str:
+        return "some" if count else "none"
+    ```
+    ```text title="Output"
+    StaticTypeError at line 5
+        return "some" if count else "none"
+                         ^
+    StaticTypeError: A condition must be a bool, but this is an int
+    sicpfuf hint: conditions (if, while, ... if ... else ..., not, and, or) must be exactly True or False. Write the comparison out: `if n != 0:` or `if not is_none(xs):`.
+
+    1 type error: the program was not run.
+    ```
+
     `describe2` is rejected: the predicate of the conditional expression has type `int`, but a condition must be `bool`. `describe` is fine: `count > 0` is a `bool`.
 
     Without a checker the error appears only **while running**, and only when that line is reached:
@@ -84,6 +121,23 @@ def score(passed: bool) -> int:
 ```
 
 ??? success "Answer"
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def score(passed: bool) -> int:
+        return passed * 10
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return passed * 10
+               ^
+    StaticTypeError: Operator "*" not supported for types "bool" and "int"
+    sicpfuf hint: the operator does not work for these types: numbers and strings don't mix (use str(n)), and True and False are not numbers.
+
+    1 type error: the program was not run.
+    ```
+
     Rejected: `*` needs numbers, and `passed` is a `bool`. Fix: `return 10 if passed else 0`. Untyped, it fails at run time, again only once someone calls it:
 
     ```python title="§4"
@@ -111,6 +165,36 @@ e: float | None = count_up(1)
 ```
 
 ??? success "Answer"
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    a: float = area(2)
+    b: int = count_up(2.5)
+    c: int | None = 5
+    d: int = c
+    e: float | None = count_up(1)
+    ```
+    ```text title="Output"
+    StaticTypeError at line 1
+        a: float = area(2)
+                   ^
+    StaticTypeError: "area" is not defined
+    sicpfuf hint: every name needs a value before it is used: by `name = ...`, `def name(...)` or as a parameter.
+
+    StaticTypeError at line 2
+        b: int = count_up(2.5)
+                 ^
+    StaticTypeError: "count_up" is not defined
+
+    StaticTypeError at line 5
+        e: float | None = count_up(1)
+                          ^
+    StaticTypeError: "count_up" is not defined
+
+    3 type errors: the program was not run.
+    ```
+
     - `a: float = area(2)`: **accepted**. `2` is an `int`, and `int` is a subtype of `float`.
     - `b: int = count_up(2.5)`: **rejected**. `count_up` expects `n` to be `int`, but got `float`.
     - `c: int | None = 5`: **accepted**. `int` is a subtype of `int | None`.
@@ -131,9 +215,26 @@ def first(xs: LList[int]) -> int:
 Why is it rejected? Fix it so that it is accepted and says honestly what happens for the empty llist.
 
 ??? success "Answer"
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def first(xs: LList[int]) -> int:
+        return head(xs)
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return head(xs)
+                    ^
+    StaticTypeError: head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+    sicpfuf hint: a linked list (LList) or a stream can be None: the EMPTY list. Test it first, as in `0 if is_none(xs) else head(xs)` or `if is_none(xs): return ...`: after that test the checker knows that xs is a pair.
+
+    1 type error: the program was not run.
+    ```
+
     `LList[int]` is `Pair[int, LList[int]] | None`. `head` needs a pair, and `xs` may be `None` (the checker suggests testing with `is_none` first). After the test, the checker knows `xs` is a pair in the `else` branch:
 
-    ```python
+    ```python title="§4 · --typed"
     def first(xs: LList[int]) -> int | None:
         if is_none(xs):
             return None
@@ -167,7 +268,7 @@ def compose(f, g):
 ```
 
 ??? success "Answer"
-    ```python
+    ```python title="§4 · --typed"
     def compose[A, B, C](f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
         return lambda x: f(g(x))
     ```
@@ -184,7 +285,7 @@ Annotate both, as generally as possible, and write the bodies so that the checke
 2. `count_if(pred, xs)`: how many elements of `xs` satisfy `pred`.
 
 ??? success "Answer"
-    ```python
+    ```python title="§4 · --typed"
     def last[T](xs: LList[T]) -> T | None:
         if is_none(xs):
             return None
@@ -238,13 +339,31 @@ def insert[T](x: T, xs: LList[T]) -> LList[T]:
 Why is this rejected? Give two fixes.
 
 ??? success "Answer"
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def insert[T](x: T, xs: LList[T]) -> LList[T]:
+        return (pair(x, xs) if is_none(xs) or x <= head(xs)
+                else pair(head(xs), insert(x, tail(xs))))
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return (pair(x, xs) if is_none(xs) or x <= head(xs)
+                                              ^
+    StaticTypeError: Operator "<=" not supported for types "T" and "T"
+    sicpfuf hint: the operator does not work for these types: numbers and strings don't mix (use str(n)), and True and False are not numbers.
+
+    1 type error: the program was not run.
+    ```
+
     Inside a generic function, `T` could be **any** type, including functions or llists, and `<=` only works on two numbers or two strings. The checker cannot know that the `T` used later will be comparable, so `x <= head(xs)` is rejected. (The `is_none(xs) or …` part is fine: on the right of `or`, `xs` is known not to be `None`.)
 
     Fix 1: give up generality and fix the element type, e.g. `def insert(x: int, xs: LList[int]) -> LList[int]:`.
 
     Fix 2: keep it generic and let the caller say how to compare:
 
-    ```python
+    ```python title="§4 · --typed"
     def insert[T](x: T, xs: LList[T], before: Callable[[T, T], bool]) -> LList[T]:
         return (pair(x, xs) if is_none(xs) or before(x, head(xs))
                 else pair(head(xs), insert(x, tail(xs), before)))

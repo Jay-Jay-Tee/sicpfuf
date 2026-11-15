@@ -1169,11 +1169,55 @@ def count_if(pred, xs):
 
 ??? solution "Solution"
 
-    These answers follow the typing rules of the lectures (they are not machine-checked here).
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def last(xs: LList[int]) -> int:
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+                    ^
+    StaticTypeError: head expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+    sicpfuf hint: a linked list (LList) or a stream can be None: the EMPTY list. Test it first, as in `0 if is_none(xs) else head(xs)` or `if is_none(xs): return ...`: after that test the checker knows that xs is a pair.
+
+    StaticTypeError at line 2
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+                                        ^
+    StaticTypeError: tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+
+    StaticTypeError at line 2
+        return head(xs) if is_none(tail(xs)) else last(tail(xs))
+                                                            ^
+    StaticTypeError: tail expects p to be Pair[H, T], but got LList[int]. The value can be None: test for that first, for example with is_none(...)
+
+    3 type errors: the program was not run.
+    ```
+
+
+    What sicpfuf's type checker (`--typed`) reports for the program in the question:
+
+    ```python title="§4 · --typed"
+    def mean(a: int, b: int) -> int:
+        return (a + b) / 2
+    ```
+    ```text title="Output"
+    StaticTypeError at line 2
+        return (a + b) / 2
+                ^
+    StaticTypeError: Type "float" is not assignable to return type "int"
+    sicpfuf hint: what a `return` gives back must fit the return type written after `->` in the def.
+
+    1 type error: the program was not run.
+    ```
+
+
+    The programs labelled **§4 · --typed** are checked automatically, including the rejection diagnostics and the corrected programs below.
 
     **(a)** `xs` has type `LList[int]`, which includes `None`, and `head(xs)` and `tail(xs)` need a pair: the checker complains that the argument may be `None`. Test for `None` first; the result type must then allow `None`:
 
-    ```python
+    ```python title="§4 · --typed"
     def last(xs: LList[int]) -> int | None:
         if is_none(xs):
             return None
@@ -1187,7 +1231,7 @@ def count_if(pred, xs):
 
     **(c)**
 
-    ```python
+    ```python title="§4 · --typed"
     def count_if[A](pred: Callable[[A], bool], xs: LList[A]) -> int:
         if is_none(xs):
             return 0

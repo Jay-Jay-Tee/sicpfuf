@@ -49,7 +49,7 @@ and runs only if there are no type errors. At run time the annotations are ignor
 
 The complete new syntax:
 
-```python
+```python title="§4 · --typed"
 def square(x: float) -> float:          # annotated parameters and result
     return x * x
 
@@ -84,7 +84,7 @@ type Point = Pair[float, float]          # a type alias: a new name for a type
 A lambda expression has no annotations: its type comes from the name it is assigned to or the
 parameter it is passed to.
 
-```python
+```python title="§4 · --typed"
 double: Callable[[float], float] = lambda x: 2 * x
 
 def twice(f: Callable[[float], float], x: float) -> float:
@@ -119,7 +119,7 @@ After the test `is_none(xs)` (or `xs is None`) the checker knows, in each branch
 is: in the alternative, `xs` is a `Pair[int, LList[int]]`, so `head(xs)` is an `int`. This is
 called **narrowing**. The same works for any `T | None`:
 
-```python
+```python title="§4 · --typed"
 def label(age: int | None) -> str:
     return "unknown" if age is None else "age " + str(age)
 ```
@@ -144,7 +144,7 @@ unknown age 19
 
 `sum_llist` works only on llists of numbers, so its type mentions `int`:
 
-```python
+```python title="§4 · --typed"
 def sum_llist(xs: LList[int]) -> int:
     return 0 if is_none(xs) else head(xs) + sum_llist(tail(xs))
 ```
@@ -152,7 +152,7 @@ def sum_llist(xs: LList[int]) -> int:
 `length` works for llists of ANY element type. A **generic** function has a type parameter in
 square brackets that stands for "any type, the same one everywhere it appears":
 
-```python
+```python title="§4 · --typed"
 def length[A](xs: LList[A]) -> int:
     return 0 if is_none(xs) else 1 + length(tail(xs))
 
@@ -177,7 +177,7 @@ says that the result has the SAME element type as the input.
 
 `list[T]` types Python lists. With a type alias, the code says what the data means:
 
-```python
+```python title="§4 · --typed"
 type Vector = list[float]
 
 def dot(u: Vector, v: Vector) -> float:

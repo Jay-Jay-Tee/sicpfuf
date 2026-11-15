@@ -3,7 +3,7 @@
 <p class="chapter-goal">Annotations, subtypes, None narrowing, generic llist functions, what the checker rejects, and objects made from function objects.</p>
 
 !!! note "How to read this page"
-    **Python §4 Typed** is §4 plus **type annotations**. The program is parsed, then **type-checked**, and runs only if the checker finds no type errors. At run time the annotations are ignored. Typed code below is shown as illustration (not run here); the untyped parts in sections 7–8 are run.
+    **Python §4 Typed** is §4 plus **type annotations**. The program is parsed, then **type-checked**, and runs only if the checker finds no type errors. At run time the annotations are ignored. Programs labelled **§4 · --typed** below are checked automatically: accepted programs run, and rejected programs are checked against their displayed diagnostics. The untyped parts in sections 7–8 are also run.
 
 ## 1. The syntax
 
@@ -21,7 +21,7 @@
 | `def f[A](x: A) -> A:` | a **generic** function: works for every type `A` |
 | `type Vector = list[float]` | a **type alias**: a new name for a type |
 
-```python
+```python title="§4 · --typed"
 def area(width: float, height: float) -> float:
     return width * height
 
@@ -63,7 +63,7 @@ def last_or_zero(xs: LList[int]) -> int:
 
 ## 4. Generic llist functions
 
-```python
+```python title="§4 · --typed"
 def length[A](xs: LList[A]) -> int:
     return 0 if is_none(xs) else 1 + length(tail(xs))
 
