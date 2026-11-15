@@ -169,7 +169,7 @@ A **box-and-pointer diagram** draws each pair as a box with two halves: head on 
 A small value is written inside its half; a pair is drawn as an arrow to its own box; `None` is a slash.
 sicpfuf's `draw_data` draws them for you, as text and as a picture.
 
-```python title="§2 · figure 07-data-pairs"
+```python title="§2 · figure 07-data-abstraction-pairs"
 draw_data(pair(pair(1, 2), pair(3, None)))
 ```
 ```text title="Output"
@@ -179,7 +179,7 @@ draw_data(pair(pair(1, 2), pair(3, None)))
  [1|2]
 ```
 
-![Box-and-pointer diagram of pair(pair(1, 2), pair(3, None))](../assets/figures/07-data-pairs-data-1.svg)
+![Box-and-pointer diagram of pair(pair(1, 2), pair(3, None))](../assets/figures/07-data-abstraction-pairs-data-1.svg)
 
 How to draw one by hand, from the expression:
 
@@ -196,7 +196,7 @@ an element, the tail holds *the rest*, and the empty rest is `None`.
 
 `None` is the **empty llist**. `llist(1, 2, 3)` is short for `pair(1, pair(2, pair(3, None)))`.
 
-```python title="§2 · figure 07-data-llist"
+```python title="§2 · figure 07-data-abstraction-llist"
 xs = llist(1, 2, 3)
 print(xs == pair(1, pair(2, pair(3, None))))
 print(xs)
@@ -212,7 +212,7 @@ None
 [1|•]-->[2|•]-->[3|/]
 ```
 
-![Box-and-pointer diagram of llist(1, 2, 3)](../assets/figures/07-data-llist-data-1.svg)
+![Box-and-pointer diagram of llist(1, 2, 3)](../assets/figures/07-data-abstraction-llist-data-1.svg)
 
 The same value has three faces:
 
@@ -230,7 +230,7 @@ copied.
 `print_llist` writes `llist(...)` for every part that is a proper llist, and keeps square brackets for a pair
 that is not one:
 
-```python title="§2 · figure 07-data-mixed"
+```python title="§2 · figure 07-data-abstraction-mixed"
 mixed = llist(pair(1, 2), llist(3, 4), 5)
 print(mixed)
 print_llist(mixed)
@@ -249,7 +249,7 @@ True False
  [1|2]    [3|•]-->[4|/]
 ```
 
-![Box-and-pointer diagram of llist(pair(1, 2), llist(3, 4), 5)](../assets/figures/07-data-mixed-data-1.svg)
+![Box-and-pointer diagram of llist(pair(1, 2), llist(3, 4), 5)](../assets/figures/07-data-abstraction-mixed-data-1.svg)
 
 `pair(1, 2)` is a pair but not a llist: its tail is 2, not a llist. `mixed` is still a llist of three
 elements, because what matters is the chain of tails along the top row.
