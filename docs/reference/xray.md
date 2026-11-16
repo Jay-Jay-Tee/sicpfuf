@@ -56,6 +56,14 @@ remaining code, with the changed part highlighted; **Diagram** shows frames, fun
 and shared lists. Grey objects are unreachable and remain available for inspection.
 Select a function to inspect its parameters, body and creation environment.
 
+**Tree** provides a second representation of list data from the selected step. Choose a
+binding or heap object under **Root**. **Nested llists** displays llist elements as children;
+**Binary: entry, left, right** interprets each node as `llist(entry, left, right)`. Empty
+subtrees stay visible as ∅. Shared subtrees and cycles have reference nodes rather than
+duplicated expansions. Shared tails are shown explicitly. Non-llist arrays and improper
+pairs show their actual slots, and invalid binary nodes are labelled. Large projections
+are abbreviated at 320 displayed nodes or 48 levels; select a smaller subtree to inspect it.
+
 Tail chains run horizontally and nested heads hang below them. Shared objects have one
 box; cycles point back to that box. Selecting a node highlights outgoing pointers and
 uses a second colour for incoming references. Unrelated pointers fade until the selection
@@ -69,6 +77,9 @@ to open the local UI in the integrated browser beside your editor.
 
 The default is 400 states. `--max-steps` accepts 2–5000; histories and execution time
 are bounded too. Typed checking requires §4 and prevents execution on a type error.
+In either browser UI, change **Max steps** and press **Run**. **More steps** doubles the
+limit after a step-limit stop and preserves your current position in the retraced history.
+It reruns the program rather than resuming a suspended interpreter; recorded input is reused.
 These interactive histories differ from the compact `--estep` event log below.
 See [compatibility](compatibility.md) for exact reference checks and remaining differences.
 

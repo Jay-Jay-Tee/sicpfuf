@@ -43,7 +43,7 @@ class UITests(unittest.TestCase):
         return int(header.split()[1]), content
 
     def test_serves_ui_assets_and_initial_program(self):
-        for path in ("/", "/ui.js", "/ui.css", "/api/session"):
+        for path in ("/", "/ui.js", "/tree.js", "/ui.css", "/api/session"):
             with self.subTest(path=path):
                 status, body = self.request(path)
                 self.assertEqual(status, 200)
@@ -70,6 +70,20 @@ class UITests(unittest.TestCase):
                      {"source": "", "chapter": 2, "mode": "unknown"}):
             with self.subTest(data=data):
                 self.assertEqual(self.request("/api/trace", data)[0], 400)
+
+    def test_browser_step_limit_is_honoured_and_validated(self):
+        data = {"source": "print(2 + 3)\n", "chapter": 2, "mode": "environment", "max_steps": 2}
+        status, body = self.request("/api/trace", data)
+        self.assertEqual(status, 200)
+        self.assertEqual(len(json.loads(body)["steps"]), 2)
+        self.assertIn("2 steps", json.loads(body)["error"])
+        status, body = self.request("/api/trace", dict(data, max_steps=1000))
+        self.assertEqual(status, 200)
+        self.assertIsNone(json.loads(body)["error"])
+        self.assertEqual(json.loads(body)["steps"][-1]["output"], "5\n")
+        for limit in (True, 0, 5001, 2.5, "800", None):
+            with self.subTest(limit=limit):
+                self.assertEqual(self.request("/api/trace", dict(data, max_steps=limit))[0], 400)
 
     def test_both_models_and_fresh_runs(self):
         for mode in ("environment", "substitution"):

@@ -18,13 +18,18 @@ class PlaygroundTests(unittest.TestCase):
     def test_examples_and_output_match(self):
         examples = json.loads((Path(__file__).resolve().parents[1] /
                                "sicpfuf/ui/examples.json").read_text())
-        expected = ["15\n17\n", "13\n", "6\n", "7\n15\n", "99\nTrue\n", "24\n", "6\n", "10\n", "4\n"]
-        self.assertEqual(len(examples), len(expected))
-        for example, output in zip(examples, expected):
+        expected = {
+            "nested-tree": "llist(1, llist(2, 3), llist(llist(4), llist()), 5)\n",
+            "binary-tree": "llist(8, llist(3, llist(), llist()), llist(11, llist(9, llist(), llist()), llist()))\n",
+            "counter": "15\n17\n", "scope": "13\n", "recursion": "6\n", "independent": "7\n15\n",
+            "sharing": "99\nTrue\n", "tail": "24\n", "subst-factorial": "6\n",
+            "subst-higher-order": "10\n", "subst-conditional": "4\n"}
+        self.assertEqual({example['id'] for example in examples}, set(expected))
+        for example in examples:
             with self.subTest(example=example["id"]):
                 result = trace(example["source"], example["chapter"], example.get("mode", "environment"))
                 self.assertIsNone(result["error"])
-                self.assertEqual(result["steps"][-1]["output"], output)
+                self.assertEqual(result["steps"][-1]["output"], expected[example['id']])
                 json.dumps(result)  # no live interpreter objects cross the worker boundary
 
     def test_mutation_does_not_rewrite_history(self):

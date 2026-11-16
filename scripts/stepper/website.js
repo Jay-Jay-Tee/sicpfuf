@@ -11,6 +11,21 @@
   const failed = error => ({ steps: [], error });
   const status = message => window.dispatchEvent(new CustomEvent("sicpfuf:status", { detail: message }));
 
+  function importedProgram() {
+    // Prefer a self-contained link. A fresh tab, reload or storage-disabled
+    // embedded browser must receive the same code as the original click.
+    const fragments = [location.hash];
+    try { if (parent !== window) fragments.push(parent.location.hash); } catch (_) { /* Cross-origin host. */ }
+    for (const fragment of fragments) {
+      try {
+        const encoded = new URLSearchParams(fragment.slice(1)).get("program");
+        if (encoded !== null) return JSON.parse(encoded);
+      } catch (_) { /* A malformed link can still use a legacy import. */ }
+    }
+    try { return JSON.parse(sessionStorage.getItem("sicpfuf-stepper-import")); }
+    catch (_) { return null; }
+  }
+
   function stop(message) {
     if (worker) worker.terminate();
     worker = null;
@@ -20,7 +35,8 @@
   async function execute(data) {
     const recorded = (await examples).find(example => example.trace && example.source === data.source &&
       example.chapter === data.chapter && (example.mode || "environment") === data.mode &&
-      Boolean(example.typed) === data.typed && !data.stdin);
+      Boolean(example.typed) === data.typed && !data.stdin &&
+      (data.max_steps || 400) >= example.trace.steps.length);
     if (recorded) return recorded.trace;
     const cold = !worker;
     if (!worker) worker = new Worker(new URL("worker.js", assets), { type: "module" });
@@ -57,18 +73,20 @@
       select.append(option);
     }
     let initial = entries[0];
+    const imported = importedProgram();
     try {
-      const imported = JSON.parse(sessionStorage.getItem("sicpfuf-stepper-import"));
       sessionStorage.removeItem("sicpfuf-stepper-import");
-      if (imported && typeof imported.source === "string" && imported.source.length < 100000 &&
-          [1, 2, 3, 4].includes(imported.chapter)) {
-        initial = { ...imported, title: "Textbook example", id: "imported" };
-        const option = document.createElement("option");
-        option.value = initial.id;
-        option.textContent = initial.title;
-        select.append(option);
-      }
-    } catch (_) { /* Examples remain available when browser storage is disabled. */ }
+    } catch (_) { /* URL imports work even when storage is unavailable. */ }
+    if (imported && typeof imported.source === "string" && imported.source.length < 100000 &&
+        [1, 2, 3, 4].includes(imported.chapter) &&
+        (imported.mode === "environment" || imported.mode === "substitution")) {
+      initial = { source: imported.source, chapter: imported.chapter, mode: imported.mode,
+        typed: Boolean(imported.typed), title: "Textbook example", id: "imported" };
+      const option = document.createElement("option");
+      option.value = initial.id;
+      option.textContent = initial.title;
+      select.append(option);
+    }
     select.value = initial.id;
     select.addEventListener("change", () => {
       const entry = entries.find(example => example.id === select.value) || initial;

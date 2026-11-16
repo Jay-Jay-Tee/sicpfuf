@@ -6,6 +6,7 @@
   let history = null, index = 0, timer = null, running = false, zoom = null;
   let syntaxSource = null;
   let programView = false;
+  let treeView = false, treeRoot = null;
   let pan = null, dragged = false;
   const bindingText = binding => binding.objectId ? binding.objectId + (binding.function ? "" : " " + binding.value) : binding.value;
   const keywords = new Set("and as assert async await break class continue def del elif else except False finally for from global if import in is lambda None nonlocal not or pass raise return True try type while with yield".split(" "));
@@ -91,7 +92,7 @@
   }
 
   function controls(disabled) {
-    [code, mode, chapter, get("stdin"), get("run")].forEach(el => { el.disabled = disabled; });
+    [code, mode, chapter, get("stdin"), get("max-steps"), get("more-steps"), get("run")].forEach(el => { el.disabled = disabled; });
     if (get("example")) get("example").disabled = disabled;
     if (get("stop")) get("stop").disabled = !disabled;
     get("typed").disabled = disabled || chapter.value !== "4" || mode.value !== "environment";
@@ -123,8 +124,12 @@
     slider.value = index;
     get("count").textContent = step ? `${index + 1} / ${steps.length}` : "0 / 0";
     get("output").textContent = step && step.output || "No output yet.";
-    get("error").textContent = history && history.error || "";
+    const error = history && history.error || "";
+    const reachedLimit = error.match(/^Trace stopped at (\d+) steps\./);
+    get("error").textContent = error.replace("Increase --max-steps to see more.",
+      Number(get("max-steps").value) < 5000 ? "Increase Max steps above, then Run, or choose More steps." : "The browser limit is 5,000 steps. Try a smaller input.");
     get("error").hidden = !(history && history.error);
+    get("more-steps").hidden = !reachedLimit || Number(get("max-steps").value) >= 5000;
     get("message").textContent = step ? (step.line ? `Line ${step.line} · ` : "") + step.message : "Edit the code, then Run.";
     get("inspection").hidden = true;
     get("inspection-panel").hidden = true;
@@ -151,6 +156,23 @@
     get("diagram-help").hidden = !environment || programView;
     get("program-view").hidden = !environment || !programView;
     get("zoom-controls").hidden = programView;
+    const showTree = environment && treeView && !programView;
+    get("tree-controls").hidden = !showTree;
+    get("tree-note").hidden = true;
+    let treeChoice = null;
+    if (showTree) {
+      const choices = window.sicpfufTree.roots(step && step.store);
+      treeChoice = choices.find(choice => choice.id === treeRoot) || choices[0];
+      treeRoot = treeChoice ? treeChoice.id : null;
+      get("tree-root").replaceChildren(...choices.map(choice => {
+        const option = document.createElement("option");
+        option.value = choice.id; option.textContent = choice.label;
+        return option;
+      }));
+      get("tree-root").value = treeRoot || "";
+      get("tree-root").disabled = !choices.length;
+    }
+    get("diagram").setAttribute("aria-label", showTree ? "Tree view" : "Environment diagram");
     const programText = step && step.program || "Run your code to see its reductions.";
     get("remaining-program").replaceChildren();
     if (step && step.focus) {
@@ -162,17 +184,21 @@
     get("program-phase").textContent = step && step.phase === "beforeMarker" ? "Before reduction" : step && step.phase === "afterMarker" ? "After reduction" : "";
     get("reduction").hidden = environment;
     get("diagram").replaceChildren();
-    if (environment && step && step.diagram) {
-      const parsed = new DOMParser().parseFromString(step.diagram, "image/svg+xml");
-      const picture = document.importNode(parsed.documentElement, true);
+    if (environment && step && (showTree ? treeChoice : step.diagram)) {
+      const tree = showTree ? window.sicpfufTree.draw(step.store, treeChoice.value, get("tree-format").value) : null;
+      const picture = tree ? tree.svg : document.importNode(new DOMParser().parseFromString(step.diagram, "image/svg+xml").documentElement, true);
       picture.setAttribute("aria-label", step.message);
+      if (tree) {
+        get("tree-note").textContent = tree.note;
+        get("tree-note").hidden = !tree.note;
+      }
       if (current) Array.from(picture.querySelectorAll("[data-frame]")).filter(node => node.dataset.frame === current.id).forEach(node => { node.dataset.current = "true"; });
       get("diagram").append(picture);
       sizeDiagram();
     } else if (environment) {
       const empty = document.createElement("div");
       empty.className = "empty-diagram";
-      empty.textContent = "Run your code to explore its environment.";
+      empty.textContent = showTree ? "Step forward until a list is created, then choose its root." : "Run your code to explore its environment.";
       get("diagram").append(empty);
     }
     const before = index > 0 && steps[index - 1].expression || "";
@@ -193,6 +219,7 @@
   function invalidate() {
     pause();
     history = null;
+    treeRoot = null;
     index = 0;
     state("Edited · run again");
     render();
@@ -207,8 +234,9 @@
     render();
   }
 
-  async function run() {
+  async function run(resumeAt) {
     if (running) return;
+    if (!get("max-steps").reportValidity()) return;
     running = true;
     invalidate();
     controls(true);
@@ -218,12 +246,12 @@
     try {
       const response = await request("/api/trace", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: code.value, chapter: Number(chapter.value), mode: mode.value, stdin: get("stdin").value, typed: get("typed").checked })
+        body: JSON.stringify({ source: code.value, chapter: Number(chapter.value), mode: mode.value, stdin: get("stdin").value, typed: get("typed").checked, max_steps: Number(get("max-steps").value) })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not run the program.");
       history = result;
-      index = result.error ? Math.max(0, result.steps.length - 1) : 0;
+      index = Number.isInteger(resumeAt) ? Math.min(resumeAt, Math.max(0, result.steps.length - 1)) : result.error ? Math.max(0, result.steps.length - 1) : 0;
       render();
       state(result.error ? "Stopped" : "Trace ready", result.error ? "error" : "");
     } catch (error) {
@@ -239,14 +267,26 @@
   }
 
   get("run").addEventListener("click", run);
-  for (const [id, showProgram] of [["view-diagram", false], ["view-program", true]]) {
+  get("max-steps").addEventListener("change", invalidate);
+  get("more-steps").addEventListener("click", () => {
+    const previous = index;
+    get("max-steps").value = Math.min(5000, Number(get("max-steps").value) * 2);
+    run(previous);
+  });
+  for (const [id, view] of [["view-diagram", "diagram"], ["view-tree", "tree"], ["view-program", "program"]]) {
     get(id).addEventListener("click", () => {
-      programView = showProgram;
-      get("view-diagram").setAttribute("aria-pressed", String(!programView));
+      const selected = get("diagram").querySelector(".selected[data-object]");
+      if (view === "tree" && selected) treeRoot = selected.dataset.object;
+      programView = view === "program"; treeView = view === "tree";
+      get("view-diagram").setAttribute("aria-pressed", String(!programView && !treeView));
+      get("view-tree").setAttribute("aria-pressed", String(treeView));
       get("view-program").setAttribute("aria-pressed", String(programView));
+      zoom = null;
       render();
     });
   }
+  get("tree-root").addEventListener("change", () => { treeRoot = get("tree-root").value; zoom = null; render(); });
+  get("tree-format").addEventListener("change", () => { zoom = null; render(); });
   get("back").addEventListener("click", () => { pause(); move(index - 1); });
   get("next").addEventListener("click", () => { pause(); move(index + 1); });
   slider.addEventListener("input", () => { pause(); move(Number(slider.value)); });
@@ -319,7 +359,10 @@
       if (entry) text = `${entry.objectId || entry.id} (${entry.params.join(", ")})\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}${entry.source}\nRemembers: ${entry.env}`;
     } else if (object) {
       const entry = step.store && step.store.heap.find(item => item.id === object.dataset.object);
-      if (entry) text = `${entry.id} · list\n${entry.isGarbage ? "Unreachable · retained for inspection\n" : ""}` + entry.elements.map((item, i) => `${i}: ${item.objectId || item.display || item.name || "(unassigned)"}`).join("\n");
+      if (entry && entry.kind === "function") {
+        const info = step.functions.find(f => f.objectId === entry.id);
+        text = `${entry.id} · function\n${entry.isGarbage ? "Unreachable · retained for inspection\n" : ""}${info ? info.source + "\nRemembers: " + info.env : ""}`;
+      } else if (entry) text = `${entry.id} · list\n${entry.isGarbage ? "Unreachable · retained for inspection\n" : ""}` + entry.elements.map((item, i) => `${i}: ${item.objectId || item.display || item.name || "(unassigned)"}`).join("\n");
     }
     clearSelection();
     get("inspection").textContent = text;
@@ -387,8 +430,13 @@
     mode.value = session.mode || "environment";
     chapter.value = session.chapter;
     get("typed").checked = Boolean(session.typed);
+    if (session.max_steps) get("max-steps").value = session.max_steps;
     get("filename").textContent = session.filename || session.title || "Untitled";
     mode.dispatchEvent(new Event("change"));
+    if (session.view === "tree") {
+      get("tree-format").value = session.treeFormat || "llist";
+      get("view-tree").click();
+    } else get("view-diagram").click();
     return run();
   }
   window.addEventListener("sicpfuf:example", event => { if (!running) loadSession(event.detail); });

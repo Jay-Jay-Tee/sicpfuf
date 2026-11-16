@@ -23,8 +23,11 @@ request = json.loads(stepper_request)
 previous_stdin = sys.stdin
 try:
     sys.stdin = io.StringIO(request.get("stdin", ""))
+    max_steps = request.get("max_steps", 400)
+    if type(max_steps) is not int or not 2 <= max_steps <= 5000:
+        raise ValueError("Max steps must be an integer between 2 and 5000.")
     result = trace(request["source"], request["chapter"], request["mode"],
-                   typed=request.get("typed", False), max_steps=400)
+                   typed=request.get("typed", False), max_steps=max_steps)
 finally:
     sys.stdin = previous_stdin
 json.dumps(result)

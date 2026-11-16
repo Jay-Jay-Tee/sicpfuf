@@ -184,6 +184,11 @@ True True False
 `reduce` inserts from the right, so 7 became the root, then 12, 5, 1, 9. Each search follows **one** path
 from the root down.
 
+In the [visual stepper](../playground.md), choose **Tree**, select `t`, and set **Structure**
+to **Binary: entry, left, right**. This displays entries as nodes with labelled left and right
+branches. The three-item llist representation is an explicit choice: the same data in
+**Nested llists** mode means a llist with three elements, rather than a binary node.
+
 - **Balanced** (height about log₂ n): search and insert are **Θ(log n)**.
 - Inserting sorted data sends every entry right: a chain, as slow as a llist, **Θ(n)**.
 - `bst_insert` builds new nodes along one path and shares the untouched subtrees; the old tree is unchanged.

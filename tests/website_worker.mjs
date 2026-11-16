@@ -43,9 +43,9 @@ const worker = new vm.SourceTextModule(source, {
 await worker.link(() => { throw new Error("Unexpected static import"); });
 await worker.evaluate();
 
-async function run(source, chapter = 3, mode = "environment", typed = false, stdin = "") {
+async function run(source, chapter = 3, mode = "environment", typed = false, stdin = "", max_steps = 400) {
   messages.length = 0;
-  await self.onmessage({ data: { source, chapter, mode, typed, stdin } });
+  await self.onmessage({ data: { source, chapter, mode, typed, stdin, max_steps } });
   const final = messages.at(-1);
   assert.equal(final.type, "result", final.message);
   return final.trace;
@@ -72,6 +72,14 @@ const failure = await run("print(7)\nx = 1 / 0\n");
 assert.match(failure.error, /ZeroDivisionError/);
 assert.equal(failure.steps.at(-1).output, "7\n");
 assert.match((await run("while True:\n    pass\n")).error, /400 steps/);
+const smallLimit = await run('print(2 + 3)\n', 2, 'environment', false, '', 2);
+assert.equal(smallLimit.steps.length, 2);
+assert.match(smallLimit.error, /2 steps/);
+const longer = 'i = 0\nwhile i < 40:\n    i = i + 1\nprint(i)\n';
+assert.match((await run(longer)).error, /400 steps/);
+const expanded = await run(longer, 3, 'environment', false, '', 1000);
+assert.equal(expanded.error, null);
+assert.equal(expanded.steps.at(-1).output, '40\n');
 assert.equal((await run("print(123)\n")).steps.at(-1).output, "123\n");
 assert.equal((await run("print((2 + 3) * 4)\n", 1, "substitution")).steps.at(-1).output, "20\n");
 assert.ok((await run("x = 1\n", 3, "substitution")).error);

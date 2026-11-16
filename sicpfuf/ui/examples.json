@@ -1,5 +1,22 @@
 [
   {
+    "id": "nested-tree",
+    "title": "A tree made from nested llists",
+    "chapter": 2,
+    "view": "tree",
+    "hint": "Choose Tree and watch the nested llists become branches. Empty llists are empty subtrees, not leaves.",
+    "source": "tree = llist(1, llist(2, 3), llist(llist(4), None), 5)\nprint_llist(tree)\n"
+  },
+  {
+    "id": "binary-tree",
+    "title": "A binary tree: entry, left, right",
+    "chapter": 2,
+    "view": "tree",
+    "treeFormat": "binary",
+    "hint": "Each node is llist(entry, left, right). The left and right empty branches stay visible.",
+    "source": "def node(value, left, right):\n    return llist(value, left, right)\n\ntree = node(8, node(3, None, None), node(11, node(9, None, None), None))\nprint_llist(tree)\n"
+  },
+  {
     "id": "counter",
     "title": "A closure that remembers",
     "chapter": 3,

@@ -40,6 +40,13 @@ llist(1, llist(2, 3), llist(llist(4), llist()), 5)
 
 `length(t)` is 4: the top row has four boxes. But the tree holds **five** leaves: 1, 2, 3, 4, 5.
 
+!!! tip "See the same data as a tree"
+    Open the program in the [visual stepper](../playground.md), advance past `t`'s assignment,
+    choose **Tree**, select `t` under **Root**, and leave **Structure** on **Nested llists**.
+    The top-level llist becomes a branching node; nested llists become subtrees and numbers
+    become leaves. ∅ marks the empty subtree. Switch back to **Diagram** to inspect the
+    underlying pairs and tail links. Both views use the same recorded objects.
+
 ## 2. Counting leaves: recurse on head and tail
 
 Three cases, and the order of the tests matters:

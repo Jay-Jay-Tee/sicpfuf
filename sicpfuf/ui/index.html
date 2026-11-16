@@ -6,6 +6,7 @@
   <title>sicpfuf · stepper</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/ui.css">
+  <script src="/tree.js" defer></script>
   <script src="/ui.js" defer></script>
 </head>
 <body>
@@ -22,6 +23,7 @@
       <option value="3">Python §3</option><option value="4">Python §4</option>
     </select>
     <label class="typed-toggle"><input id="typed" type="checkbox"> Typed</label>
+    <label class="step-limit">Max steps <input id="max-steps" type="number" min="2" max="5000" step="1" value="400" aria-label="Maximum trace steps"></label>
     <button id="run" type="button" title="Run · Ctrl / ⌘ + Enter">Run</button>
     </div>
   </header>
@@ -41,6 +43,7 @@
         <div class="section-title">Output <span>At the selected step</span></div>
         <pre id="output">No output yet.</pre>
         <pre id="error" role="alert" hidden></pre>
+        <button id="more-steps" type="button" hidden>More steps</button>
       </div>
     </section>
     <section class="execution-panel panel" aria-label="Execution steps">
@@ -48,7 +51,9 @@
       <div class="step-event"><span id="event-kind">START</span><p id="message" role="status">Loading…</p></div>
       <div class="model-workspace">
         <div class="visualization">
-          <div id="diagram-toolbar"><div class="view-switch" role="group" aria-label="Execution view"><button id="view-diagram" type="button" aria-pressed="true">Diagram</button><button id="view-program" type="button" aria-pressed="false">Program</button></div><small class="model-legend">Grey = unreachable</small><div id="zoom-controls"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button" title="Fit the whole diagram to view">Fit</button><button id="zoom-actual" type="button" title="Show diagram at actual size">1:1</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div></div>
+          <div id="diagram-toolbar"><div class="view-switch" role="group" aria-label="Execution view"><button id="view-diagram" type="button" aria-pressed="true">Diagram</button><button id="view-tree" type="button" aria-pressed="false">Tree</button><button id="view-program" type="button" aria-pressed="false">Program</button></div><small class="model-legend">Grey = unreachable</small><div id="zoom-controls"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button" title="Fit the whole diagram to view">Fit</button><button id="zoom-actual" type="button" title="Show diagram at actual size">1:1</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div></div>
+          <div id="tree-controls" hidden><label>Root <select id="tree-root" aria-label="Tree root"></select></label><label>Structure <select id="tree-format" aria-label="Tree representation"><option value="llist">Nested llists</option><option value="binary">Binary: entry, left, right</option></select></label></div>
+          <p id="tree-note" class="hint" role="status" hidden></p>
           <div id="diagram" aria-label="Environment diagram"></div>
           <p id="diagram-help">Drag to pan · Select to trace pointers · Double-click to focus</p>
           <div id="program-view" hidden><div class="section-title">Remaining program <span id="program-phase"></span></div><pre id="remaining-program"></pre><p class="hint"># labels refer to shared objects. E ⟦ … ⟧ runs in that environment.</p></div>

@@ -64,6 +64,7 @@ def make_handler(session):
                 return
             assets = {"/": ("index.html", "text/html; charset=utf-8"),
                       "/ui.js": ("ui.js", "text/javascript; charset=utf-8"),
+                      "/tree.js": ("tree.js", "text/javascript; charset=utf-8"),
                       "/ui.css": ("ui.css", "text/css; charset=utf-8")}
             if path not in assets:
                 self.send(404, {"error": "Not found"})
@@ -96,11 +97,14 @@ def make_handler(session):
                 typed = data.get("typed", False)
                 if type(typed) is not bool or (typed and (chapter != 4 or mode != "environment")):
                     raise ValueError("Typed checking requires Python §4 and the environment stepper.")
+                max_steps = data.get("max_steps", session.get("max_steps", 400))
+                if type(max_steps) is not int or not 2 <= max_steps <= 5000:
+                    raise ValueError("Max steps must be an integer between 2 and 5000.")
             except (ValueError, UnicodeError) as exc:
                 self.send(400, {"error": str(exc)})
                 return
             self.send(200, run_trace(data["source"], chapter, mode, data.get("stdin", ""), typed=typed,
-                                     max_steps=session.get("max_steps", 400)))
+                                     max_steps=max_steps))
 
     return Handler
 

@@ -142,10 +142,16 @@ operations and 10 seconds. Optional program input supplies one line per `input()
 browser “Cancel” input is not emulated. `--typed` is supported in the §4 environment UI and
 terminal stepper; errors are reported before execution. Other CLI x-ray flags remain separate.
 Use `--max-steps 1000` to change the state limit (2–5000), or press + in the terminal to
-increase it and retrace. The operation and time limits still apply.
+increase it and retrace. The browser's **Max steps** field sets the same limit, and
+**More steps** doubles it after a state-limit stop. The operation and time limits still apply.
 Retained environment history is also bounded to 250,000 frame/heap entries across its snapshots.
 Finer reductions produce longer histories than the old event recorder; increase the limit for
 longer examples. Large traces can still hit the history or execution-time bound.
+
+**Tree** is an additional projection of the recorded heap, not an extra evaluation model.
+Its nested-llist and explicit binary-tree interpretations leave the program and histories
+unchanged. Shared references, cycles and invalid binary shapes are labelled; projections
+are bounded to 320 displayed nodes and expansion depth 48.
 
 The [website stepper](../playground.md) uses the same UI and interpreter inside a browser worker.
 Examples have build-checked histories, so opening one needs no Python download. Edited code

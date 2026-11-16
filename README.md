@@ -58,7 +58,10 @@ In the E-stepper, **Program** shows the remaining code before and after each red
 **Diagram** shows frames, function objects and shared/cyclic lists.
 Select a node to trace its pointers, double-click to focus it, and drag the background to pan.
 **Fit** fits the entire graph; **1:1** restores readable actual size. Unreachable objects stay grey.
-Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 400 steps
+**Tree** draws nested llists or explicitly selected `llist(entry, left, right)` binary trees.
+Choose the root variable/object; sharing, cycles and empty subtrees remain visible.
+Change **Max steps** (2–5000) and Run, or use **More steps** after reaching the limit.
+Edits in the UI do not overwrite your file. Each run starts fresh, with a default limit of 400 states
 (adjust with `--max-steps 1000`, up to 5000; press + in the terminal to increase and retrace),
 15,000 interpreter operations, and 10 seconds. Python §4 Typed is available with `--typed` in
 either interface, and with the Typed checkbox in the browser. Type errors prevent execution.

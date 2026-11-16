@@ -22,6 +22,7 @@ def on_post_build(config, **kwargs):
     ui = ROOT / "sicpfuf/ui"
     page = (ui / "index.html").read_text()
     page = page.replace('href="/ui.css"', 'href="ui.css"')
+    page = page.replace('src="/tree.js"', 'src="tree.js"')
     page = page.replace('<script src="/ui.js" defer></script>',
                         '<script src="website.js" defer></script>\n  <script src="ui.js" defer></script>')
     page = page.replace("Local session", "Browser session")
@@ -31,7 +32,7 @@ def on_post_build(config, **kwargs):
     page = page.replace("Edits stay in this session. Your file is unchanged.",
                         "Code runs in your browser. First custom run downloads Python.")
     (target / "index.html").write_text(page)
-    for filename in ("ui.css", "ui.js"):
+    for filename in ("ui.css", "ui.js", "tree.js"):
         shutil.copyfile(ui / filename, target / filename)
     for filename in ("website.js", "worker.js"):
         shutil.copyfile(ROOT / "scripts/stepper" / filename, target / filename)
