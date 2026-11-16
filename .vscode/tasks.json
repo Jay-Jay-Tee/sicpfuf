@@ -2,6 +2,24 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "sicpfuf: Start local textbook",
+      "type": "process",
+      "command": "python3",
+      "args": ["${workspaceFolder}/scripts/serve_book.py"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "isBackground": true,
+      "presentation": {"reveal": "silent", "panel": "dedicated"},
+      "problemMatcher": {
+        "owner": "sicpfuf-book",
+        "pattern": {"regexp": "^(.+):(\\d+): (.+)$", "file": 1, "line": 2, "message": 3},
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^sicpfuf textbook: starting$",
+          "endsPattern": "^sicpfuf textbook: ready "
+        }
+      }
+    },
+    {
       "label": "sicpfuf: Start local stepper",
       "type": "process",
       "command": "python3",

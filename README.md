@@ -70,11 +70,15 @@ terminals; redirected output stays plain. Set `NO_COLOR=1` to disable terminal c
 Open this folder in VS Code. In **Run and Debug**, choose **sicpfuf: Textbook beside code**
 and start it. The book opens inside VS Code in a dedicated side editor group, which stays
 separate from your code tabs. This uses VS Code's built-in integrated browser; no extension is needed.
+The launch starts MkDocs automatically and waits until the local book is ready. It reuses
+an existing textbook server on port 8000. MkDocs must be available in your project `.venv`,
+the study environment at `~/.cache/sicpfuf/venv`, or your PATH; otherwise it is run through
+`python3 -m mkdocs` (install the documentation requirements first).
 
 Choose **sicpfuf: Visual stepper beside code** to start the local stepper in that pane too.
-If you are already serving the docs with MkDocs, **sicpfuf: Local textbook (MkDocs running)**
-opens the current local book instead of the published one. Stop the stepper server with
-**Tasks: Terminate Task** when you finish.
+**sicpfuf: Local textbook (MkDocs running)** also starts or reuses that server.
+Choose **sicpfuf: Published textbook** to read the deployed book without a local server.
+Stop a locally started server with **Tasks: Terminate Task** when you finish.
 
 For the terminal workflow, run **Tasks: Run Task → sicpfuf: Terminal stepper (current file)**
 with your Python file active. **sicpfuf: Run current Python file** runs it through the course

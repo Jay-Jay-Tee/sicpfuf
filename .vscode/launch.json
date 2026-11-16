@@ -5,13 +5,21 @@
       "type": "editor-browser",
       "request": "launch",
       "name": "sicpfuf: Textbook beside code",
-      "url": "https://jay-jay-tee.github.io/sicpfuf/book/"
+      "url": "http://127.0.0.1:8000/sicpfuf/book/",
+      "preLaunchTask": "sicpfuf: Start local textbook"
     },
     {
       "type": "editor-browser",
       "request": "launch",
       "name": "sicpfuf: Local textbook (MkDocs running)",
-      "url": "http://127.0.0.1:8000/sicpfuf/book/"
+      "url": "http://127.0.0.1:8000/sicpfuf/book/",
+      "preLaunchTask": "sicpfuf: Start local textbook"
+    },
+    {
+      "type": "editor-browser",
+      "request": "launch",
+      "name": "sicpfuf: Published textbook",
+      "url": "https://jay-jay-tee.github.io/sicpfuf/book/"
     },
     {
       "type": "editor-browser",
