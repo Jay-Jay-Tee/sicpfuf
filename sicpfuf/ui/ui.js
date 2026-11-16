@@ -260,11 +260,13 @@
   });
   get("typed").addEventListener("change", invalidate);
   get("diagram").addEventListener("click", event => {
-    const frame = event.target.closest("[data-frame]"), fn = event.target.closest("[data-function]"), object = event.target.closest("[data-object]");
+    const frame = event.target.closest("[data-frame]"), fn = event.target.closest("[data-function]"), object = event.target.closest("[data-object]"), builtins = event.target.closest("[data-builtins]");
     const step = history && history.steps[index];
     if (!step) return;
     let text = "";
-    if (frame) {
+    if (builtins) {
+      text = "Built-ins · pre-declared names\n\nBuilt-in functions and the chapter's library names are available through this enclosing environment. Its bindings are collapsed here.\n\nGlobal points here; each call frame points to its lexical parent.";
+    } else if (frame) {
       const entry = step.frames.find(f => f.id === frame.dataset.frame);
       if (entry) text = `${entry.id} · ${entry.call}\n${entry.reachable === false ? "Unreachable · retained for inspection\n" : ""}Enclosing: ${entry.parent}\n\n` + entry.bindings.map(b => b.name + " = " + bindingText(b)).join("\n");
     } else if (fn) {
@@ -278,14 +280,14 @@
     get("inspection").hidden = !text;
     get("inspection-panel").hidden = !text;
     get("diagram").querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
-    if (text) (frame || fn || object).classList.add("selected");
+    if (text) (frame || fn || object || builtins).classList.add("selected");
   });
   get("clear-inspection").addEventListener("click", () => {
     get("inspection").hidden = get("inspection-panel").hidden = true;
     get("diagram").querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
   });
   get("diagram").addEventListener("keydown", event => {
-    if ((event.key === "Enter" || event.key === " ") && event.target.closest("[data-frame], [data-function], [data-object]")) {
+    if ((event.key === "Enter" || event.key === " ") && event.target.closest("[data-frame], [data-function], [data-object], [data-builtins]")) {
       event.preventDefault();
       event.target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     }

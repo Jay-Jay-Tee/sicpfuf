@@ -37,6 +37,11 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   assert.equal(get('syntax').textContent, source + '\n');
   assert.equal(get('syntax').querySelector('.tok-keyword').textContent, 'def');
   assert.ok(get('diagram').querySelector('svg'));
+  const builtins = get('diagram').querySelector('[data-builtins]');
+  assert.ok(builtins);
+  builtins.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  assert.match(get('inspection').textContent, /Built-ins · pre-declared names/);
+  get('clear-inspection').click();
   const naturalWidth = parseFloat(get('diagram').querySelector('svg').style.width);
   get('zoom-in').click();
   assert.ok(parseFloat(get('diagram').querySelector('svg').style.width) > naturalWidth);

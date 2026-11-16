@@ -12,6 +12,25 @@ from sicpfuf.xray.playground import trace
 
 
 class ReductionTests(unittest.TestCase):
+    def test_global_points_to_visible_collapsed_builtins(self):
+        result = trace('print(1)\n')
+        for step in (result['steps'][0], result['steps'][-1]):
+            picture = ET.fromstring(step['diagram'])
+            builtins = next(node for node in picture.iter() if 'data-builtins' in node.attrib)
+            self.assertIn(':::pre-declared names:::', ''.join(builtins.itertext()))
+            self.assertTrue(any(node.attrib.get('data-parent') == 'Builtins' and
+                                node.attrib.get('marker-end') == 'url(#arrow)' for node in picture.iter()))
+            self.assertEqual([frame['id'] for frame in step['store']['frames']], ['Global'])
+
+    def test_function_environment_links_curve_to_distinct_parent_ports(self):
+        result = trace('def f(x):\n    return x\ndef g(x):\n    return x+1\n')
+        picture = ET.fromstring(result['steps'][-1]['diagram'])
+        links = [node for node in picture.iter() if node.attrib.get('data-edge-kind') == 'environment']
+        self.assertEqual(len(links), 2)
+        self.assertEqual({node.attrib['data-target'] for node in links}, {'Global'})
+        self.assertEqual(len({node.attrib['d'].split()[-1] for node in links}), 2)
+        self.assertTrue(all(' C' in node.attrib['d'] and ' H' not in node.attrib['d'] for node in links))
+
     def test_programs_and_live_stores_match_reference_at_each_step(self):
         fixture = Path(__file__).parent / 'conformance/environment.json.gz'
         data = json.loads(gzip.decompress(fixture.read_bytes()))

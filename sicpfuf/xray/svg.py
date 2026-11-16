@@ -284,7 +284,7 @@ def reduction_environment(store, calls, functions):
     """
     parts, edges, positions = [], [], {}
     frame_x, frame_w, heap_x, heap_w = 80, 260, 540, 340
-    frame_y = heap_y = 24
+    frame_y = heap_y = 184
 
     def group(attribute, key, dead, label):
         state = ' class="unreachable" data-reachable="false"' if dead else ' data-reachable="true"'
@@ -293,19 +293,30 @@ def reduction_environment(store, calls, functions):
     def value_text(value):
         return value.get('display', value.get('name', '(unassigned)'))
 
+    # The protocol omits library internals. Show their enclosing environment
+    # as a collapsed presentation frame, keeping it separate from user frames.
+    positions['Builtins'] = (frame_x, 49, 440, 80)
+    group('data-builtins', 'true', False, 'Inspect built-in and pre-declared names')
+    parts.append(f'<text class="small" x="{frame_x}" y="38">Built-ins</text>')
+    parts.append(f'<rect class="frame" x="{frame_x}" y="49" width="440" height="80" rx="5"/>')
+    parts.append(f'<text class="small" x="{frame_x + 24}" y="94">:::pre-declared names:::</text>')
+    parts.append('</g>')
+
     for frame in store['frames']:
         key = 'global env' if frame['id'] == 'Global' else frame['id']
         bindings = frame['bindings']
-        height = max(1, len(bindings)) * 25 + 26
-        positions[frame['id']] = (frame_x, frame_y + 25, frame_w, height)
+        width = 160 if not bindings else frame_w
+        height = max(1, len(bindings)) * 25 + (59 if not bindings else 26)
+        positions[frame['id']] = (frame_x, frame_y + 25, width, height)
         group('data-frame', key, frame['isGarbage'], 'Inspect ' + key)
-        parts.append(f'<text x="{frame_x}" y="{frame_y + 14}" font-weight="bold">{esc(key)}</text>')
+        title = 'Global' if frame['id'] == 'Global' else key
+        parts.append(f'<text x="{frame_x}" y="{frame_y + 14}" font-weight="bold">{esc(title)}</text>')
         if frame['id'] in calls and frame['id'] != 'Global':
             parts.append(f'<text class="small" x="{frame_x + 35}" y="{frame_y + 14}">{esc(short_text(calls[frame["id"]], 30))}</text>')
         top = frame_y + 25
-        parts.append(f'<rect class="frame" x="{frame_x}" y="{top}" width="{frame_w}" height="{height}" rx="7"/>')
+        parts.append(f'<rect class="frame" x="{frame_x}" y="{top}" width="{width}" height="{height}" rx="7"/>')
         if frame['id'] == store['activeFrameId']:
-            parts.append(f'<rect x="{frame_x}" y="{top}" width="{frame_w}" height="{height}" rx="7" fill="none" stroke="#008577" stroke-width="4" pointer-events="none"/>')
+            parts.append(f'<rect x="{frame_x}" y="{top}" width="{width}" height="{height}" rx="7" fill="none" stroke="#008577" stroke-width="4" pointer-events="none"/>')
         for index, binding in enumerate(bindings):
             y = top + 27 + index * 25
             value = binding['value']
@@ -339,7 +350,7 @@ def reduction_environment(store, calls, functions):
             code_lines = info['source'].splitlines()
             code = (code_lines[1].strip() if len(code_lines) > 1 else code_lines[0]) if code_lines else ''
             parts.append(f'<text class="small" x="{heap_x}" y="{cy + 51}">{esc(short_text(code, 42))}</text>')
-            edges.append((heap_x + 35, cy, item['envId'], item['isGarbage'], ('function', heap_y + 3)))
+            edges.append((heap_x + 35, cy, item['envId'], item['isGarbage'], None))
         else:
             if not elements:
                 parts.append(f'<rect class="box" x="{heap_x}" y="{heap_y + 27}" width="40" height="32"/>')
@@ -359,6 +370,10 @@ def reduction_environment(store, calls, functions):
 
     arrows = []
     for index, frame in enumerate(store['frames']):
+        if frame['id'] == 'Global':
+            x, y, width, _ = positions['Global']
+            arrows.append(f'<path class="line" data-parent="Builtins" d="M{x + width / 2},{y} V129" marker-end="url(#arrow)" pointer-events="none"/>')
+            continue
         if frame['parentId'] not in positions:
             continue
         x, y, _, _ = positions[frame['id']]
@@ -366,6 +381,7 @@ def reduction_environment(store, calls, functions):
         lane = 64 - index % 5 * 10
         arrows.append(f'<path class="line{" unreachable" if frame["isGarbage"] else ""}" d="M{x},{y + 12} H{lane} V{py + ph - 10} H{px}" marker-end="url(#arrow)"/>')
     heap_kinds = {item['id']: item['kind'] for item in store['heap']}
+    environment_arrivals = {}
     for index, (x, y, target, dead, departure) in enumerate(edges):
         if target not in positions:
             continue
@@ -383,8 +399,12 @@ def reduction_environment(store, calls, functions):
                 path = f'M{x},{y} C{bend},{y} {bend},{destination_y} {target_x},{destination_y}'
         else:
             target_x = tx + tw
-            destination_y = ty + min(35, th / 2)
-            lane = frame_x + frame_w + 45 + index % 4 * 8
-            path = f'M{x},{y} V{departure[1]} H{lane} V{destination_y} H{target_x}'
-        arrows.append(f'<path class="line{" unreachable" if dead else ""}" data-target="{target}" d="{path}" marker-end="url(#arrow)" pointer-events="none"/>')
-    return document(heap_x + heap_w + 80, max(frame_y, heap_y) + 12, parts + arrows)
+            arrival = environment_arrivals.get(target, 0)
+            environment_arrivals[target] = arrival + 1
+            destination_y = max(ty + 12, min(y, ty + th - 12) - 6 * (arrival % 5))
+            lift = y - 52
+            path = f'M{x},{y} C{x},{lift} {target_x + 70},{destination_y} {target_x},{destination_y}'
+        kind = 'environment' if target not in heap_kinds else 'reference'
+        arrows.append(f'<path class="line{" unreachable" if dead else ""}" data-edge-kind="{kind}" data-target="{target}" d="{path}" marker-end="url(#arrow)" pointer-events="none"/>')
+    width = heap_x + heap_w + 80 if store['heap'] else frame_x + 440 + 40
+    return document(width, max(frame_y, heap_y) + 12, parts + arrows)

@@ -12,6 +12,8 @@ Unreachable frames and functions stay visible in grey. A returned frame retained
 closure stays reachable. The E-stepper shows a **before** and **after** state for each reduction.
 Choose **Program** to follow the remaining code, or **Diagram** to inspect frames, functions and
 shared lists. Matching object numbers refer to the same object, including cycles.
+The collapsed **Built-ins** frame sits above **Global**; the arrow shows where
+lookup continues for pre-declared names.
 
 <iframe class="stepper-frame" src="../assets/stepper/index.html" title="sicpfuf visual stepper" loading="eager"></iframe>
 
