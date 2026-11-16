@@ -7,7 +7,7 @@ async function loadRuntime() {
   const response = await fetch(new URL("sicpfuf.zip", self.location.href));
   if (!response.ok) throw new Error("Could not download sicpfuf. Reload and try again.");
   py.unpackArchive(await response.arrayBuffer(), "zip");
-  py.runPython("import io, json, sys\nfrom sicpfuf.xray.playground import trace");
+  py.runPython("import io, json, sys\nfrom sicpfuf.xray.playground import trace\nfrom sicpfuf.ui.checking import check_source");
   return py;
 }
 
@@ -26,8 +26,9 @@ try:
     max_steps = request.get("max_steps", 400)
     if type(max_steps) is not int or not 2 <= max_steps <= 5000:
         raise ValueError("Max steps must be an integer between 2 and 5000.")
-    result = trace(request["source"], request["chapter"], request["mode"],
-                   typed=request.get("typed", False), max_steps=max_steps)
+    result = (check_source(request["source"], request["chapter"], request.get("typed", False)) if request.get("validate_only", False)
+              else trace(request["source"], request["chapter"], request["mode"],
+                         typed=request.get("typed", False), max_steps=max_steps))
 finally:
     sys.stdin = previous_stdin
 json.dumps(result)

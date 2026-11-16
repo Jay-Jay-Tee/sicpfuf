@@ -23,7 +23,7 @@ class Worker {
   postMessage(data) {
     this.onmessage({ data: { type: 'status', message: 'Tracing your program…' } });
     if (blocked) return;
-    const trace = JSON.parse(execFileSync('python3', ['-m', 'sicpfuf.ui', '--trace'], {
+    const trace = JSON.parse(execFileSync('python3', ['-m', 'sicpfuf.ui', data.validate_only ? '--check' : '--trace'], {
       cwd: root, input: JSON.stringify({ max_steps: 400, ...data })
     }));
     this.onmessage({ data: { type: 'result', trace } });
@@ -90,6 +90,19 @@ function edit(source) { get('code').value = source; get('code').dispatchEvent(ne
   await wait(); end();
   assert.equal(get('view-diagram').getAttribute('aria-pressed'), 'true');
   assert.equal(get('tree-controls').hidden, true);
+  edit('print(missing)\n');
+  await new Promise(resolve => setTimeout(resolve, 550));
+  assert.equal(get('syntax').querySelector('.editor-squiggle').textContent, 'missing');
+  assert.equal(get('run').disabled, false, 'live checks leave editing enabled');
+  // Stop while a check is pending also cancels the Run queued behind it.
+  blocked = true;
+  edit('print(987)\n'); await new Promise(resolve => setTimeout(resolve, 550));
+  get('run').click(); await wait();
+  get('stop').click(); await wait();
+  assert.match(get('error').textContent, /Run stopped/);
+  blocked = false;
+  get('run').click(); await wait(); end();
+  assert.equal(get('output').textContent, '987\n');
   require('./tree_view.cjs')(w, root);
   w.close();
 

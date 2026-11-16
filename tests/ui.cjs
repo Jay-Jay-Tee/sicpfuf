@@ -21,9 +21,9 @@ w.setInterval = (callback, delay) => { playbackDelay = delay; timers.set(++timer
 w.clearInterval = id => timers.delete(id);
 w.fetch = async (path, options) => {
   if (path === '/api/session') return { ok: true, json: async () => ({ source, filename: 'sample.py', chapter: 2, mode: 'environment' }) };
-  assert.equal(path, '/api/trace');
+  assert.ok(['/api/trace', '/api/validate'].includes(path));
   const data = options.body;
-  const result = JSON.parse(execFileSync('python3', ['-m', 'sicpfuf.ui', '--trace'], { cwd: root, input: data }));
+  const result = JSON.parse(execFileSync('python3', ['-m', 'sicpfuf.ui', path === '/api/validate' ? '--check' : '--trace'], { cwd: root, input: data }));
   return { ok: true, json: async () => result };
 };
 const wait = () => new Promise(resolve => setTimeout(resolve, 20));
@@ -37,6 +37,9 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   assert.equal(get('filename').textContent, 'sample.py');
   assert.equal(get('syntax').textContent, source + '\n');
   assert.equal(get('syntax').querySelector('.tok-keyword').textContent, 'def');
+  assert.equal(get('syntax').querySelector('.tok-function').textContent, 'square');
+  assert.equal(get('syntax').querySelector('.tok-builtin').textContent, 'print');
+  assert.equal(get('syntax').querySelector('.tok-operator').textContent, '*');
   assert.ok(get('diagram').querySelector('svg'));
   const builtins = get('diagram').querySelector('[data-builtins]');
   assert.ok(builtins);
@@ -153,6 +156,7 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   await wait(); seekEnd();
   assert.equal(get('output').textContent, '7\n');
   assert.match(get('error').textContent, /ZeroDivisionError/);
+  assert.match(get('editor-problems').textContent, /ZeroDivisionError/);
   get('code').value = 't = llist(1, llist(2,3), None)\n';
   get('code').dispatchEvent(new w.Event('input'));
   get('run').click(); await wait(); seekEnd();
@@ -183,6 +187,38 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   get('code').dispatchEvent(new w.Event('input'));
   assert.equal(get('syntax').querySelector('img'), null);
   assert.equal(get('syntax').querySelector('.tok-string').textContent, '"<img src=x onerror=alert(1)>"');
+  const realFetch = w.fetch;
+  let traceRequests = 0;
+  w.fetch = (...args) => { if (args[0] === '/api/trace') traceRequests++; return realFetch(...args); };
+  const edit = text => { get('code').value = text; get('code').dispatchEvent(new w.Event('input')); };
+  const checked = () => new Promise(resolve => setTimeout(resolve, 550));
+  edit('print(missing)\n'); await checked();
+  assert.match(get('editor-problems').textContent, /missing/);
+  assert.equal(get('syntax').querySelector('.editor-squiggle').textContent, 'missing');
+  assert.equal(get('gutter').querySelector('.error-line').textContent, '1');
+  assert.equal(get('syntax').textContent, get('code').value + '\n');
+  get('editor-problems').querySelector('button').click();
+  assert.equal(doc.activeElement, get('code'));
+  assert.equal(get('code').value.slice(get('code').selectionStart, get('code').selectionEnd), 'missing');
+  edit('def f(x)\n    return x\n'); await checked();
+  assert.match(get('editor-problems').textContent, /expected ':'/);
+  assert.ok(get('syntax').querySelector('.editor-squiggle-empty'));
+  assert.equal(get('syntax').textContent, get('code').value + '\n');
+  edit('def f(x):\n    return x\nprint(f(1 // 0))\n'); await checked();
+  assert.equal(get('editor-feedback').hidden, true);
+  assert.equal(get('syntax').querySelector('.editor-squiggle'), null);
+  assert.equal(traceRequests, 0, 'editing must never execute the program');
+  // A response for an older edit must not mark the newer program.
+  let release;
+  w.fetch = (path, options) => path === '/api/validate' ? new Promise(resolve => { release = resolve; }) : realFetch(path, options);
+  edit('print(old_name)\n'); await checked();
+  edit('print(42)\n');
+  release({ok:true,json:async()=>({diagnostics:[{line:1,column:7,message:'old_name missing'}]})});
+  await wait();
+  assert.equal(get('editor-feedback').hidden, true);
+  w.fetch = realFetch;
+  await checked();
+  assert.equal(get('code-status').textContent, 'No syntax issues');
   w.fetch = async () => { throw new Error('Connection closed'); };
   get('run').click(); await wait();
   assert.match(get('error').textContent, /Connection closed/);

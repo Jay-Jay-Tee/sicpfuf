@@ -8,6 +8,9 @@ hide:
 
 Choose an example or edit the code. Step through **environments** or **substitution**,
 inspect bindings, and zoom the diagram. Python §4 **Typed** checks annotations before running.
+The editor colours syntax and marks syntax, chapter-rule and unknown-name errors
+with red squiggles as you type. Click a message to select the source. These checks
+do not run your program; runtime errors appear after **Run**.
 Unreachable frames and functions stay visible in grey. A returned frame retained by a live
 closure stays reachable. The E-stepper shows a **before** and **after** state for each reduction.
 Choose **Program** to follow the remaining code, or **Diagram** to inspect frames, functions and

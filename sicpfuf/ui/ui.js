@@ -8,27 +8,139 @@
   let programView = false;
   let treeView = false, treeRoot = null;
   let pan = null, dragged = false;
+  let diagnostics = [], validationTimer = null, validationVersion = 0, validating = false, validationQueued = false;
   const bindingText = binding => binding.objectId ? binding.objectId + (binding.function ? "" : " " + binding.value) : binding.value;
   const keywords = new Set("and as assert async await break class continue def del elif else except False finally for from global if import in is lambda None nonlocal not or pass raise return True try type while with yield".split(" "));
+  const typeNames = new Set("int float complex str bool object Pair LList Stream Callable".split(" "));
+  const builtinNames = new Set("print input error len abs max min round repr arity pair head tail llist print_llist draw_data draw_tree map filter reduce append reverse length member remove remove_all for_each build_llist enum_llist llist_ref llist_to_string range stream_tail stream_ref stream_map stream_filter eval_stream enum_stream integers_from memo_fun parse tokenize apply_in_underlying_python show_env trace measure".split(" "));
+
+  function problemRanges() {
+    const lines = code.value.split("\n");
+    return diagnostics.map(problem => {
+      const row = Math.max(0, Math.min(lines.length - 1, (problem.line || 1) - 1));
+      const base = lines.slice(0, row).reduce((sum, line) => sum + line.length + 1, 0);
+      const column = Array.from(lines[row]).slice(0, Math.max(0, (problem.column || 1) - 1)).join("").length;
+      const start = base + column, rest = lines[row].slice(column);
+      const token = rest.match(/^[A-Za-z_]\w*|^\S/);
+      return { start, end: start + (token ? token[0].length : 0), message: problem.message };
+    });
+  }
 
   // Colour only: the actual parser and type checker remain in Python. All source
   // enters the DOM as text nodes, including strings that look like HTML.
   function highlight() {
     if (syntaxSource === code.value) return;
     syntaxSource = code.value;
-    const tokens = /#[^\n]*|"""[\s\S]*?(?:"""|$)|'''[\s\S]*?(?:'''|$)|"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|\b\d+(?:\.\d*)?(?:[eE][+-]?\d+)?j?\b|\b[A-Za-z_]\w*\b/g;
+    const tokens = /#[^\n]*|"""[\s\S]*?(?:"""|$)|'''[\s\S]*?(?:'''|$)|"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|\b\d+(?:\.\d*)?(?:[eE][+-]?\d+)?j?\b|\b[A-Za-z_]\w*\b|\*\*|\/\/|->|==|!=|<=|>=|[-+*/%=<>~^&|]|[()[\]{},.:]/g;
     const fragment = document.createDocumentFragment();
+    const problems = problemRanges(), markers = new Set();
+    function emit(text, kind, offset) {
+      const cuts = new Set([0, text.length]);
+      for (const problem of problems) for (const boundary of [problem.start, problem.end]) {
+        if (boundary >= offset && boundary <= offset + text.length) cuts.add(boundary - offset);
+      }
+      const points = [...cuts].sort((a,b) => a-b);
+      for (let i=0; i<points.length; i++) {
+        const start = offset + points[i];
+        const atEnd = problems.filter(problem => problem.start === start && problem.end === start);
+        if (atEnd.length && !markers.has(start)) {
+          const marker = document.createElement('span');
+          marker.className = 'editor-squiggle editor-squiggle-empty';
+          marker.title = atEnd.map(problem => problem.message).join('\n');
+          fragment.append(marker); markers.add(start);
+        }
+        if (i === points.length-1 || points[i+1] === points[i]) continue;
+        const found = problems.filter(problem => problem.start <= start && start < problem.end);
+        const span = document.createElement('span');
+        span.className = (kind ? 'tok-' + kind : '') + (found.length ? ' editor-squiggle' : '');
+        if (found.length) span.title = found.map(problem => problem.message).join('\n');
+        span.textContent = text.slice(points[i], points[i+1]);
+        fragment.append(span);
+      }
+    }
     let end = 0;
     for (const match of code.value.matchAll(tokens)) {
-      fragment.append(document.createTextNode(code.value.slice(end, match.index)));
-      const word = match[0], span = document.createElement("span");
-      span.className = "tok-" + (word[0] === "#" ? "comment" : /^["']/.test(word) ? "string" : /^\d/.test(word) ? "number" : keywords.has(word) ? "keyword" : "name");
-      span.textContent = word;
-      fragment.append(span);
+      emit(code.value.slice(end, match.index), '', end);
+      const word = match[0], following = code.value.slice(match.index + word.length);
+      const kind = word[0] === '#' ? 'comment' : /^["']/.test(word) ? 'string' : /^\d/.test(word) ? 'number' :
+        keywords.has(word) ? 'keyword' : typeNames.has(word) ? 'type' : builtinNames.has(word) || /^(math_|is_)/.test(word) ? 'builtin' :
+        /^[A-Za-z_]\w*$/.test(word) ? (/^\s*(?:\[[^\]\n]*\])?\s*\(/.test(following) || /\bdef\s+$/.test(code.value.slice(0, match.index)) ? 'function' : 'name') :
+        /^[()[\]{},.:]$/.test(word) ? 'punctuation' : 'operator';
+      emit(word, kind, match.index);
       end = match.index + word.length;
     }
-    fragment.append(document.createTextNode(code.value.slice(end) + "\n"));
+    emit(code.value.slice(end) + "\n", '', end);
     get("syntax").replaceChildren(fragment);
+  }
+
+  function editorProblems(items, label) {
+    diagnostics = items || [];
+    syntaxSource = null;
+    get('code-status').textContent = label || (diagnostics.length ? `${diagnostics.length} code issue${diagnostics.length === 1 ? '' : 's'}` : 'No syntax issues');
+    get('code-status').dataset.state = diagnostics.length ? 'error' : 'ok';
+    get('editor-feedback').hidden = !diagnostics.length;
+    get('editor-problems').replaceChildren(...diagnostics.map((problem, i) => {
+      const row = document.createElement('li'), button = document.createElement('button');
+      button.type = 'button'; button.textContent = `Line ${problem.line || 1}: ${problem.message}`;
+      button.addEventListener('click', () => {
+        const range = problemRanges()[i];
+        code.focus(); code.setSelectionRange(range.start, range.end);
+        code.scrollTop = Math.max(0, ((problem.line || 1) - 3) * 21); lines();
+      });
+      row.append(button); return row;
+    }));
+    lines();
+  }
+
+  function scheduleValidation() {
+    clearTimeout(validationTimer);
+    validationVersion++;
+    if (running) return;
+    get('code-status').textContent = 'Checking…';
+    get('code-status').dataset.state = 'pending';
+    validationTimer = setTimeout(validateEditor, 450);
+  }
+
+  async function validateEditor() {
+    if (running) return;
+    if (validating) { validationQueued = true; return; }
+    validating = true;
+    const version = validationVersion, source = code.value;
+    try {
+      const response = await request('/api/validate', {method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({source, chapter: Number(chapter.value), typed: get('typed').checked})});
+      if (!response.ok) throw new Error('Live checks unavailable; restart the local server.');
+      const result = await response.json();
+      if (version === validationVersion && !running) {
+        if (!Array.isArray(result.diagnostics)) throw new Error(result.error || 'Live checks unavailable.');
+        editorProblems(result.diagnostics);
+      }
+    } catch (error) {
+      if (version === validationVersion && !running) {
+        get('code-status').textContent = error.message;
+        get('code-status').dataset.state = 'unavailable';
+      }
+    } finally {
+      validating = false;
+      if (validationQueued) { validationQueued = false; scheduleValidation(); }
+    }
+  }
+
+  function traceProblems(error) {
+    const found = [], rows = (error || '').split('\n');
+    for (let i=0; i<rows.length; i++) {
+      const feature = rows[i].match(/^Feature not supported.*\(line (\d+), col (\d+)\)/);
+      const match = rows[i].match(/^(\w+Error) at line (\d+)/) ||
+        (feature && [feature[0], 'FeatureNotSupportedError', feature[1]]);
+      if (match) {
+        const message = rows.slice(i+1).find(row => row.startsWith(match[1] + ':')) || rows[i];
+        const sourceLine = code.value.split('\n')[Number(match[2])-1] || '';
+        const caret = rows[i+2] && rows[i+2].indexOf('^');
+        const column = feature ? Number(feature[2]) : caret >= 4 ? caret - 3 : sourceLine.length-sourceLine.trimStart().length+1;
+        found.push({line:Number(match[2]),column,message});
+      }
+    }
+    return found;
   }
 
   function state(text, value = "") {
@@ -105,6 +217,7 @@
       const line = document.createElement("span");
       line.textContent = i + 1;
       if (step && step.line === i + 1) line.className = "active";
+      if (diagnostics.some(problem => problem.line === i+1)) line.classList.add('error-line');
       return line;
     }));
     get("gutter").scrollTop = code.scrollTop;
@@ -222,7 +335,9 @@
     treeRoot = null;
     index = 0;
     state("Edited · run again");
+    editorProblems([], 'Checking…');
     render();
+    scheduleValidation();
   }
 
   function move(next) {
@@ -251,6 +366,7 @@
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not run the program.");
       history = result;
+      editorProblems(traceProblems(result.error));
       index = Number.isInteger(resumeAt) ? Math.min(resumeAt, Math.max(0, result.steps.length - 1)) : result.error ? Math.max(0, result.steps.length - 1) : 0;
       render();
       state(result.error ? "Stopped" : "Trace ready", result.error ? "error" : "");
@@ -421,7 +537,7 @@
       event.target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     }
   });
-  window.addEventListener("pagehide", pause);
+  window.addEventListener("pagehide", () => { pause(); clearTimeout(validationTimer); validationVersion++; });
   window.addEventListener("sicpfuf:status", event => {
     if (running) { get("message").textContent = event.detail; state(event.detail, "tracing"); }
   });

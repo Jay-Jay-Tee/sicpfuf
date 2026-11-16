@@ -15,11 +15,15 @@ DEFAULT_TYPED_SOURCE = "def square(x: int) -> int:\n    return x * x\n\nprint(sq
 
 def run_trace(source, chapter, mode, stdin="", typed=False, graphics=True, max_steps=250):
     """A fresh subprocess bounds expensive operations as well as interpreter steps."""
+    return run_worker({"source": source, "chapter": chapter, "mode": mode, "stdin": stdin,
+                       "typed": typed, "graphics": graphics, "max_steps": max_steps})
+
+
+def run_worker(data, action='--trace'):
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "sicpfuf.ui", "--trace"],
-            input=json.dumps({"source": source, "chapter": chapter, "mode": mode, "stdin": stdin,
-                              "typed": typed, "graphics": graphics, "max_steps": max_steps}),
+            [sys.executable, "-m", "sicpfuf.ui", action],
+            input=json.dumps(data),
             text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             cwd=str(ASSETS.parents[1]), timeout=10,
         )
@@ -75,7 +79,7 @@ def make_handler(session):
         def do_POST(self):
             if not self.local_request():
                 return
-            if self.path != "/api/trace":
+            if self.path not in ("/api/trace", "/api/validate"):
                 self.send(404, {"error": "Not found"})
                 return
             try:
@@ -87,6 +91,8 @@ def make_handler(session):
                 data = json.loads(self.rfile.read(length))
                 if not isinstance(data, dict) or not isinstance(data.get("source"), str):
                     raise ValueError("Expected source code.")
+                if self.path == '/api/validate':
+                    data = dict(data, mode='environment')
                 chapter, mode = data.get("chapter"), data.get("mode")
                 if type(chapter) is not int or chapter not in (1, 2, 3, 4):
                     raise ValueError("Choose Python §1, §2, §3 or §4.")
@@ -102,6 +108,9 @@ def make_handler(session):
                     raise ValueError("Max steps must be an integer between 2 and 5000.")
             except (ValueError, UnicodeError) as exc:
                 self.send(400, {"error": str(exc)})
+                return
+            if self.path == '/api/validate':
+                self.send(200, run_worker({'source': data['source'], 'chapter': chapter, 'typed': typed}, '--check'))
                 return
             self.send(200, run_trace(data["source"], chapter, mode, data.get("stdin", ""), typed=typed,
                                      max_steps=max_steps))

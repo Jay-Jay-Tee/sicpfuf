@@ -64,6 +64,15 @@ class UITests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(body)["steps"][-1]["output"], "42\n")
 
+    def test_live_check_api_does_not_execute(self):
+        status, body = self.request('/api/validate', {'source': 'while True:\n    pass\n', 'chapter': 3})
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body), {'ok': True, 'error': None, 'diagnostics': []})
+        _, body = self.request('/api/validate', {'source': 'print(missing)\n', 'chapter': 2})
+        self.assertEqual(json.loads(body)['diagnostics'][0]['column'], 7)
+        for data in ({}, {'source': '', 'chapter': True}, {'source': '', 'chapter': 2, 'typed': True}):
+            self.assertEqual(self.request('/api/validate', data)[0], 400)
+
     def test_tree_output_from_a_program_is_recorded_in_the_stepper(self):
         result = run_trace('t = llist(1,llist(2,3),4)\ndraw_tree(t)\n', 2, 'environment')
         self.assertIsNone(result['error'])

@@ -50,6 +50,10 @@ python3 -m sicpfuf --ui program.py --typed --max-steps 1000
 
 The browser UI opens a local session. The terminal UI uses arrows or n/p to step,
 Space to play, r to reload and q to quit; + increases the limit and retraces.
+The browser editor colours syntax and checks code as you type. Red squiggles and
+clickable messages show syntax, chapter-rule and unknown-name errors without
+executing your program. Runtime errors appear after **Run**. Annotations are
+only required when you select **Typed** in Python §4.
 Press v to switch the terminal between the remaining program and its frames.
 In the E-stepper each reduction has a before and after state. **Program** shows the
 remaining code, with the changed part highlighted; **Diagram** shows frames, functions

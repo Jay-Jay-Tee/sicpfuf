@@ -6,7 +6,7 @@
     if (!response.ok) throw new Error("Could not load examples.");
     return response.json();
   });
-  let worker = null, cancel = null;
+  let worker = null, cancel = null, epoch = 0, queue = Promise.resolve();
   const result = trace => ({ ok: true, json: async () => trace });
   const failed = error => ({ steps: [], error });
   const status = message => window.dispatchEvent(new CustomEvent("sicpfuf:status", { detail: message }));
@@ -27,13 +27,21 @@
   }
 
   function stop(message) {
+    epoch++;
     if (worker) worker.terminate();
     worker = null;
     if (cancel) cancel(failed(message));
   }
 
-  async function execute(data) {
-    const recorded = (await examples).find(example => example.trace && example.source === data.source &&
+  function execute(data) {
+    const version = epoch;
+    const task = queue.then(() => version === epoch ? executeNow(data) : failed('Run stopped.'));
+    queue = task.catch(() => {});
+    return task;
+  }
+
+  async function executeNow(data) {
+    const recorded = !data.validate_only && (await examples).find(example => example.trace && example.source === data.source &&
       example.chapter === data.chapter && (example.mode || "environment") === data.mode &&
       Boolean(example.typed) === data.typed && !data.stdin &&
       (data.max_steps || 400) >= example.trace.steps.length);
@@ -50,7 +58,7 @@
       };
       worker.onmessage = ({ data: message }) => {
         if (message.type === "status") {
-          status(message.message);
+          if (!data.validate_only) status(message.message);
           if (message.message === "Tracing your program…") deadline(10000);
         } else if (message.type === "result") finish(message.trace);
         else if (message.type === "error") stop(message.message);
@@ -62,6 +70,7 @@
   }
 
   window.sicpfufRequest = async (path, options) => {
+    if (path === '/api/validate') return result(await execute({ ...JSON.parse(options.body), validate_only: true }));
     if (path === "/api/trace") return result(await execute(JSON.parse(options.body)));
     if (path !== "/api/session") throw new Error("Unknown stepper request.");
     const entries = await examples;

@@ -89,6 +89,19 @@ assert.equal((await run('print(input("Name: "))\n', 2, "environment", false, "Ad
 const typedError = await run('print("must not run")\nx: int = "wrong"\n', 4, "environment", true);
 assert.match(typedError.error, /StaticTypeError/);
 assert.equal(typedError.steps.at(-1).output, "");
+async function check(source, chapter = 2, typed = false) {
+  messages.length = 0;
+  await self.onmessage({data:{source, chapter, typed, validate_only:true}});
+  const final = messages.at(-1);
+  assert.equal(final.type, 'result', final.message);
+  return final.trace;
+}
+assert.equal((await check('def f(x):\n    return x\nprint(f(3))\n')).ok, true);
+const liveError = await check('print(missing)\n');
+assert.equal(liveError.diagnostics[0].column, 7);
+assert.equal((await check('print(input("unused"))\nprint(1 // 0)\nwhile True:\n    pass\n', 3)).ok, true);
+assert.equal((await check('a = "bad"\nprint(a + 1)\n', 4)).ok, true);
+assert.equal((await check('a: int = "bad"\nb: str = 1\n', 4, true)).diagnostics.length, 2);
 assert.equal(runtimeLoads, 1, "reuse the runtime after the first custom run");
 assert.equal(archiveFetches, 1, "unpack the interpreter only once");
 console.log("Real Pyodide worker checks passed: all example histories match CPython; edits, chapter rules, errors, limits, and runtime reuse work.");
