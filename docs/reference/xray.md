@@ -54,6 +54,10 @@ The browser editor colours syntax and checks code as you type. Red squiggles and
 clickable messages show syntax, chapter-rule and unknown-name errors without
 executing your program. Runtime errors appear after **Run**. Annotations are
 only required when you select **Typed** in Python §4.
+Enter keeps indentation and adds a level after `:`. Brackets and quotes close
+automatically; selected text can be wrapped by typing an opening bracket or quote.
+Use Tab / Shift+Tab to indent / outdent a line or selection. Backspace removes an
+empty pair or one indentation level.
 Press v to switch the terminal between the remaining program and its frames.
 In the E-stepper each reduction has a before and after state. **Program** shows the
 remaining code, with the changed part highlighted; **Diagram** shows frames, functions

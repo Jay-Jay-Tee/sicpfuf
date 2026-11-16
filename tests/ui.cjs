@@ -183,6 +183,7 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   assert.equal(get('position').value, stoppedPosition);
   get('max-steps').value = 400; change(get('max-steps'));
   require('./tree_view.cjs')(w, root);
+  require('./editor_keys.cjs')(w);
   get('code').value = 'print("<img src=x onerror=alert(1)>") # comment\n';
   get('code').dispatchEvent(new w.Event('input'));
   assert.equal(get('syntax').querySelector('img'), null);

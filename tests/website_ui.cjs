@@ -104,6 +104,7 @@ function edit(source) { get('code').value = source; get('code').dispatchEvent(ne
   get('run').click(); await wait(); end();
   assert.equal(get('output').textContent, '987\n');
   require('./tree_view.cjs')(w, root);
+  require('./editor_keys.cjs')(w);
   w.close();
 
   // A textbook link transfers code and chapter under a project-prefixed URL.

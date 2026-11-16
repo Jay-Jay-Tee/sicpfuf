@@ -437,13 +437,133 @@
   code.addEventListener("input", invalidate);
   get("stdin").addEventListener("input", invalidate);
   code.addEventListener("scroll", lines);
-  code.addEventListener("keydown", event => {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      code.setRangeText("    ", code.selectionStart, code.selectionEnd, "end");
-      invalidate();
+
+  // Editing assistance is separate from parsing: incomplete code must stay
+  // editable, and punctuation in strings/comments must not open new brackets.
+  function editingContext(source) {
+    let quote = null, triple = false, comment = false, escaped = false, plain = '';
+    const brackets = [], pairs = {')':'(', ']':'[', '}':'{'};
+    for (let i = 0; i < source.length; i++) {
+      const char = source[i];
+      if (comment) {
+        if (char === '\n') comment = false;
+        plain += char === '\n' ? '\n' : ' ';
+      } else if (quote) {
+        if (escaped) { escaped = false; plain += char === '\n' ? '\n' : ' '; }
+        else if (char === '\\') { escaped = true; plain += ' '; }
+        else if (char === quote && (!triple || source.slice(i, i+3) === quote.repeat(3))) {
+          plain += triple ? '   ' : ' '; i += triple ? 2 : 0; quote = null; triple = false;
+        } else {
+          plain += char === '\n' ? '\n' : ' ';
+          if (char === '\n' && !triple) quote = null;
+        }
+      } else if (char === '#') { comment = true; plain += ' '; }
+      else if (char === '"' || char === "'") {
+        quote = char; triple = source.slice(i, i+3) === char.repeat(3);
+        plain += triple ? '   ' : ' '; i += triple ? 2 : 0;
+      } else {
+        plain += char;
+        if ('([{'.includes(char)) brackets.push({char, offset:i});
+        else if (pairs[char] && brackets.length && brackets[brackets.length-1].char === pairs[char]) brackets.pop();
+      }
     }
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); run(); }
+    return {quote, triple, comment, escaped, brackets, plain};
+  }
+
+  function replaceCode(start, end, text, anchor = start + text.length, head = anchor) {
+    code.focus();
+    code.setSelectionRange(start, end);
+    // Native insertion keeps the browser's undo/redo history. setRangeText is
+    // also available in embedded hosts that do not implement that command.
+    let inserted = false;
+    if (typeof document.execCommand === 'function') {
+      try { inserted = document.execCommand('insertText', false, text); } catch (_) { /* Use the textarea API. */ }
+    }
+    if (!inserted) {
+      code.setRangeText(text, start, end, 'end');
+      code.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    code.setSelectionRange(anchor, head);
+    lines();
+  }
+
+  function indentSelection(outdent) {
+    const start = code.selectionStart, end = code.selectionEnd, source = code.value;
+    const first = source.slice(0, start).lastIndexOf('\n') + 1;
+    if (start === end && !outdent) {
+      replaceCode(start, end, ' '.repeat(4 - (start-first) % 4));
+      return;
+    }
+    const last = source.indexOf('\n', end > start && source[end-1] === '\n' ? end-1 : end);
+    const stop = last < 0 ? source.length : last;
+    let offset = first;
+    const edits = source.slice(first, stop).split('\n').map(line => {
+      const remove = outdent ? (line[0] === '\t' ? 1 : Math.min(4, line.match(/^ */)[0].length)) : 0;
+      const edit = {start:offset, remove, add:outdent ? '' : '    '};
+      offset += line.length + 1;
+      return edit;
+    });
+    const map = position => position + edits.reduce((shift, edit) =>
+      shift + (edit.start <= position ? edit.add.length - Math.min(edit.remove, position-edit.start) : 0), 0);
+    const text = source.slice(first, stop).split('\n').map((line, i) => edits[i].add + line.slice(edits[i].remove)).join('\n');
+    replaceCode(first, stop, text, map(start), map(end));
+  }
+
+  code.addEventListener("keydown", event => {
+    if (event.isComposing || event.key === 'Process' || code.disabled || code.readOnly) return;
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); run(); return; }
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key === 'Tab') { event.preventDefault(); indentSelection(event.shiftKey); return; }
+    const source = code.value, start = code.selectionStart, end = code.selectionEnd;
+    const before = source.slice(0, start), after = source.slice(end), selected = source.slice(start, end);
+    const context = editingContext(before), pairs = {'(':')', '[':']', '{':'}', '"':'"', "'":"'"};
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const line = before.slice(before.lastIndexOf('\n')+1), base = line.match(/^[ \t]*/)[0];
+      let indent = base, closing = '', replaceEnd = end;
+      if (!context.quote) {
+        const clean = context.plain.slice(context.plain.lastIndexOf('\n')+1).trimEnd();
+        const open = context.brackets[context.brackets.length-1];
+        if (/:$/.test(clean)) indent += '    ';
+        else if (open) {
+          const openingLine = source.slice(source.lastIndexOf('\n', open.offset)+1, open.offset);
+          const openingIndent = openingLine.match(/^[ \t]*/)[0];
+          indent = openingIndent + '    ';
+          const space = after.match(/^[ \t]*/)[0].length;
+          if (open.offset === before.trimEnd().length-1 && after[space] === pairs[open.char]) {
+            closing = '\n' + openingIndent; replaceEnd += space;
+          }
+        } else if (/^\s*(return|raise|break|continue|pass)\b/.test(clean)) indent = base.replace(/(?: {1,4}|\t)$/, '');
+      }
+      replaceCode(start, replaceEnd, '\n' + indent + closing, start+1+indent.length);
+      return;
+    }
+    const key = event.key, quoted = key === '"' || key === "'";
+    if (pairs[key] && selected) {
+      event.preventDefault(); replaceCode(start, end, key+selected+pairs[key], start+1, end+1); return;
+    }
+    if (!selected && after[0] === key && ((quoted && context.quote === key && !context.escaped) ||
+        (')]}'.includes(key) && !context.quote && !context.comment && context.brackets.length &&
+         pairs[context.brackets[context.brackets.length-1].char] === key))) {
+      event.preventDefault(); code.setSelectionRange(start+1, start+1); return;
+    }
+    if (pairs[key] && !context.quote && !context.comment &&
+        (!after || /^[\s)\]}:,;]/.test(after))) {
+      event.preventDefault();
+      if (quoted && before.endsWith(key.repeat(2))) replaceCode(start, end, key.repeat(4), start+1);
+      else replaceCode(start, end, key+pairs[key], start+1);
+      return;
+    }
+    if (key === 'Backspace' && !selected) {
+      if (pairs[before.slice(-1)] && pairs[before.slice(-1)] === after[0] && !context.comment &&
+          (!context.quote || (context.quote === before.slice(-1) && !context.triple && !context.escaped))) {
+        event.preventDefault(); replaceCode(start-1, start+1, ''); return;
+      }
+      const whitespace = before.slice(before.lastIndexOf('\n')+1);
+      if (/^ +$/.test(whitespace)) {
+        event.preventDefault(); replaceCode(start-((whitespace.length-1)%4+1), start, '');
+      }
+    }
   });
   mode.addEventListener("change", () => {
     const substitution = mode.value === "substitution";
