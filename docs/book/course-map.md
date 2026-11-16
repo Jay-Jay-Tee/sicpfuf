@@ -7,10 +7,10 @@ then practise the skill and check it with the interpreter. For exams, use the
 
 ## What this map establishes
 
-Source inventory reviewed on **15 November 2026**.
+Source inventory reviewed on **16 November 2026**.
 
 The source set available for this review contains **20 lecture decks, 11 studio sheets and
-12 reflection sheets**, plus the assessment archives listed below. These links map their
+12 reflection sheets**, plus the assessment archives and mission/practice export listed below. These links map their
 topics to original explanations and exercises. A mapped topic does **not** mean that every
 slide diagram has been visually checked or every official question has a worked solution here.
 
@@ -18,6 +18,12 @@ The [applied-patterns workshop](21-applied-patterns.md) fills several gaps betwe
 chapter and solving a longer question: power series, destructive filtering, binary-search
 boundaries, multi-variable state, fair stream interleaving, combinations, comparators and
 static name analysis.
+
+The newly supplied mission export adds **19 missions with 68 tasks** and **four distinct PA
+practice papers with 38 questions**. Two PA2 solution versions repeat 18 of those questions.
+Their presence establishes which tasks were supplied; it does not make the saved editor code
+a verified answer key. The mission and practice tables below distinguish topic routes from
+material that still needs a dedicated explanation or a browser/hardware check.
 
 ## Lectures
 
@@ -77,6 +83,83 @@ static name analysis.
 | R12 | evaluator markers, argument order, self-interpretation | [Evaluator II](18-mce-lazy.md), [marker identity](21-applied-patterns.md#internal-markers-need-identity), [evaluator drills](../practice/14-mce.md) |
 | R13 | narrowing, generic annotations, optional results | [Types](19-types-objects.md), [typed drills](../practice/15-types.md) |
 
+## Missions supplied in the November export
+
+The IDs and titles help you find the matching item in your own course workspace. The routes
+lead to original explanations; course question text and saved submissions are not reproduced.
+All 68 task entries were inventoried, including the optional final task in mission 1864.
+No claim is made here that every saved mission program has been run or corrected.
+
+| Mission | Tasks | Read first | What still needs attention |
+|---|---:|---|---|
+| 1652 · Rune Trials | 4 | [Functional abstraction with runes](02-runes.md), [functions as arguments](05-higher-order-scope.md) | Check the requested transformation rather than one hard-coded example; reference images are absent from the export. |
+| 1676 · Rune Reading | 3 | [Recursive processes](03-substitution-recursion.md), [repeating a transformation](02-runes.md#repeating-a-transformation) | Dedicated geometric decomposition exercises and the missing target images. |
+| 1679 · Beyond the Second Dimension | 2 | [Runes and composition](02-runes.md), [module limits](../reference/compatibility.md#modules) | 3-D shape rendering is outside the implemented modules; 2-D previews do not validate depth or occlusion. |
+| 1703 · Curve Introduction | 3 | [Curves are functions](06-curves-sound.md#curves-are-functions) | Check endpoints, parameter ranges and the difference between a point and a function returning points. |
+| 1714 · Curve Manipulation | 2 | [Curve transformations](06-curves-sound.md#makers-and-transformations), [joining curves](06-curves-sound.md#connecting-curves) | Transformation order and endpoint alignment need task-specific checks. |
+| 1726 · Beyond the First Dimension | 3 | [Higher-order functions](05-higher-order-scope.md), [curves](06-curves-sound.md), [growth](04-orders-of-growth.md) | The individual fractal constructions and their visual results are not fully worked through here. |
+| 1737 · Premorseal Communications | 5 | [Sounds as functions of time](06-curves-sound.md#sounds-are-functions-of-time), [combining sounds](06-curves-sound.md#combining-sounds) | Timing boundaries, silence and sampled waveform checks; no browser playback certification. |
+| 1764 · POTS and Pans | 4 | [Pairs and abstraction](07-data-abstraction.md), [sound composition](06-curves-sound.md#combining-sounds), [llist pipelines](08-llist-processing.md) | Frequency-table and sequence-delimiter checks remain separate from audible output. |
+| 1789 · Musical Diversions | 5 | [Sound](06-curves-sound.md), [folds](08-llist-processing.md), [nested trees](09-trees-cps.md) | Recursive rhythm expansion and scheduled overlapping events need further worked practice. |
+| 1798 · Search and Rescue | 3 | [Binary search trees](10-sorting-symbolic.md#4-binary-search-trees-as-llists), [data abstraction](07-data-abstraction.md) | Respect the supplied tree selectors and constructors when checking a solution. |
+| 1809 · Sorting Things Out | 5 | [Quicksort](10-sorting-symbolic.md#quicksort-the-idea), [growth](04-orders-of-growth.md) | Partition correctness and best/worst-case analysis are separate obligations. |
+| 1814 · Robotic Trials | 4 | [Functions](01-elements.md#functions), [state and mutation](12-state-mutation.md) | EV3 motor/speech APIs, calibration and non-blocking commands require the hardware environment. |
+| 1825 · Moving about on Planet Y | 3 | [Loops](13-lists-loops.md), [state machines](21-applied-patterns.md#a-closure-can-hold-a-state-machine) | Sensor units, obstacle handling and movement need robot testing. |
+| 1826 · Finding ELDRIC | 3 | [Predicates](01-elements.md#booleans-and-predicates), [loops](13-lists-loops.md), [state](12-state-mutation.md) | Light thresholds and line-following behaviour need physical calibration and testing. |
+| 1832 · Know Your Environment | 3 | [Environments](14-environment-model.md), [sharing and mutation](12-state-mutation.md) | Retain every required frame and distinguish lexical parents from callers; these particular diagrams are not certified here. |
+| 1844 · Corrective Sky Surgery | 4 | [Lists of lists](13-lists-loops.md#lists-of-lists), [higher-order functions](05-higher-order-scope.md) | Dedicated image-coordinate and filter-composition teaching is missing; live-camera APIs are unsupported. |
+| 1846 · Reuse Your Pairs | 3 | [Mutation and identity](12-state-mutation.md), [merge sort](15-search-sort-memo.md#merge-sort), [rewiring nodes](21-applied-patterns.md#removing-nodes-without-allocating-new-pairs) | A dedicated destructive split/merge/sort explanation must account for pair identity and exact allocation limits. |
+| 1864 · Streaming the Anomaly | 5 | [Streams](11-streams.md), [self-reference and memoization](16-streams-ii.md), [mutable state](12-state-mutation.md) | Stream repetition and sampling can be checked separately; video filters and the footage require unavailable browser assets. |
+| 1885 · The Essence of Python | 4 | [Evaluator I](17-mce.md), [changing the evaluator](18-mce-lazy.md#how-to-modify-the-evaluator), [resource definitions](21-applied-patterns.md#count-the-resource-the-question-defines) | Frame/function-allocation instrumentation and operator extensions need dedicated checks. The programmable browser REPL is not implemented. |
+
+The export refers to pictures but contains **no embedded images or image links**. It also
+contains templates and unfinished submissions. For example, a section labelled “Solution”
+has an incomplete assignment; the label alone is not evidence of a complete staff solution.
+
+## PA practice papers supplied in the export
+
+These are **practice papers**, separate from the PA1/PA2 assessment summary supplied in chat.
+PA1 Practice A and B each have 10 questions; PA2 Practice A and B each have nine. The PA2
+solution versions repeat the corresponding questions and test cases, with different saved code.
+
+| Paper and questions | Skills | Route and remaining gaps |
+|---|---|---|
+| PA1 A · Q1–4 | Numeric folds, digit reduction, stable partition, repeated function application | [Llist processing](08-llist-processing.md), [iteration and recursion](03-substitution-recursion.md), [higher-order functions](05-higher-order-scope.md). Test non-integer results as well as the supplied examples. |
+| PA1 A · Q5–6 | Searching a supplied word collection and using access functions | [Searching](15-search-sort-memo.md), [data abstraction](07-data-abstraction.md). The external word collection and helper environment are not fully captured. |
+| PA1 A · Q7–8 | Sparse polynomial evaluation and combination | [Symbolic data](10-sorting-symbolic.md), [folds](08-llist-processing.md), [coefficient representations](21-applied-patterns.md#streams-as-coefficients-of-a-power-series). Sparse-term merging still needs its own worked example. |
+| PA1 A · Q9–10 | Prefix recognition and non-mutating sequence replacement | [Llist recursion](08-llist-processing.md), [sharing](12-state-mutation.md#hidden-sharing-append). Overlapping matches and the replacement contract need dedicated practice. |
+| PA1 B · Q1–5 | Counting, maximum, recursive numeric processes, sortedness | [Llists](08-llist-processing.md), [recursive processes](03-substitution-recursion.md), [sorting](10-sorting-symbolic.md). |
+| PA1 B · Q6–8 | Order-preserving interleavings and non-mutating sequence edits | [Tree recursion](03-substitution-recursion.md), [llists](08-llist-processing.md). Ambiguous equal elements require branching rather than a greedy choice. |
+| PA1 B · Q9–10 | Recursive tree rearrangement and traversal | [Trees](09-trees-cps.md), [binary tree abstraction](10-sorting-symbolic.md#4-binary-search-trees-as-llists). Stable rearrangement at every nested level needs further practice. |
+| PA2 A · Q1–3 | Adjacent-element processing and reversible encodings | [Llist recursion and accumulators](08-llist-processing.md). Encoding/decoding laws need a dedicated worked example. |
+| PA2 A · Q4–6 | Matrix indexing, postfix evaluation, shortest paths | [Nested lists and loops](13-lists-loops.md), [expression trees](10-sorting-symbolic.md). Postfix stacks and grid shortest-path search are not fully taught here. |
+| PA2 A · Q7–9 | Constant-time stream construction, self-generated streams, destructive merge | [Streams](11-streams.md), [self-reference](16-streams-ii.md), [mutation](12-state-mutation.md). Exact forcing costs and node-reuse constraints need additional checks. |
+| PA2 B · Q1–3 | Matrix geometry, pixel quantization, image serialization | [Lists of lists](13-lists-loops.md#lists-of-lists). Image-coordinate and quantization explanations still need expansion. |
+| PA2 B · Q4–5 | Expression traversal and grid-path counting | [Expression trees](10-sorting-symbolic.md), [memoization](15-search-sort-memo.md). Postfix conversion and grid recurrences need dedicated practice. |
+| PA2 B · Q6–7 | Run-length streams and mutable queues | [Streams](11-streams.md), [state](12-state-mutation.md), [abstraction](07-data-abstraction.md). Run-boundary forcing and constant-time queue invariants are not fully developed here. |
+| PA2 B · Q8–9 | Bounding geometry and in-place three-way partition | [Folds](08-llist-processing.md), [loop invariants](13-lists-loops.md). Dedicated bounding-box and three-region partition explanations are still missing. |
+
+### What was actually executed
+
+The export contains **442 fenced test programs**, counting repeated tests in the two PA2
+solution versions. The **386 PA practice tests** were run with their saved editor code,
+without inventing missing assessment helpers. Output and normalized error kind agreed with
+the pinned reference interpreter in **386/386** cases. One long stream probe needed a higher
+reference evaluation budget; evaluator-step counts are not compared.
+
+Of those local runs, **314 produced the listed final output line** and **72 stopped with an
+error**, including unfinished programs and missing helper names. Agreement between interpreters
+includes agreement on those errors; it is not a score or proof that the supplied answers are
+correct. The test harness compares the final printed line with the export label separately
+from the full-output comparison between interpreters. Mission programs, visual results, hidden
+tests and actual deployed assessment grading are outside this execution check.
+
+A separate counterexample confirms that passing the supplied examples is insufficient: the
+saved average calculation uses integer division, so a non-integer mean is truncated in both
+interpreters. Raw programs, test cases and results remain in a private assessment cache,
+outside this public repository. See [compatibility](../reference/compatibility.md) for the
+reference revision and the limits of the comparison.
+
 ## Assessment material available locally
 
 The filenames below identify the archives supplied for this review. The PDFs themselves are
@@ -89,14 +172,16 @@ question groups and the chapters to revise; they are not an official answer key.
 | `Assessments_export.zip` | Four midterms with answer PDFs: AY23/24 through AY26/27 |
 | `Reading_Assessment_1_export.zip` | RA1 papers and answers for AY23/24–25/26; four AY26/27 answer variants |
 | `Reading_Assessment___export (1).zip` | RA2 papers and answers for AY23/24–25/26; two AY26/27 answer variants |
+| `cs1101s-missions-and-pa-practice.md` | November 16 export: 19 missions, four distinct PA practice papers and two PA2 solution versions; editor code, some test cases, no embedded figures |
 
 ## Material that is still missing or not fully verified
 
 - The available set has no L8B deck. Do not infer its contents from the numbering alone.
 - There is no S4 in-class continuation, no S1 sheet and no R7 sheet in the supplied set.
   Some of these numbering gaps may be intentional; that is not evidence that a file was reviewed.
-- Complete Paths, Missions, Quests and Check-Ins were not supplied, so their individual tasks
-  are not audited here. Topic overlap with a chapter is not the same as reviewing every task.
+- The supplied export inventories 19 missions, but completeness against the live mission list
+  has not been verified. Paths, Quests and Check-Ins remain unsupplied. Topic routes are not
+  task-by-task worked explanations, and saved mission programs have not all been executed.
 - Text extraction loses diagrams and some mathematical layout. Existing explanations and regenerated
   diagrams help, but a complete slide-figure audit has not been performed.
 - The three finals have topic routes here, not complete verified worked solutions for all 73 questions.

@@ -169,7 +169,18 @@ adapted, and one question has equivalent alternatives, so these are independent 
 than certification of an official historical key. Paper text, extracted programs and the answer
 ledger remain outside the public repository.
 
-The textbook's course map records the available lectures, studios and reflections and the
-missing materials. It does not establish complete coverage of unseen sheets, every slide figure,
-or full official worked solutions. Browser DOM/SVG and actual Pyodide histories are tested;
+The November 16 mission/practice export contains 19 missions (68 tasks), four distinct PA
+practice papers (38 questions), and two PA2 solution versions. Its 386 PA practice test programs,
+run with the saved editor code and without filling missing assessment helpers, agree between
+sicpfuf and the pinned CSE reference on stdout and normalized error kind. This includes 72
+programs that stop with errors; 314 produce the exported final-line result. A long stream case
+needed a 50-million-step reference budget. No parity of evaluation counts, official scores,
+hidden-test results or mission graphics is inferred. Extracted source, raw results and the
+comparison ledger remain in the private assessment cache. The saved average program also
+fails a separate non-integer-mean probe in both interpreters despite passing its supplied tests.
+
+The textbook's [course map](../book/course-map.md) records the available lectures, studios,
+reflections, missions and practice papers, with remaining topic and source gaps. It does not
+establish complete coverage of unseen sheets, every slide figure, or full official worked
+solutions. Browser DOM/SVG and actual Pyodide histories are tested;
 pixel layout has not been verified in a live browser in this environment.

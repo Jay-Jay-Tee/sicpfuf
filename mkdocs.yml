@@ -103,7 +103,7 @@ nav:
       - Mock final 3: finals/mock-3.md
   - The Book:
       - book/index.md
-      - Course, studios & reflections: book/course-map.md
+      - Course & assessment map: book/course-map.md
       - "Unit 1 · Functions":
           - book/01-elements.md
           - book/02-runes.md
