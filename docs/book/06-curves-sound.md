@@ -283,6 +283,154 @@ draw_connected(100)(two_peaks)
 `join` is a higher-order function that combines two curves into one, like `beside` combines two
 runes. The module's `connect_rigidly` does the same thing.
 
+## Endpoints, transformation order and repeated refinement
+
+A curve maker returns a function; applying that function to t returns one point. Check
+the endpoints numerically before deciding that a drawing is correct. Joining two curves
+continuously requires the first endpoint to match the second start point.
+
+Transformations usually do not commute. A translation followed by a reflection moves a
+point differently from a reflection followed by a translation:
+
+```python title="§1"
+from curve import make_point, x_of, y_of
+
+def path(t):
+    return make_point(t, t * t)
+
+def shift_right(c):
+    return lambda t: make_point(x_of(c(t)) + 3, y_of(c(t)))
+
+def reflect(c):
+    return lambda t: make_point(-x_of(c(t)), y_of(c(t)))
+
+first = reflect(shift_right(path))
+second = shift_right(reflect(path))
+print(x_of(first(0)), x_of(second(0)))
+print(x_of(path(1)), y_of(path(1)))
+```
+```text title="Output"
+-3 3
+1 1
+```
+
+To refine a curve repeatedly, write one transformation that preserves a useful contract,
+then apply it n times. This example replaces each curve by three scaled copies. All copies
+start and end on the same horizontal line; the middle copy is reflected vertically.
+It is a fresh construction for practising composition, rather than a mission solution.
+
+```python title="§1"
+from curve import make_point, x_of, y_of
+
+def arch(t):
+    return make_point(t, 4 * t * (1 - t))
+
+def three_arches(c):
+    def refined(t):
+        section = 0 if t < 1 / 3 else 1 if t < 2 / 3 else 2
+        p = c(3 * t - section)
+        direction = -1 if section == 1 else 1
+        return make_point((section + x_of(p)) / 3,
+                          direction * y_of(p) / 3)
+    return refined
+
+def refine(n, change, c):
+    return c if n == 0 else refine(n - 1, change, change(c))
+
+c = refine(2, three_arches, arch)
+print(x_of(c(0)), y_of(c(0)), x_of(c(1)), y_of(c(1)))
+print(round(y_of(c(1 / 18)), 6))
+```
+```text title="Output"
+0.0 0.0 1.0 0.0
+0.111111
+```
+
+At each join, the input endpoints have y = 0, so the pieces meet. The parameter maps each
+third of [0, 1] back onto the whole interval. One point query passes through n layers of
+transformations, taking Θ(n) work here, although the expanded curve has 3^n pieces.
+An image sampled at a fixed number of points can miss details at high refinement levels.
+
+### Build a self-similar path from oriented segments
+
+For a fractal-style replacement, preserve the shape of the replacement path at each
+level, rather than shrinking every vertical coordinate towards a straight line. A curve
+from (0, 0) to (1, 0) can be fitted onto any segment from A to B by translating, rotating
+and scaling it. If B − A = (dx, dy), the transformed point is
+`(ax + dx*x - dy*y, ay + dy*x + dx*y)`.
+
+Here is an original three-segment zigzag replacement. All three fitted copies remember
+the **same previous curve**, so building a level does not recursively rebuild it three
+times. The middle segment points downwards; the other two point upwards.
+
+```python title="§1 · figure 06-curves-sound-zigzag-refinement"
+from curve import make_point, x_of, y_of, draw_connected_full_view_proportional
+
+def fit_segment(c, ax, ay, bx, by):
+    def fitted(t):
+        p = c(t)
+        dx = bx - ax
+        dy = by - ay
+        return make_point(ax + dx * x_of(p) - dy * y_of(p),
+                          ay + dy * x_of(p) + dx * y_of(p))
+    return fitted
+
+def zigzag(c):
+    a = fit_segment(c, 0, 0, 1 / 3, 1 / 3)
+    b = fit_segment(c, 1 / 3, 1 / 3, 2 / 3, -1 / 3)
+    d = fit_segment(c, 2 / 3, -1 / 3, 1, 0)
+    return lambda t: a(3 * t) if t < 1 / 3 else b(3 * t - 1) if t < 2 / 3 else d(3 * t - 2)
+
+def refine(n, c):
+    return c if n == 0 else refine(n - 1, zigzag(c))
+
+c = refine(3, lambda t: make_point(t, 0))
+print(round(x_of(c(0)), 6), round(y_of(c(0)), 6),
+      round(x_of(c(1)), 6), round(y_of(c(1)), 6))
+draw_connected_full_view_proportional(243)(c)
+```
+??? note "Output (text preview)"
+    ```text title="Output"
+    0.0 0.0 1.0 0.0
+    ┌────────────────────────────────────────────────────────┐
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                        ▄▄██                            │
+    │                     ▄█▀   █                            │
+    │           ▄▄██       ▀█▄  ▀▄                           │
+    │        ▄▄▀▀  █     ▄▄▄▀▀   █    ▄▄                     │
+    │         ▀█▄   █  ▀█▀       █▄▄█▀▀█                     │
+    │        ▄▄▀▀   █    █▄      ▀▀    █▄                    │
+    │      █▀       █ ▄▄█▀              █                    │
+    │      ▀█▄      ▀▀   █▀▄▄▄▄▄▄       █                    │
+    │        ▀           █       ▀▀▀▀▀▀▄█   ▄▄      ▀█▄      │
+    │                    █              ▄█▀▀ █       ▄█▀     │
+    │                    ▀█    ▄▄      ▀█    █   ▄▄▀▀        │
+    │                     █▄▄█▀▀█       ▄█▄  █   ▀█▄         │
+    │                     ▀▀    █   ▄▄▀▀▀     █  ▄▄▀▀        │
+    │                           ▀█  ▀█▄       ██▀▀           │
+    │                            █   ▄█▀                     │
+    │                            ██▀▀                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    │                                                        │
+    └────────────────────────────────────────────────────────┘
+    ```
+
+![Three rounds of a three-segment zigzag refinement](../assets/figures/06-curves-sound-zigzag-refinement-curve-1.svg){ width="360" }
+
+The endpoint contract makes adjacent pieces meet at every refinement level. Starting
+with one segment, n rounds describe 3^n segments. The construction stores Θ(n) layers
+of function objects here; evaluating a sampled point follows one branch per layer.
+Rendering every segment still requires output work proportional to their number.
+
 ## Sounds are functions of time
 
 A **wave** is a function from time `t` (in seconds) to a number between −1 and 1: how far the
@@ -357,6 +505,88 @@ play(simultaneously(llist(melody, note(131, 1.2))))
 
 `pluck` is a sound transformation, made by a maker, exactly like `shift(dx, dy)` for curves. The
 picture starts flat because the attack begins at silence.
+
+## Time windows, delays and overlapping sounds
+
+Treat a timed event as occupying a half-open interval **[start, start + duration)**. Its
+local time is `t - start`. Outside that interval its contribution is zero. This avoids
+counting both adjacent events at their shared boundary.
+
+The following uses plain wave functions, so the boundary calculations can be checked
+without listening to audio. A real sine wave can replace the constant test wave.
+
+```python title="§1"
+def scheduled(wave, start, duration):
+    return lambda t: (wave(t - start)
+                      if start <= t and t < start + duration else 0)
+
+def mix(a, b):
+    return lambda t: (a(t) + b(t)) / 2
+
+a = scheduled(lambda local_time: 1, 1, 2)
+b = scheduled(lambda local_time: -1, 2, 2)
+combined = mix(a, b)
+print(combined(0), combined(1), combined(2), combined(3), combined(4))
+```
+```text title="Output"
+0.0 0.5 0.0 -0.5 0.0
+```
+
+To concatenate A and B, start B at A's duration and use B's local time after that boundary.
+The total duration is the **sum**. To overlay them, both start at zero, the duration is the
+**maximum**, and contributions are mixed. An unweighted sum can exceed [−1, 1] and clip.
+Truncation changes the time window, not the frequency; playing a wave at `wave(2*t)` instead
+changes its pitch as well as its speed.
+
+## Expand a rhythm tree, then schedule its events
+
+A nested score has two jobs: describe repeated structure and describe when events happen.
+Keep those jobs separate. Here a number is an event code, `llist("seq", children)` is a
+sequence, and `llist("times", count, child)` repeats a subtree. This is an original tagged
+representation; use the representation specified in a question when working elsewhere.
+Assume a well-formed score, nonnegative integer repetition counts and nonnegative spacing.
+
+```python title="§2"
+def repeated(n, events):
+    return None if n == 0 else append(events, repeated(n - 1, events))
+
+def expand_score(score):
+    if is_number(score):
+        return llist(score)
+    elif head(score) == "seq":
+        return reduce(append, None, map(expand_score, llist_ref(score, 1)))
+    else:
+        return repeated(llist_ref(score, 1), expand_score(llist_ref(score, 2)))
+
+def schedule(codes, spacing):
+    def walk(rest, time):
+        return (None if is_none(rest)
+                else pair(pair(time, head(rest)),
+                          walk(tail(rest), time + spacing)))
+    return walk(codes, 0)
+
+score = llist("seq", llist(3, llist("times", 2, llist("seq", llist(1, 0)))))
+events = expand_score(score)
+print_llist(events)
+print_llist(schedule(events, 0.25))
+print(expand_score(llist("times", 0, 3)))
+print(expand_score(llist("times", 2, llist("seq", None))))
+```
+```text title="Output"
+llist(3, 1, 0, 1, 0)
+llist([0, 3], [0.25, 1], [0.5, 0], [0.75, 1], [1.0, 0])
+None
+None
+```
+
+The zero event still occupies a beat, even if it represents silence. Repetition count zero
+expands to no events. Repeating an empty sequence also produces no events. Expanding nested
+repetitions may produce far more events than there are nodes in the score description;
+include the expanded output size when analysing the work.
+
+For event i, the start time is i × spacing. If a note lasts longer than the spacing, it
+overlaps the next note; concatenating whole notes would move the later starts and change
+the rhythm. Use the time-window model above and mix the currently active events.
 
 ## Takeaways
 

@@ -335,6 +335,73 @@ overwrites it, or the rest of the llist is lost.
     is like `p[0] = v`). Real Python's `is` on numbers and strings can surprise you (two equal large
     integers may not be `is`); in §3 it behaves like `==`. Either way, compare values with `==`.
 
+## A queue needs a front and a rear invariant
+
+A queue removes the oldest item first. Repeatedly using `append` to add a singleton at the
+back of a llist takes Θ(n) time per insertion. Instead, remember the first **node** and the
+last **node**, and change one tail when inserting.
+
+Keep these invariants together:
+
+- An empty queue has both references equal to `None`.
+- A nonempty queue's rear is its last node, whose tail is `None`.
+- Removing the only node must reset **both** references.
+
+Here is an original mailbox interface. The function object hides the two references; its
+messages are not the interface of any course exercise. `None` can be stored as ordinary data.
+
+```python title="§3"
+def make_mailbox():
+    front = None
+    rear = None
+    def mailbox(message, value):
+        nonlocal front, rear
+        if message == "put":
+            node = pair(value, None)
+            if is_none(front):
+                front = node
+            else:
+                set_tail(rear, node)
+            rear = node
+        elif message == "empty":
+            return is_none(front)
+        elif message == "get":
+            if is_none(front):
+                return error("empty mailbox")
+            result = head(front)
+            front = tail(front)
+            if is_none(front):
+                rear = None
+            return result
+        else:
+            return error("unknown mailbox message", message)
+    return mailbox
+
+mail = make_mailbox()
+mail("put", None)
+mail("put", "parcel")
+print(mail("get", None), mail("get", None), mail("empty", None))
+mail("put", "new arrival")
+print(mail("get", None), mail("empty", None))
+```
+```text title="Output"
+None parcel True
+new arrival True
+```
+
+Each operation takes Θ(1) time; every insertion creates one queue node. The total live
+storage is Θ(k) for k items, apart from the fixed interface state. “No new pairs” and
+“constant-time operation” are different requirements: this queue intentionally allocates
+one node when a new item arrives.
+
+??? question "Why test insertion again after emptying the queue?"
+    ??? success "Answer"
+        It catches a stale rear reference. If insertion attaches to an old detached node
+        instead of resetting the front, the newly inserted item becomes unreachable.
+
+For algorithms that must rearrange existing nodes without allocating result nodes, see
+[merge sort by rewiring](15-search-sort-memo.md#merge-sort-by-rewiring-existing-nodes).
+
 ## Takeaways
 
 - **Reassignment** changes what a name refers to: evaluate the right side with the old value, then update.

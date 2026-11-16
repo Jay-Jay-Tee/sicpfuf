@@ -251,6 +251,190 @@ print(seats)
 
     `[None] * n` and `[0] * n` are safe because numbers and `None` cannot be changed in place.
 
+## Images: coordinates, channels and separate buffers
+
+An image can be represented as `image[row][column][channel]`. Geometry often calls the
+column x and the row y, so accessing `(x, y)` means `image[y][x]`. For RGBA pixels, the
+channel positions are red, green, blue, alpha. State the valid range before writing a loop:
+`0 <= x and x < width`, `0 <= y and y < height`, and four channels per pixel.
+
+This original filter mirrors an image horizontally and increases its red channel. Each
+destination pixel receives its own list; no rows or pixels are accidentally shared.
+
+```python title="§3"
+def blank_image(height, width):
+    image = [None] * height
+    for y in range(height):
+        image[y] = [None] * width
+        for x in range(width):
+            image[y][x] = [0, 0, 0, 255]
+    return image
+
+def mirror_and_warm(src, dest, increase):
+    height = len(src)
+    width = len(src[0])
+    for y in range(height):
+        for x in range(width):
+            pixel = src[y][width - 1 - x]
+            dest[y][x][0] = max(0, min(255, pixel[0] + increase))
+            dest[y][x][1] = pixel[1]
+            dest[y][x][2] = pixel[2]
+            dest[y][x][3] = pixel[3]
+
+src = [[[10, 20, 30, 255], [240, 50, 60, 255]],
+       [[70, 80, 90, 255], [100, 110, 120, 255]]]
+dest = blank_image(2, 2)
+mirror_and_warm(src, dest, 30)
+print(dest)
+print(src[0][0], dest[0][0] is dest[1][0])
+```
+```text title="Output"
+[ [[255, 50, 60, 255], [40, 20, 30, 255]],
+[[130, 110, 120, 255], [100, 80, 90, 255]]]
+[10, 20, 30, 255] False
+```
+
+Assume a nonempty rectangular source and a separate destination with the same dimensions.
+Reading and writing the same image during this operation would overwrite pixels that later
+iterations still need. A filter that reads source pixels and fills destination pixels takes
+Θ(height × width) time here; allocating the destination also takes that much space and time.
+
+### Work backwards from a destination pixel
+
+To avoid holes, visit every destination pixel and calculate **which source pixel to read**.
+A horizontal mirror reads source x = width − 1 − destination x. A vertical mirror changes y
+instead. For a transform centred on an image, the centre coordinates are `(width - 1)/2`
+and `(height - 1)/2`, including for even dimensions. Rounding and handling coordinates
+outside the source are part of the transformation's specification.
+
+For an endpoint-aligned resize that rounds down to a source pixel, test the coordinate
+arithmetic independently:
+
+```python title="§3"
+def source_index(position, source_size, destination_size):
+    if destination_size == 1:
+        return (source_size - 1) // 2
+    return position * (source_size - 1) // (destination_size - 1)
+
+for x in range(5):
+    print(source_index(x, 3, 5))
+print(source_index(0, 4, 1))
+```
+```text title="Output"
+0
+0
+1
+1
+2
+1
+```
+
+This version chooses the lower source neighbour and maps both endpoints exactly. Other
+sampling conventions are possible; do not mix their formulas. Quantizing a brightness
+value into k character levels similarly needs a boundary rule: for integer brightness
+0…255, `brightness * (k - 1) // 255` maps black to 0 and white to k − 1.
+
+### Compose filters without corrupting their inputs
+
+If A and B both read an image and write another, applying A and then B needs an intermediate
+image: `source → A → temporary → B → destination`. To compare two transformations of the
+**same original**, run each with that original source and separate temporary destinations.
+Feeding A's result to B would show a composition rather than an independent comparison.
+
+A split-screen filter also needs a destination-to-source mapping for each viewport. Decide
+which viewport owns the dividing column when the width is odd, map into that viewport's
+source image, and write every destination pixel exactly once. Reuse buffers between video
+frames when their dimensions are unchanged; allocating them inside the innermost loop is
+unnecessary work. These data-processing examples do not implement a live camera interface.
+
+## Sensor-driven programs are state machines
+
+Separate a decision from the hardware command that carries it out. This lets you test the
+decision on recorded measurements. Here a vehicle pauses at or below distance 12 and
+resumes at or above 18; readings between those limits retain its previous state. The separate thresholds
+prevent noisy readings near one boundary from repeatedly starting and stopping it.
+
+```python title="§3"
+def next_mode(mode, distance, stop_pressed):
+    if mode == "stopped" or stop_pressed:
+        return "stopped"
+    elif distance <= 12:
+        return "waiting"
+    elif distance >= 18:
+        return "moving"
+    else:
+        return mode
+
+measurements = [24, 10, 14, 20, 16]
+mode = "waiting"
+for i in range(len(measurements)):
+    mode = next_mode(mode, measurements[i], False)
+    print(mode)
+mode = next_mode(mode, 25, True)
+print(mode, next_mode(mode, 25, False))
+```
+```text title="Output"
+moving
+waiting
+waiting
+moving
+moving
+stopped stopped
+```
+
+The stop state is latched: releasing the button does not restart the vehicle. This is one
+chosen policy, not a claim about a specific robot API. Convert sensor units according to
+that API, calibrate thresholds on the real surface, and handle absent readings explicitly.
+For line following, deciding “dark” or “light” is only the first step: retain which direction
+you were correcting so that loss of the line has a defined response.
+
+Non-blocking motor commands return before the movement finishes. Starting the left motor,
+waiting, then starting the right motor produces different motion from starting both and
+then waiting. Distance also depends on wheel circumference, gear ratio and slip; turning
+depends on wheel separation. Pure decision tests cannot validate those physical quantities.
+
+## Partition with three regions
+
+For an in-place three-way partition, keep four regions: finished low values, finished
+middle values, unexamined values, and finished high values. This fresh example groups
+negative, zero and positive measurements. It does not promise to preserve order within a
+group.
+
+```python title="§3"
+def group_signs(xs):
+    low = 0
+    scan = 0
+    high = len(xs)
+    while scan < high:
+        if xs[scan] < 0:
+            saved = xs[low]
+            xs[low] = xs[scan]
+            xs[scan] = saved
+            low = low + 1
+            scan = scan + 1
+        elif xs[scan] == 0:
+            scan = scan + 1
+        else:
+            high = high - 1
+            saved = xs[high]
+            xs[high] = xs[scan]
+            xs[scan] = saved
+
+values = [4, 0, -2, 5, -1, 0]
+alias = values
+print(group_signs(values))
+print(values, alias is values)
+```
+```text title="Output"
+None
+[-2, -1, 0, 0, 5, 4] True
+```
+
+The unexamined region is `[scan, high)`. After swapping from its right end, **do not advance
+scan**: the incoming element has not been classified yet. Each iteration shrinks that
+region by one, proving termination and Θ(n) time. Only a fixed number of variables are
+needed, so extra space is Θ(1).
+
 ## From recursion to loops
 
 A recursive process keeps deferred operations waiting; a loop keeps everything in a few variables.

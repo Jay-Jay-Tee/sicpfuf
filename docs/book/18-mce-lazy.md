@@ -259,6 +259,128 @@ rule of the course language: the LAST operand may be any value.
 
 **Modification 2** is the X-ray above: wrapping `apply` to count applications.
 
+## Instrument allocation where it happens
+
+Counting function **applications**, function **objects** and environment **extensions**
+answers three different questions. Reusing a function object through an alias creates no
+new function object; evaluating a lambda inside a body can create one on every application.
+Instrument the constructor rather than counting occurrences of `lambda` in the source.
+
+The following experiment wraps constructors in the book's own evaluator. Its chosen frame
+metric is **extensions with at least one symbol**, measured after evaluator setup. Startup
+frames and empty implementation frames are excluded. The functions being measured belong
+to the interpreted program; the host functions that implement this instrumentation are
+not themselves counted as interpreted function objects.
+
+```python title="§4 · --with examples/mce.py"
+function_objects = 0
+nonempty_extensions = 0
+make_function_without_metrics = make_function
+extend_without_metrics = extend_environment
+
+def make_function(parameters, locals, globals, body, env):
+    global function_objects
+    result = make_function_without_metrics(parameters, locals, globals, body, env)
+    function_objects = function_objects + 1
+    return result
+
+def extend_environment(symbols, values, base):
+    global nonempty_extensions
+    result = extend_without_metrics(symbols, values, base)
+    if not is_none(symbols):
+        nonempty_extensions = nonempty_extensions + 1
+    return result
+
+parse_and_evaluate("""
+def factory(offset):
+    def adjust(value):
+        return value + offset
+    return adjust
+first = factory(2)
+second = factory(4)
+print(first(5), second(5))
+""")
+print(function_objects, nonempty_extensions)
+parse_and_evaluate("""
+alias = first
+print(alias(1))
+def constant():
+    return 7
+print(constant())
+""")
+print(function_objects, nonempty_extensions)
+```
+```text title="Output"
+7 9
+3 4
+3
+7
+4 5
+```
+
+`factory` is created once, and the two executions of its inner definition create separate
+`adjust` objects. Both remember the environment of their own creation. The alias adds an
+application without creating an object; defining `constant` creates an object, but applying
+it adds no nonempty extension under this metric.
+
+Before comparing a counter with a diagram, specify what the diagram omits. This evaluator
+stores global-redirection markers as frame entries and still allocates an implementation
+frame for an empty call. A model may represent either differently. Physical pair allocations,
+nonempty evaluator frames and the model's displayed frames need not have the same count.
+If a question prescribes a particular omission rule, implement and test that rule explicitly.
+Count only successful creations, keep a fresh counter for an independent experiment, and
+include lambdas as well as `def` in function-object tests.
+
+## Extend an operator without evaluating its operands twice
+
+An operator extension should preserve ordinary cases and the existing evaluation order.
+The original evaluator converts an operator combination into an application. By the time
+`apply` receives it, the operands have already been evaluated once. Dispatching on these
+**values** avoids accidentally evaluating a printing or mutating operand again.
+
+This original extension gives text multiplied by a nonnegative integer a repetition meaning.
+It is a change to the language interpreted by this evaluator, not a new rule for Python §4
+itself. It does not implement the overloaded operations in any mission.
+
+```python title="§4 · --with examples/mce.py"
+multiply = lookup_symbol_value("*", the_global_environment)
+apply_without_text_repetition = apply
+
+def repeat_text(text, count):
+    return "" if count == 0 else text + repeat_text(text, count - 1)
+
+def apply(fun, arguments):
+    if fun is multiply and length(arguments) == 2:
+        left = head(arguments)
+        right = head(tail(arguments))
+        if is_string(left) and is_integer(right):
+            if right < 0:
+                return error("repetition count must be nonnegative")
+            return repeat_text(left, right)
+    return apply_without_text_repetition(fun, arguments)
+
+parse_and_evaluate("""
+def announce(value):
+    print(value)
+    return value
+print(announce("ha") * announce(3))
+print(6 * 7)
+print("x" * 0)
+""")
+```
+```text title="Output"
+ha
+3
+hahaha
+42
+```
+
+The printed operands expose their order and number of evaluations. Numeric multiplication
+still goes through the original implementation. Test supported operand combinations,
+unsupported combinations, zero, invalid counts and operands with side effects. If you add
+an entirely new syntax form instead, revisit both the parser representation and any static
+scan of names assigned inside that form.
+
 ## Lazy evaluation
 
 Python is **applicative order**: all arguments are evaluated before the body runs. In **normal

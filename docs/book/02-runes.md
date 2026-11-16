@@ -362,6 +362,112 @@ that take functions.
     `stack(a, stack(b, c))` is **not** three equal rows: `a` gets 1/2, `b` and `c` get 1/4 each. Use
     `stack_frac(1 / 3, a, stack(b, c))` or `stackn` for equal rows.
 
+## Decompose a picture before writing recursion
+
+Give each recursive call a precise job: “return a picture of the same outer size, with one
+less level of detail.” First locate the repeated subpicture, then decide which transformation
+places it in the larger picture. The base case must already be a rune.
+
+Here is an original nested-panel pattern. Each level puts a smaller copy of the previous
+picture in the top-left and bottom-right regions. The other two regions remain blank.
+The depth is a nonnegative integer.
+
+```python title="§1 · figure 02-runes-nested-panels"
+from rune import heart, blank, stack, beside, show
+
+def nested_panels(depth, picture):
+    if depth == 0:
+        return picture
+    smaller = nested_panels(depth - 1, picture)
+    return stack(beside(smaller, blank), beside(blank, smaller))
+
+show(nested_panels(2, heart))
+```
+??? note "Output (text preview)"
+    ```text title="Output"
+    ┌────────────────────────────────────────────────┐
+    │ ▄███▄▄███▄                                     │
+    │████████████                                    │
+    │████████████                                    │
+    │ ▀████████▀                                     │
+    │   ▀████▀                                       │
+    │     ▀▀                                         │
+    │             ▄███▄▄███▄                         │
+    │            ████████████                        │
+    │            ████████████                        │
+    │             ▀████████▀                         │
+    │               ▀████▀                           │
+    │                 ▀▀                             │
+    │                         ▄███▄▄███▄             │
+    │                        ████████████            │
+    │                        ████████████            │
+    │                         ▀████████▀             │
+    │                           ▀████▀               │
+    │                             ▀▀                 │
+    │                                     ▄███▄▄███▄ │
+    │                                    ████████████│
+    │                                    ████████████│
+    │                                     ▀████████▀ │
+    │                                       ▀████▀   │
+    │                                         ▀▀     │
+    └────────────────────────────────────────────────┘
+    ```
+
+![Four small hearts arranged in nested diagonal panels](../assets/figures/02-runes-nested-panels-rune-1.svg){ width="240" }
+
+The recursive result is named once and reused twice. Constructing the description takes
+Θ(depth) applications of `nested_panels`; the fully expanded picture contains 2^depth copies.
+Construction cost, expanded picture size and rendering cost are different quantities.
+
+When a function takes a transformation as an argument, apply **that parameter** to the
+completed picture. Test it with two different transformations. A function that always rotates
+can accidentally pass a test that supplied rotation, while ignoring its argument entirely.
+
+??? question "Should the base case return `show(picture)`?"
+    ??? success "Answer"
+        Return the picture itself and put `show(...)` around the final application. That keeps
+        picture construction independent of displaying it, so the result can be transformed
+        and combined before rendering.
+
+## Extending the geometry to three dimensions
+
+A 2-D picture occupies an x–y region. A 3-D object also has depth z. Scaling its footprint
+changes x and y; translating it upwards changes z. These are independent operations.
+Use named selectors rather than scattering coordinate positions throughout a program:
+
+```python title="§2"
+def make_position(x, y, z):
+    return llist(x, y, z)
+
+def x_position(p):
+    return llist_ref(p, 0)
+
+def y_position(p):
+    return llist_ref(p, 1)
+
+def z_position(p):
+    return llist_ref(p, 2)
+
+def place_position(p, footprint, height):
+    return make_position(footprint * x_position(p),
+                         footprint * y_position(p),
+                         z_position(p) + height)
+
+p = make_position(4, 2, 1)
+print_llist(place_position(p, 0.5, 3))
+print_llist(p)
+```
+```text title="Output"
+llist(2.0, 1.0, 4)
+llist(4, 2, 1)
+```
+
+This checks the coordinate arithmetic and leaves the input unchanged. It is a data model,
+not a 3-D renderer. A real scene also needs object extents, the camera and an occlusion rule.
+If an object has height h and rests on a surface at z, its top is at z + h; “translate by h”
+and “scale to height h” mean different things. Do not use a flat preview to decide which
+object hides another. See the [module limits](../reference/compatibility.md#modules).
+
 ## Takeaways
 
 - Runes are values: name them, pass them, return them.

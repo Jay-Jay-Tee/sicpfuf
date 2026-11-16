@@ -325,6 +325,153 @@ Read it line by line:
     different idea. A course stream is plain data plus nullary lambdas, so everything in this chapter can
     be explained with the environment model.
 
+## When the head is delayed too
+
+An ordinary stream stores its head as a **value** and its tail as a nullary function. A
+fully delayed representation stores **two nullary functions**. `None` still denotes the
+empty stream; a head function that returns `None` denotes a present element whose value
+is `None`.
+
+| Operation | Ordinary stream | Fully delayed representation used below |
+|---|---|---|
+| Read one element | `head(s)` | `head(s)()` |
+| Advance once | `stream_tail(s)` | `tail(s)()` |
+
+An ordinary library operation must not be silently applied to the fully delayed version.
+The following position-labelling transformation delays reading the input head until the
+corresponding output head is requested. Its first source head deliberately raises an error.
+
+```python title="§3"
+def with_positions(s, position):
+    if is_none(s):
+        return None
+    return pair(lambda: pair(position, head(s)()),
+                lambda: with_positions(tail(s)(), position + 1))
+
+source = pair(lambda: error("unneeded first head was forced"),
+              lambda: pair(lambda: None, lambda: None))
+tagged = with_positions(source, 20)
+second = tail(tagged)()
+print(head(second)())
+print(tail(second)())
+```
+```text title="Output"
+[21, None]
+None
+```
+
+Constructing the result and advancing to its second node do not need the first element's
+value. Putting `head(s)()` in a local assignment **before** constructing its lambda would
+force it immediately. A useful laziness test makes an unneeded head raise an error or
+increment a counter, then requests only tails.
+
+## A delayed running result needs a delayed predecessor
+
+For a running summary, carrying an already computed accumulator can force earlier heads
+too soon. Carry a nullary function that will compute the previous result instead. This
+original example produces running maxima, starting from a supplied lower bound.
+
+```python title="§3"
+def remember(compute):
+    ready = False
+    value = None
+    def get():
+        nonlocal ready, value
+        if not ready:
+            value = compute()
+            ready = True
+        return value
+    return get
+
+def running_peaks(s, lower_bound):
+    def build(previous, rest):
+        if is_none(rest):
+            return None
+        current = remember(lambda: max(previous(), head(rest)()))
+        return pair(current, lambda: build(current, tail(rest)()))
+    return build(lambda: lower_bound, s)
+
+forced = 0
+def observe(value):
+    global forced
+    forced = forced + 1
+    return value
+
+def delayed_values(xs):
+    return (None if is_none(xs)
+            else pair(lambda: observe(head(xs)),
+                      lambda: delayed_values(tail(xs))))
+
+peaks = running_peaks(delayed_values(llist(4, 7, 3)), -math_inf)
+third = tail(tail(peaks)())()
+print(forced)
+print(head(third)(), forced)
+print(head(third)(), forced)
+```
+```text title="Output"
+0
+7 3
+7 3
+```
+
+Walking two tails does no head work. Requesting the third result then forces the required
+prefix, and requesting that same result again uses its remembered value. The separate
+`ready` flag matters: `None`, zero and `False` can all be legitimate computed results.
+The tail functions themselves are not memoized here; traversing the same tails again can
+create different result nodes. For impure operations, memoization changes side effects,
+so its role must be part of the specified behaviour rather than assumed harmless.
+
+## Some transformations must inspect ahead
+
+Repeating a finite stream and selecting every kth element concern **tail traversal**.
+Remember the original start when repetition must restart; a restart should happen only
+when the current finite traversal reaches `None`. For subsampling, emit the current head
+and delay advancing k tails until the next result node is demanded. On an infinite input
+there is no end to restart from. Specify empty-input behaviour separately.
+
+Run-length encoding has a different demand: the count of a complete run requires finding
+its end. An infinite stream containing only one value never finishes its first maximal
+run. No implementation can both return its exact finite run length and remain productive.
+
+A useful alternative contract caps each output chunk. This original encoder emits at most
+`limit` equal values per chunk; consecutive chunks may therefore contain the same value.
+It uses the **ordinary** stream representation, not the fully delayed one above.
+
+```python title="§3"
+def bounded_runs(s, limit):
+    if not is_integer(limit) or limit <= 0:
+        return error("chunk limit must be a positive integer")
+    if is_none(s):
+        return None
+    value = head(s)
+    def gather(cursor, count):
+        if count == limit:
+            return pair(count, lambda: stream_tail(cursor))
+        rest = stream_tail(cursor)
+        if is_none(rest) or head(rest) != value:
+            return pair(count, lambda: rest)
+        return gather(rest, count + 1)
+    summary = gather(s, 1)
+    return pair(pair(value, head(summary)),
+                lambda: bounded_runs(tail(summary)(), limit))
+
+def constant_stream(value):
+    return pair(value, lambda: constant_stream(value))
+
+finite = llist_to_stream(llist(5, 5, 1, 1, 1, 1, 5))
+print_llist(eval_stream(bounded_runs(finite, 3), 4))
+print_llist(eval_stream(bounded_runs(constant_stream(8), 3), 3))
+```
+```text title="Output"
+llist([5, 2], [1, 3], [1, 1], [5, 1])
+llist([8, 3], [8, 3], [8, 3])
+```
+
+At the cap, the next source tail is left inside a lambda. Before the cap, detecting a run
+boundary can inspect the first head of the next run. Thus “returns a stream” does not mean
+“does no input work until a tail is forced.” State separately the work needed to construct
+a result head, to force a result tail, and to request the same result again.
+
 ## Takeaways
 
 - A stream can be defined in terms of **itself** because the self-reference sits inside a lambda that

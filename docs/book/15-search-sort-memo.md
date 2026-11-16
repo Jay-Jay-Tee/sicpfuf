@@ -205,6 +205,106 @@ The buffers need Θ(n) extra space.
 | insertion sort | Θ(n²) worst, Θ(n) on a sorted list | Θ(1) |
 | merge sort | Θ(n log n) | Θ(n) |
 
+## Merge sort by rewiring existing nodes
+
+The previous merge sort sorts a **list** using a buffer. For a **llist**, a different
+representation permits a different operation: change tails to join already existing nodes.
+Do not copy a value into a new node and call that node reuse. Check identity with `is`.
+
+This version uses bottom-up passes over runs of width 1, 2, 4, … . Its comparison function
+`before(a, b)` is strict: it says that a must precede b. Equal keys are taken from the left
+run first, preserving their original order. Inputs must be proper, acyclic llists; the two
+runs supplied to a merge must be disjoint.
+
+```python title="§3"
+def cut_run(first, width):
+    if is_none(first):
+        return None
+    last = first
+    used = 1
+    while used < width and not is_none(tail(last)):
+        last = tail(last)
+        used = used + 1
+    remainder = tail(last)
+    set_tail(last, None)
+    return remainder
+
+def join_sorted_nodes(left, right, before):
+    if is_none(left):
+        return right
+    if is_none(right):
+        return left
+    if before(head(right), head(left)):
+        result = right
+        right = tail(right)
+    else:
+        result = left
+        left = tail(left)
+    last = result
+    while not is_none(left) and not is_none(right):
+        if before(head(right), head(left)):
+            set_tail(last, right)
+            right = tail(right)
+        else:
+            set_tail(last, left)
+            left = tail(left)
+        last = tail(last)
+    set_tail(last, right if is_none(left) else left)
+    return result
+
+def reorder_nodes(xs, before):
+    size = length(xs)
+    width = 1
+    while width < size:
+        rest = xs
+        result = None
+        last = None
+        while not is_none(rest):
+            left = rest
+            right = cut_run(left, width)
+            rest = cut_run(right, width)
+            merged = join_sorted_nodes(left, right, before)
+            if is_none(result):
+                result = merged
+            else:
+                set_tail(last, merged)
+            last = merged
+            while not is_none(tail(last)):
+                last = tail(last)
+        xs = result
+        width = 2 * width
+    return xs
+
+jobs = llist(pair(2, "a"), pair(4, "b"), pair(2, "c"), pair(1, "d"))
+old_first = jobs
+old_third = tail(tail(jobs))
+ordered = reorder_nodes(jobs, lambda a, b: head(a) > head(b))
+print_llist(ordered)
+print(tail(ordered) is old_first, tail(tail(ordered)) is old_third)
+print(reorder_nodes(None, lambda a, b: a < b))
+print_llist(reorder_nodes(llist(3, 1, 3, 2, 0), lambda a, b: a < b))
+single = llist("only")
+print(reorder_nodes(single, lambda a, b: a < b) is single)
+```
+```text title="Output"
+llist([4, 'b'], [2, 'a'], [2, 'c'], [1, 'd'])
+True True
+None
+llist(0, 1, 2, 3, 3)
+True
+```
+
+`cut_run` saves the remainder **before** cutting the last tail. It returns that remainder;
+the caller already remembers the run's first node, so no wrapper pair is needed. Neither
+merging nor sorting calls `pair`, `llist` or `set_head`. The record values and llist nodes
+were all allocated before sorting began.
+
+After each pass, runs of size at most 2 × width are sorted. A pass visits Θ(n) nodes,
+including the walks that find merged tails. There are Θ(log n) passes, giving Θ(n log n)
+time for constant-time comparisons and Θ(1) auxiliary storage. This bottom-up version does
+not accumulate recursive calls. Replacing it with recursive splitting changes the space
+analysis even if neither implementation allocates new result nodes.
+
 ## Memoization
 
 Tree-recursive `fib` asks the same questions many times: `fib(5)` computes `fib(3)` twice and `fib(2)`

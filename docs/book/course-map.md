@@ -25,6 +25,16 @@ Their presence establishes which tasks were supplied; it does not make the saved
 a verified answer key. The mission and practice tables below distinguish topic routes from
 material that still needs a dedicated explanation or a browser/hardware check.
 
+Mission techniques are now taught within their subject chapters: [picture decomposition
+and 3-D coordinates](02-runes.md#decompose-a-picture-before-writing-recursion),
+[curve refinement](06-curves-sound.md#endpoints-transformation-order-and-repeated-refinement),
+[rhythm expansion and scheduling](06-curves-sound.md#expand-a-rhythm-tree-then-schedule-its-events),
+[image filters and sensor state machines](13-lists-loops.md#images-coordinates-channels-and-separate-buffers),
+[node-reusing merge sort](15-search-sort-memo.md#merge-sort-by-rewiring-existing-nodes),
+[stream demand](16-streams-ii.md#when-the-head-is-delayed-too) and
+[evaluator instrumentation](18-mce-lazy.md#instrument-allocation-where-it-happens).
+These are original explanations and worked examples, not copied mission solutions.
+
 ## Lectures
 
 | Lecture | Read | Practise |
@@ -92,25 +102,25 @@ No claim is made here that every saved mission program has been run or corrected
 
 | Mission | Tasks | Read first | What still needs attention |
 |---|---:|---|---|
-| 1652 · Rune Trials | 4 | [Functional abstraction with runes](02-runes.md), [functions as arguments](05-higher-order-scope.md) | Check the requested transformation rather than one hard-coded example; reference images are absent from the export. |
-| 1676 · Rune Reading | 3 | [Recursive processes](03-substitution-recursion.md), [repeating a transformation](02-runes.md#repeating-a-transformation) | Dedicated geometric decomposition exercises and the missing target images. |
-| 1679 · Beyond the Second Dimension | 2 | [Runes and composition](02-runes.md), [module limits](../reference/compatibility.md#modules) | 3-D shape rendering is outside the implemented modules; 2-D previews do not validate depth or occlusion. |
-| 1703 · Curve Introduction | 3 | [Curves are functions](06-curves-sound.md#curves-are-functions) | Check endpoints, parameter ranges and the difference between a point and a function returning points. |
-| 1714 · Curve Manipulation | 2 | [Curve transformations](06-curves-sound.md#makers-and-transformations), [joining curves](06-curves-sound.md#connecting-curves) | Transformation order and endpoint alignment need task-specific checks. |
-| 1726 · Beyond the First Dimension | 3 | [Higher-order functions](05-higher-order-scope.md), [curves](06-curves-sound.md), [growth](04-orders-of-growth.md) | The individual fractal constructions and their visual results are not fully worked through here. |
-| 1737 · Premorseal Communications | 5 | [Sounds as functions of time](06-curves-sound.md#sounds-are-functions-of-time), [combining sounds](06-curves-sound.md#combining-sounds) | Timing boundaries, silence and sampled waveform checks; no browser playback certification. |
-| 1764 · POTS and Pans | 4 | [Pairs and abstraction](07-data-abstraction.md), [sound composition](06-curves-sound.md#combining-sounds), [llist pipelines](08-llist-processing.md) | Frequency-table and sequence-delimiter checks remain separate from audible output. |
-| 1789 · Musical Diversions | 5 | [Sound](06-curves-sound.md), [folds](08-llist-processing.md), [nested trees](09-trees-cps.md) | Recursive rhythm expansion and scheduled overlapping events need further worked practice. |
+| 1652 · Rune Trials | 4 | [Functional abstraction with runes](02-runes.md), [picture decomposition](02-runes.md#decompose-a-picture-before-writing-recursion), [functions as arguments](05-higher-order-scope.md) | Reference images are absent from the export, so exact target drawings remain unverified. |
+| 1676 · Rune Reading | 3 | [Recursive processes](03-substitution-recursion.md), [nested-panel worked example](02-runes.md#decompose-a-picture-before-writing-recursion) | Apply the decomposition method to each target; missing images prevent a complete visual comparison. |
+| 1679 · Beyond the Second Dimension | 2 | [3-D coordinate model](02-runes.md#extending-the-geometry-to-three-dimensions), [module limits](../reference/compatibility.md#modules) | Coordinates, footprint scaling and height are explained; full 3-D rendering and occlusion remain unsupported. |
+| 1703 · Curve Introduction | 3 | [Curves are functions](06-curves-sound.md#curves-are-functions), [endpoint checks](06-curves-sound.md#endpoints-transformation-order-and-repeated-refinement) | Exact mission drawings are not certified by these original examples. |
+| 1714 · Curve Manipulation | 2 | [Curve transformations](06-curves-sound.md#makers-and-transformations), [order and endpoint contracts](06-curves-sound.md#endpoints-transformation-order-and-repeated-refinement) | Compare each requested transformation with its specified endpoints and geometry. |
+| 1726 · Beyond the First Dimension | 3 | [Self-similar segment replacement](06-curves-sound.md#build-a-self-similar-path-from-oriented-segments), [growth](04-orders-of-growth.md) | The original zigzag example teaches the construction method; it is not a worked solution to each named course fractal. |
+| 1737 · Premorseal Communications | 5 | [Sounds as functions of time](06-curves-sound.md#sounds-are-functions-of-time), [time windows and mixing](06-curves-sound.md#time-windows-delays-and-overlapping-sounds) | Timing boundaries are tested numerically; browser playback remains outside this check. |
+| 1764 · POTS and Pans | 4 | [Pairs and abstraction](07-data-abstraction.md), [time windows and mixing](06-curves-sound.md#time-windows-delays-and-overlapping-sounds), [llist pipelines](08-llist-processing.md) | The method is explained; verify the question's frequency table and delimiters separately. |
+| 1789 · Musical Diversions | 5 | [Rhythm-tree expansion and scheduling](06-curves-sound.md#expand-a-rhythm-tree-then-schedule-its-events), [nested trees](09-trees-cps.md) | Worked examples distinguish event spacing, silence and overlapping duration; they do not certify instrument playback. |
 | 1798 · Search and Rescue | 3 | [Binary search trees](10-sorting-symbolic.md#4-binary-search-trees-as-llists), [data abstraction](07-data-abstraction.md) | Respect the supplied tree selectors and constructors when checking a solution. |
 | 1809 · Sorting Things Out | 5 | [Quicksort](10-sorting-symbolic.md#quicksort-the-idea), [growth](04-orders-of-growth.md) | Partition correctness and best/worst-case analysis are separate obligations. |
-| 1814 · Robotic Trials | 4 | [Functions](01-elements.md#functions), [state and mutation](12-state-mutation.md) | EV3 motor/speech APIs, calibration and non-blocking commands require the hardware environment. |
-| 1825 · Moving about on Planet Y | 3 | [Loops](13-lists-loops.md), [state machines](21-applied-patterns.md#a-closure-can-hold-a-state-machine) | Sensor units, obstacle handling and movement need robot testing. |
-| 1826 · Finding ELDRIC | 3 | [Predicates](01-elements.md#booleans-and-predicates), [loops](13-lists-loops.md), [state](12-state-mutation.md) | Light thresholds and line-following behaviour need physical calibration and testing. |
+| 1814 · Robotic Trials | 4 | [Functions](01-elements.md#functions), [sensor decisions and non-blocking commands](13-lists-loops.md#sensor-driven-programs-are-state-machines) | EV3 motor/speech APIs and physical calibration require the hardware environment. |
+| 1825 · Moving about on Planet Y | 3 | [Sensor-driven state machine](13-lists-loops.md#sensor-driven-programs-are-state-machines), [loops](13-lists-loops.md) | Decision logic is tested on recorded values; sensor units and movement still need robot testing. |
+| 1826 · Finding ELDRIC | 3 | [Predicates](01-elements.md#booleans-and-predicates), [hysteresis and retained state](13-lists-loops.md#sensor-driven-programs-are-state-machines) | Line recovery and thresholds still need physical calibration and testing. |
 | 1832 · Know Your Environment | 3 | [Environments](14-environment-model.md), [sharing and mutation](12-state-mutation.md) | Retain every required frame and distinguish lexical parents from callers; these particular diagrams are not certified here. |
-| 1844 · Corrective Sky Surgery | 4 | [Lists of lists](13-lists-loops.md#lists-of-lists), [higher-order functions](05-higher-order-scope.md) | Dedicated image-coordinate and filter-composition teaching is missing; live-camera APIs are unsupported. |
-| 1846 · Reuse Your Pairs | 3 | [Mutation and identity](12-state-mutation.md), [merge sort](15-search-sort-memo.md#merge-sort), [rewiring nodes](21-applied-patterns.md#removing-nodes-without-allocating-new-pairs) | A dedicated destructive split/merge/sort explanation must account for pair identity and exact allocation limits. |
-| 1864 · Streaming the Anomaly | 5 | [Streams](11-streams.md), [self-reference and memoization](16-streams-ii.md), [mutable state](12-state-mutation.md) | Stream repetition and sampling can be checked separately; video filters and the footage require unavailable browser assets. |
-| 1885 · The Essence of Python | 4 | [Evaluator I](17-mce.md), [changing the evaluator](18-mce-lazy.md#how-to-modify-the-evaluator), [resource definitions](21-applied-patterns.md#count-the-resource-the-question-defines) | Frame/function-allocation instrumentation and operator extensions need dedicated checks. The programmable browser REPL is not implemented. |
+| 1844 · Corrective Sky Surgery | 4 | [Image coordinates and buffers](13-lists-loops.md#images-coordinates-channels-and-separate-buffers), [inverse mapping](13-lists-loops.md#work-backwards-from-a-destination-pixel), [filter composition](13-lists-loops.md#compose-filters-without-corrupting-their-inputs) | Image arithmetic is taught with a checked mirror/warming filter; live-camera APIs are unsupported. |
+| 1846 · Reuse Your Pairs | 3 | [Mutation and identity](12-state-mutation.md), [bottom-up merge sort using existing nodes](15-search-sort-memo.md#merge-sort-by-rewiring-existing-nodes) | The worked example explains stability and allocation limits and checks node identity; mission-specific submitted programs remain unaudited. |
+| 1864 · Streaming the Anomaly | 5 | [Streams](11-streams.md), [repetition, subsampling and lookahead](16-streams-ii.md#some-transformations-must-inspect-ahead), [image buffers](13-lists-loops.md#images-coordinates-channels-and-separate-buffers) | Stream demand and image handling are explained separately; the footage and video APIs remain unavailable. |
+| 1885 · The Essence of Python | 4 | [Allocation instrumentation](18-mce-lazy.md#instrument-allocation-where-it-happens), [value-based operator extensions](18-mce-lazy.md#extend-an-operator-without-evaluating-its-operands-twice) | Counters and an original operator extension run in the book's evaluator. Its frame metric is stated explicitly; the programmable browser REPL is not implemented. |
 
 The export refers to pictures but contains **no embedded images or image links**. It also
 contains templates and unfinished submissions. For example, a section labelled “Solution”
@@ -133,11 +143,11 @@ solution versions repeat the corresponding questions and test cases, with differ
 | PA1 B · Q9–10 | Recursive tree rearrangement and traversal | [Trees](09-trees-cps.md), [binary tree abstraction](10-sorting-symbolic.md#4-binary-search-trees-as-llists). Stable rearrangement at every nested level needs further practice. |
 | PA2 A · Q1–3 | Adjacent-element processing and reversible encodings | [Llist recursion and accumulators](08-llist-processing.md). Encoding/decoding laws need a dedicated worked example. |
 | PA2 A · Q4–6 | Matrix indexing, postfix evaluation, shortest paths | [Nested lists and loops](13-lists-loops.md), [expression trees](10-sorting-symbolic.md). Postfix stacks and grid shortest-path search are not fully taught here. |
-| PA2 A · Q7–9 | Constant-time stream construction, self-generated streams, destructive merge | [Streams](11-streams.md), [self-reference](16-streams-ii.md), [mutation](12-state-mutation.md). Exact forcing costs and node-reuse constraints need additional checks. |
-| PA2 B · Q1–3 | Matrix geometry, pixel quantization, image serialization | [Lists of lists](13-lists-loops.md#lists-of-lists). Image-coordinate and quantization explanations still need expansion. |
+| PA2 A · Q7–9 | Constant-time stream construction, self-generated streams, destructive merge | [Streams](11-streams.md), [forcing and lookahead](16-streams-ii.md#some-transformations-must-inspect-ahead), [node-reusing merge](15-search-sort-memo.md#merge-sort-by-rewiring-existing-nodes). Particular submitted implementations still need their own cost checks. |
+| PA2 B · Q1–3 | Matrix geometry, pixel quantization, image serialization | [Lists of lists](13-lists-loops.md#lists-of-lists), [pixel mapping and quantization](13-lists-loops.md#work-backwards-from-a-destination-pixel). The exact practice output format still needs dedicated practice. |
 | PA2 B · Q4–5 | Expression traversal and grid-path counting | [Expression trees](10-sorting-symbolic.md), [memoization](15-search-sort-memo.md). Postfix conversion and grid recurrences need dedicated practice. |
-| PA2 B · Q6–7 | Run-length streams and mutable queues | [Streams](11-streams.md), [state](12-state-mutation.md), [abstraction](07-data-abstraction.md). Run-boundary forcing and constant-time queue invariants are not fully developed here. |
-| PA2 B · Q8–9 | Bounding geometry and in-place three-way partition | [Folds](08-llist-processing.md), [loop invariants](13-lists-loops.md). Dedicated bounding-box and three-region partition explanations are still missing. |
+| PA2 B · Q6–7 | Run-length streams and mutable queues | [Bounded runs and lookahead](16-streams-ii.md#some-transformations-must-inspect-ahead), [front/rear queue invariants](12-state-mutation.md#a-queue-needs-a-front-and-a-rear-invariant). The bounded-run example deliberately uses a different contract from complete maximal runs. |
+| PA2 B · Q8–9 | Bounding geometry and in-place three-way partition | [Folds](08-llist-processing.md), [three-region partition](13-lists-loops.md#partition-with-three-regions). Bounding-box geometry still needs a dedicated worked example. |
 
 ### What was actually executed
 
