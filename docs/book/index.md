@@ -84,9 +84,10 @@ python3 -m sicpfuf -v 2                          # an interactive prompt
 Use the chapter number in the title of a program as the `-v` number. Change the programs, break them
 on purpose, and read the error messages: sicpfuf adds a hint to every error.
 
-!!! tip "Three builtins that only sicpfuf has"
+!!! tip "Extra builtins supplied by sicpfuf"
     `trace(f, args...)` draws the call tree of one application, `measure(f, args...)` counts time and
-    space, and `show_env()` draws the environment diagram at that moment. They work in every chapter.
+    space, `show_env()` draws the environment diagram at that moment, and `draw_tree(t)` draws
+    tree data in text (and SVG with `--out`). They work in every chapter.
     The course's own playground does not have them, so do not use them in an exam answer.
 
 ## Contents

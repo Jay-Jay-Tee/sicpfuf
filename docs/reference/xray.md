@@ -443,6 +443,46 @@ draw_data(pair(shared, shared))
 - A box reached twice (**sharing**, or a cycle made with `set_tail`) is drawn once with a label `#1=`, and every other arrow to it ends in `#1`.
 - A list with more or fewer than two items (§3) is one long box with a slot for each item.
 
+## Tree diagrams from your program: `draw_tree(...)`
+
+`draw_tree(t)` prints a branching tree in the terminal, just as `print_llist(t)` prints
+llist notation and `draw_data(t)` prints boxes and pointers. It returns `t` unchanged.
+This is an extra sicpfuf helper, available without opening the browser UI.
+
+```python title="§2 · figure xray-tree-form"
+t = llist(1, llist(2, 3), 4)
+print_llist(t)
+draw_tree(t)
+```
+```text title="Output"
+llist(1, llist(2, 3), 4)
+llist
+├── 1
+├── llist
+│   ├── 2
+│   └── 3
+└── 4
+```
+
+![The same nested llist drawn as a branching tree](../assets/figures/xray-tree-form-tree-1.svg)
+
+Save that program in `example.py` and run:
+
+```sh
+python3 -m sicpfuf example.py -v 2 --out diagrams
+```
+
+The terminal shows the text tree and the file `diagrams/tree-1.svg` contains its graphical
+form. Open that SVG in an image preview beside your code in VS Code. Repeated applications
+write `tree-2.svg`, `tree-3.svg`, and so on. `--stem NAME` prefixes these filenames.
+
+For nodes represented as `llist(entry, left, right)`, use `draw_tree(t, "binary")`.
+That explicitly labels left and right branches and keeps empty subtrees as ∅. A malformed
+binary node is an error; the default nested-llist view instead shows improper pairs and
+ordinary lists using their actual slots. Shared subtrees are labelled and later occurrences
+refer back to them; cycles do not recurse forever. Shared tails are shown explicitly.
+Output is bounded to 400 displayed nodes and expansion depth 60.
+
 ## Tokens and syntax trees: `--tokens` and `--ast`
 
 These show the first two stages of the interpreter (see [How sicpfuf works](internals.md)) and stop without running the program.

@@ -40,7 +40,35 @@ llist(1, llist(2, 3), llist(llist(4), llist()), 5)
 
 `length(t)` is 4: the top row has four boxes. But the tree holds **five** leaves: 1, 2, 3, 4, 5.
 
-!!! tip "See the same data as a tree"
+### A tree form alongside llist notation
+
+Use `draw_tree(t)` in your program to get a branching tree in the VS Code terminal. You
+can print both representations of the same value:
+
+```python title="§2 · figure 09-trees-cps-branch-form"
+t = llist(1, llist(2, 3), 4)
+print_llist(t)
+draw_tree(t)
+```
+```text title="Output"
+llist(1, llist(2, 3), 4)
+llist
+├── 1
+├── llist
+│   ├── 2
+│   └── 3
+└── 4
+```
+
+![A llist with leaves 1, 2, 3 and 4 shown as branches](../assets/figures/09-trees-cps-branch-form-tree-1.svg){ width="400" }
+
+With `python3 -m sicpfuf your_file.py -v 2 --out diagrams`, this also writes
+`diagrams/tree-1.svg`. Open the SVG in an image preview in VS Code. `draw_tree` is a
+sicpfuf drawing helper, not part of the course language; it leaves the tree unchanged.
+Empty subtrees appear as ∅ and are not counted as leaves. Shared subtrees and cycles
+have references rather than being copied or expanded indefinitely.
+
+!!! tip "Explore the same data interactively"
     Open the program in the [visual stepper](../playground.md), advance past `t`'s assignment,
     choose **Tree**, select `t` under **Root**, and leave **Structure** on **Nested llists**.
     The top-level llist becomes a branching node; nested llists become subtrees and numbers

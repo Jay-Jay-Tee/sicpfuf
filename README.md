@@ -60,6 +60,8 @@ Select a node to trace its pointers, double-click to focus it, and drag the back
 **Fit** fits the entire graph; **1:1** restores readable actual size. Unreachable objects stay grey.
 **Tree** draws nested llists or explicitly selected `llist(entry, left, right)` binary trees.
 Choose the root variable/object; sharing, cycles and empty subtrees remain visible.
+For tree output directly from your program, call `draw_tree(t)` or `draw_tree(t, "binary")`.
+It prints a text tree in the terminal and, with `--out diagrams`, saves `diagrams/tree-1.svg`.
 Change **Max steps** (2–5000) and Run, or use **More steps** after reaching the limit.
 Edits in the UI do not overwrite your file. Each run starts fresh, with a default limit of 400 states
 (adjust with `--max-steps 1000`, up to 5000; press + in the terminal to increase and retrace),

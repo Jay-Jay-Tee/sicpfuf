@@ -193,6 +193,30 @@ branches. The three-item llist representation is an explicit choice: the same da
 - Inserting sorted data sends every entry right: a chain, as slow as a llist, **Θ(n)**.
 - `bst_insert` builds new nodes along one path and shares the untouched subtrees; the old tree is unchanged.
 
+For a tree representation directly from your program or terminal, use
+`draw_tree(t, "binary")`. The second argument states the representation instead of
+guessing whether every three-element llist was intended as a binary node:
+
+```python title="§2 · figure 10-sorting-binary-form"
+t = llist(8, llist(3, None, None), llist(11, None, None))
+draw_tree(t, "binary")
+```
+```text title="Output"
+8
+├── left: 3
+│   ├── left: ∅
+│   └── right: ∅
+└── right: 11
+    ├── left: ∅
+    └── right: ∅
+```
+
+![A binary tree with root 8 and children 3 and 11](../assets/figures/10-sorting-binary-form-tree-1.svg){ width="400" }
+
+The text form appears in the terminal. With `--out diagrams`, the same drawing is saved
+as `diagrams/tree-1.svg`. This extra helper is for studying; the underlying tree is still
+made from ordinary llists, and `draw_tree` is not a function supplied in an exam.
+
 ## 5. Strings as symbols
 
 So far a llist held numbers. Strings can be data too. Mind the quotes: `x` is a **name** whose value is

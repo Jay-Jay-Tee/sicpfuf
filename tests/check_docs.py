@@ -90,7 +90,7 @@ def run_snippet(code, chapter, flags, figure):
 
 
 ORACLE = os.environ.get("SICPFUF_ORACLE", os.path.expanduser("~/.cache/sicpfuf/py-slang/dist/repl.cjs"))
-SICPFUF_ONLY = re.compile(r"\b(trace|measure|show_env|draw_data|input)\(|^\s*from\s+(rune|curve|sound|repeat)\s+import"
+SICPFUF_ONLY = re.compile(r"\b(trace|measure|show_env|draw_data|draw_tree|input)\(|^\s*from\s+(rune|curve|sound|repeat)\s+import"
                           r"|random_random|time_time", re.M)
 
 

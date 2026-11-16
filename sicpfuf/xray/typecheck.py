@@ -424,6 +424,7 @@ def remove[A](v: A, xs: LList[A]) -> LList[A]: pass
 def remove_all[A](v: A, xs: LList[A]) -> LList[A]: pass
 def llist_ref[A](xs: LList[A], n: int) -> A: pass
 def draw_data[A](value1: A, *values: object) -> A: pass
+def draw_tree[A](value: A, mode: str = "llist") -> A: pass
 def set_head[H, T](p: Pair[H, T], v: H) -> None: pass
 def set_tail[H, T](p: Pair[H, T], v: T) -> None: pass
 def stream[A](*xs: A) -> Stream[A]: pass

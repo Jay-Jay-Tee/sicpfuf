@@ -15,7 +15,7 @@ sicpfuf/__main__.py — the command line.
       --ast            show the parser's tree and stop
       --typed          check the type annotations first                 (Python §4 Typed)
       --ui             open the built-in visual steppers locally
-      --out FOLDER     save the pictures and sounds the program makes   (rune, curve, sound)
+      --out FOLDER     save pictures and sounds, including draw_tree's tree SVGs
       --with FILE      run FILE first, then the program                 (--with examples/mce.py)
 
 A program can also choose its own chapter with a first line like   # chapter 2

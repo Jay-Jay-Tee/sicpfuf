@@ -81,6 +81,8 @@ const expanded = await run(longer, 3, 'environment', false, '', 1000);
 assert.equal(expanded.error, null);
 assert.equal(expanded.steps.at(-1).output, '40\n');
 assert.equal((await run("print(123)\n")).steps.at(-1).output, "123\n");
+assert.equal((await run('t = llist(1,llist(2,3),4)\ndraw_tree(t)\n', 2)).steps.at(-1).output,
+  'llist\n├── 1\n├── llist\n│   ├── 2\n│   └── 3\n└── 4\n');
 assert.equal((await run("print((2 + 3) * 4)\n", 1, "substitution")).steps.at(-1).output, "20\n");
 assert.ok((await run("x = 1\n", 3, "substitution")).error);
 assert.equal((await run('print(input("Name: "))\n', 2, "environment", false, "Ada\n")).steps.at(-1).output, "Name: Ada\n");

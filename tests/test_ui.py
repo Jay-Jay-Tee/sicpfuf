@@ -64,6 +64,11 @@ class UITests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(body)["steps"][-1]["output"], "42\n")
 
+    def test_tree_output_from_a_program_is_recorded_in_the_stepper(self):
+        result = run_trace('t = llist(1,llist(2,3),4)\ndraw_tree(t)\n', 2, 'environment')
+        self.assertIsNone(result['error'])
+        self.assertIn('llist\n├── 1\n├── llist\n│   ├── 2\n│   └── 3\n└── 4', result['steps'][-1]['output'])
+
     def test_request_validation(self):
         for data in ({}, [], {"source": 7},
                      {"source": "", "chapter": True, "mode": "environment"},
