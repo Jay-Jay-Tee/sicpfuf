@@ -6,6 +6,7 @@
   let history = null, index = 0, timer = null, running = false, zoom = null;
   let syntaxSource = null;
   let programView = false;
+  let pan = null, dragged = false;
   const bindingText = binding => binding.objectId ? binding.objectId + (binding.function ? "" : " " + binding.value) : binding.value;
   const keywords = new Set("and as assert async await break class continue def del elif else except False finally for from global if import in is lambda None nonlocal not or pass raise return True try type while with yield".split(" "));
 
@@ -37,11 +38,50 @@
   function sizeDiagram() {
     const picture = get("diagram").querySelector("svg");
     if (!picture) return;
-    const naturalWidth = Number(picture.getAttribute("viewBox").split(/\s+/)[2]);
+    const [, , naturalWidth, naturalHeight] = picture.getAttribute("viewBox").split(/\s+/).map(Number);
     const available = get("diagram").clientWidth - 40;
-    const scale = zoom === null ? Math.min(1, Math.max(160, available) / naturalWidth) : zoom;
+    const height = get("diagram").clientHeight;
+    const scale = zoom === null ? Math.min(1, Math.max(160, available) / naturalWidth,
+      height > 80 ? (height - 40) / naturalHeight : 1) : zoom;
     picture.style.width = `${naturalWidth * scale}px`;
+    picture.style.height = `${naturalHeight * scale}px`;
     get("zoom-fit").textContent = zoom === null ? "Fit" : Math.round(zoom * 100) + "%";
+  }
+
+  function clearSelection() {
+    get("inspection").hidden = get("inspection-panel").hidden = true;
+    get("diagram").querySelectorAll(".selected, .pointer-trace, .pointer-trace-incoming, .pointer-muted, .pointer-related").forEach(node => {
+      node.classList.remove("selected", "pointer-trace", "pointer-trace-incoming", "pointer-muted", "pointer-related");
+    });
+  }
+
+  function tracePointers(node) {
+    const key = node.dataset.nodeId, related = new Set([key]);
+    get("diagram").querySelectorAll("path[data-source][data-target]").forEach(edge => {
+      const outgoing = edge.dataset.source === key, incoming = edge.dataset.target === key;
+      edge.classList.toggle("pointer-trace", outgoing);
+      edge.classList.toggle("pointer-trace-incoming", incoming && !outgoing);
+      edge.classList.toggle("pointer-muted", !outgoing && !incoming);
+      if (outgoing || incoming) { related.add(edge.dataset.source); related.add(edge.dataset.target); }
+    });
+    get("diagram").querySelectorAll("[data-node-id]").forEach(item => item.classList.toggle("pointer-related", related.has(item.dataset.nodeId)));
+  }
+
+  function zoomDiagram(value, focusX, focusY) {
+    const canvas = get("diagram"), picture = canvas.querySelector("svg");
+    if (!picture) return;
+    const naturalWidth = Number(picture.getAttribute("viewBox").split(/\s+/)[2]);
+    const previousScale = parseFloat(picture.style.width) / naturalWidth;
+    const rect = picture.getBoundingClientRect(), viewport = canvas.getBoundingClientRect();
+    const x = focusX === undefined ? canvas.clientWidth / 2 : focusX;
+    const y = focusY === undefined ? canvas.clientHeight / 2 : focusY;
+    const worldX = (viewport.left + x - rect.left) / previousScale;
+    const worldY = (viewport.top + y - rect.top) / previousScale;
+    zoom = Math.max(.15, Math.min(3, value));
+    sizeDiagram();
+    const updated = picture.getBoundingClientRect();
+    canvas.scrollLeft += updated.left + worldX * zoom - viewport.left - x;
+    canvas.scrollTop += updated.top + worldY * zoom - viewport.top - y;
   }
 
   function pause() {
@@ -108,6 +148,7 @@
     }
     get("frame-hint").textContent = current && current.bindings.length ? "Select a frame or closure to inspect it." : "No bindings in this frame yet.";
     get("diagram").hidden = !environment || programView;
+    get("diagram-help").hidden = !environment || programView;
     get("program-view").hidden = !environment || !programView;
     get("zoom-controls").hidden = programView;
     const programText = step && step.program || "Run your code to see its reductions.";
@@ -218,13 +259,16 @@
   }
   get("play").addEventListener("click", play);
   get("speed").addEventListener("change", () => { if (timer) { pause(); play(); } });
-  get("zoom-fit").addEventListener("click", () => { zoom = null; sizeDiagram(); });
+  get("zoom-fit").addEventListener("click", () => {
+    zoom = null; sizeDiagram();
+    get("diagram").scrollTop = get("diagram").scrollLeft = 0;
+  });
+  get("zoom-actual").addEventListener("click", () => zoomDiagram(1));
   for (const [id, factor] of [["zoom-in", 1.25], ["zoom-out", .8]]) get(id).addEventListener("click", () => {
     const picture = get("diagram").querySelector("svg");
     if (!picture) return;
     const naturalWidth = Number(picture.getAttribute("viewBox").split(/\s+/)[2]);
-    zoom = Math.max(.2, Math.min(3, (zoom === null ? (parseFloat(picture.style.width) / naturalWidth) : zoom) * factor));
-    sizeDiagram();
+    zoomDiagram((parseFloat(picture.style.width) / naturalWidth) * factor);
   });
   window.addEventListener("resize", sizeDiagram);
   document.addEventListener("keydown", event => {
@@ -260,6 +304,7 @@
   });
   get("typed").addEventListener("change", invalidate);
   get("diagram").addEventListener("click", event => {
+    if (dragged) { dragged = false; return; }
     const frame = event.target.closest("[data-frame]"), fn = event.target.closest("[data-function]"), object = event.target.closest("[data-object]"), builtins = event.target.closest("[data-builtins]");
     const step = history && history.steps[index];
     if (!step) return;
@@ -276,17 +321,58 @@
       const entry = step.store && step.store.heap.find(item => item.id === object.dataset.object);
       if (entry) text = `${entry.id} · list\n${entry.isGarbage ? "Unreachable · retained for inspection\n" : ""}` + entry.elements.map((item, i) => `${i}: ${item.objectId || item.display || item.name || "(unassigned)"}`).join("\n");
     }
+    clearSelection();
     get("inspection").textContent = text;
     get("inspection").hidden = !text;
     get("inspection-panel").hidden = !text;
-    get("diagram").querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
-    if (text) (frame || fn || object || builtins).classList.add("selected");
+    if (text) {
+      const node = frame || fn || object || builtins;
+      node.classList.add("selected");
+      tracePointers(node);
+    }
   });
-  get("clear-inspection").addEventListener("click", () => {
-    get("inspection").hidden = get("inspection-panel").hidden = true;
-    get("diagram").querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
+  get("clear-inspection").addEventListener("click", clearSelection);
+  get("diagram").addEventListener("dblclick", event => {
+    const node = event.target.closest("[data-bounds]");
+    if (!node) return;
+    const [x, y, width, height] = node.dataset.bounds.split(",").map(Number);
+    const canvas = get("diagram");
+    zoom = Math.min(2, Math.max(.6, Math.min((canvas.clientWidth - 80) / width, (canvas.clientHeight - 80) / height)));
+    sizeDiagram();
+    canvas.scrollLeft = Math.max(0, 20 + (x + width / 2) * zoom - canvas.clientWidth / 2);
+    canvas.scrollTop = Math.max(0, 20 + (y + height / 2) * zoom - canvas.clientHeight / 2);
+  });
+  get("diagram").addEventListener("wheel", event => {
+    if (!event.ctrlKey && !event.metaKey) return;
+    const picture = get("diagram").querySelector("svg");
+    if (!picture) return;
+    event.preventDefault();
+    const naturalWidth = Number(picture.getAttribute("viewBox").split(/\s+/)[2]);
+    const bounds = get("diagram").getBoundingClientRect();
+    zoomDiagram(parseFloat(picture.style.width) / naturalWidth * Math.exp(-event.deltaY * .003),
+      event.clientX - bounds.left, event.clientY - bounds.top);
+  }, { passive: false });
+  get("diagram").addEventListener("pointerdown", event => {
+    if (event.button !== 0 || event.target.closest("[role=button]")) return;
+    const canvas = get("diagram");
+    pan = { x: event.clientX, y: event.clientY, left: canvas.scrollLeft, top: canvas.scrollTop };
+    dragged = false;
+    if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+  });
+  get("diagram").addEventListener("pointermove", event => {
+    if (!pan) return;
+    const dx = event.clientX - pan.x, dy = event.clientY - pan.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) dragged = true;
+    if (!dragged) return;
+    get("diagram").classList.add("panning");
+    get("diagram").scrollLeft = pan.left - dx;
+    get("diagram").scrollTop = pan.top - dy;
+  });
+  for (const name of ["pointerup", "pointercancel", "lostpointercapture"]) get("diagram").addEventListener(name, () => {
+    pan = null; get("diagram").classList.remove("panning");
   });
   get("diagram").addEventListener("keydown", event => {
+    if (event.key === "Escape") { event.preventDefault(); clearSelection(); }
     if ((event.key === "Enter" || event.key === " ") && event.target.closest("[data-frame], [data-function], [data-object], [data-builtins]")) {
       event.preventDefault();
       event.target.dispatchEvent(new MouseEvent("click", { bubbles: true }));

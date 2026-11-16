@@ -66,7 +66,9 @@ pre, textarea { font: 13px/21px ui-monospace, SFMono-Regular, Menlo, Consolas, m
 .visualization { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--canvas); }
 #diagram-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; color: var(--muted); font-size: 11px; }
 #diagram-toolbar button { padding: 2px 8px; font-size: 12px; background: var(--panel); }
-#diagram { flex: 1; min-height: 160px; overflow: auto; padding: 20px; background-image: radial-gradient(var(--dot) 1px, transparent 1px); background-size: 18px 18px; }
+#diagram { flex: 1; min-height: 160px; overflow: auto; padding: 20px; cursor: grab; background-image: radial-gradient(var(--dot) 1px, transparent 1px); background-size: 18px 18px; }
+#diagram.panning { cursor: grabbing; user-select: none; touch-action: none; }
+#diagram-help { margin: 0; padding: 6px 12px; color: var(--muted); font-size: 10px; border-top: 1px solid var(--line); }
 #diagram svg { display: block; height: auto; margin: 0 auto; overflow: visible; }
 #diagram svg > rect:first-of-type { fill: transparent; }
 #diagram svg text { fill: var(--text); }#diagram svg .small { fill: var(--muted); }
@@ -79,6 +81,10 @@ pre, textarea { font: 13px/21px ui-monospace, SFMono-Regular, Menlo, Consolas, m
 #diagram [role="button"]:hover .frame, #diagram [role="button"]:focus .frame,
 #diagram [role="button"]:hover .box, #diagram [role="button"]:focus .box,
 #diagram .selected .frame, #diagram .selected .box { stroke: var(--accent); stroke-width: 2.5; }
+#diagram .pointer-trace { stroke: var(--accent); stroke-width: 2.5; opacity: 1; }
+#diagram .pointer-trace-incoming { stroke: var(--number); stroke-width: 2.5; opacity: 1; }
+#diagram .pointer-muted { opacity: .13; }
+#diagram [data-node-id].pointer-related .box, #diagram [data-node-id].pointer-related .frame { stroke: var(--accent); }
 .empty-diagram { display: grid; place-content: center; height: 100%; text-align: center; color: var(--muted); padding: 30px; }
 #frame-panel { padding: 18px 16px; overflow: auto; border-left: 1px solid var(--line); }
 #frame-name { margin: 0 0 5px; font: 600 17px/1.4 ui-monospace, monospace; }

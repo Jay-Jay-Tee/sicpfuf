@@ -1,6 +1,8 @@
 """Published-rule reductions checked against actual, pinned upstream histories."""
 import gzip
 import json
+import random
+import re
 from pathlib import Path
 import sys
 import unittest
@@ -9,9 +11,58 @@ import xml.etree.ElementTree as ET
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from conformance.steps import check
 from sicpfuf.xray.playground import trace
+from sicpfuf.xray.svg import reduction_environment
 
 
 class ReductionTests(unittest.TestCase):
+    def test_pointer_graph_uses_horizontal_tails_and_vertical_heads(self):
+        result = trace('a = pair(1,2)\nb = llist(3,4)\nc = pair(a,b)\nd = pair(c,b)\nboth = pair(d,c)\n', 3)
+        picture = ET.fromstring(result['steps'][-1]['diagram'])
+        objects = {node.attrib['data-object']: tuple(map(float, node.attrib['data-bounds'].split(',')))
+                   for node in picture.iter() if 'data-object' in node.attrib}
+        self.assertEqual(len(objects), 6)
+        self.assertLess(float(picture.attrib['height']), 500)
+        root, head, last = objects['#6'], objects['#5'], objects['#4']
+        self.assertEqual(root[1], last[1])
+        self.assertGreater(last[0], root[0])
+        self.assertEqual(root[0], head[0])
+        self.assertGreater(head[1], root[1])
+        self.assert_pointer_corridors_avoid_boxes(picture)
+
+    def assert_pointer_corridors_avoid_boxes(self, picture):
+        boxes = {node.attrib['data-node-id']: tuple(map(float, node.attrib['data-bounds'].split(',')))
+                 for node in picture.iter() if 'data-object' in node.attrib or 'data-function' in node.attrib}
+        for edge in picture.iter():
+            if edge.attrib.get('data-edge-kind') != 'reference':
+                continue
+            points = [tuple(map(float, pair)) for pair in re.findall(r'[ML](-?[\d.]+),(-?[\d.]+)', edge.attrib['d'])]
+            self.assertGreaterEqual(len(points), 2)
+            for (ax, ay), (bx, by) in zip(points, points[1:]):
+                self.assertTrue(ax == bx or ay == by)
+                for key, (x, y, w, h) in boxes.items():
+                    if key in (edge.attrib['data-source'], edge.attrib['data-target']):
+                        continue
+                    crosses = (min(ax, bx) < x + w and max(ax, bx) > x
+                               and min(ay, by) < y + h and max(ay, by) > y)
+                    self.assertFalse(crosses, (edge.attrib, key))
+
+    def test_shared_cycles_and_multirow_arrays_have_unobstructed_pointer_routes(self):
+        rng = random.Random(571)
+        for count in (1, 3, 8, 14):
+            for _ in range(6):
+                heap = [{'id': '#' + str(i), 'kind': 'list', 'isGarbage': False,
+                         'elements': [({'kind': 'ref', 'objectId': '#' + str(rng.randrange(count))}
+                                       if rng.random() < .5 else {'kind': 'literal', 'display': str(j)})
+                                      for j in range(rng.randrange(10))]}
+                        for i in range(count)]
+                store = {'heap': heap, 'activeFrameId': 'Global', 'frames': [
+                    {'id': 'Global', 'parentId': None, 'isGarbage': False,
+                     'bindings': [{'name': 'root', 'value': {'kind': 'ref', 'objectId': '#0'}}]}]}
+                with self.subTest(count=count, heap=heap):
+                    picture = ET.fromstring(reduction_environment(store, {}, {}))
+                    self.assert_pointer_corridors_avoid_boxes(picture)
+                    self.assertEqual(len([node for node in picture.iter() if 'data-object' in node.attrib]), count)
+
     def test_global_points_to_visible_collapsed_builtins(self):
         result = trace('print(1)\n')
         for step in (result['steps'][0], result['steps'][-1]):

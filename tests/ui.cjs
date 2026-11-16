@@ -47,6 +47,12 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   assert.ok(parseFloat(get('diagram').querySelector('svg').style.width) > naturalWidth);
   get('zoom-fit').click();
   assert.equal(get('zoom-fit').textContent, 'Fit');
+  Object.defineProperties(get('diagram'), { clientWidth: { value: 640, configurable: true }, clientHeight: { value: 240, configurable: true } });
+  get('zoom-fit').click();
+  assert.ok(parseFloat(get('diagram').querySelector('svg').style.height) <= 200);
+  get('zoom-actual').click();
+  assert.equal(parseFloat(get('diagram').querySelector('svg').style.width), Number(get('diagram').querySelector('svg').getAttribute('viewBox').split(' ')[2]));
+  get('zoom-fit').click();
   get('next').click();
   assert.equal(get('event-kind').textContent, 'BEFORE');
   get('next').click();
@@ -62,9 +68,11 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   assert.equal(get('inspection').hidden, false);
   assert.match(get('inspection').textContent, /square = #1/);
   assert.equal(get('inspection-panel').hidden, false);
+  assert.ok(get('diagram').querySelector('.pointer-trace'));
   assert.match(get('bindings').textContent, /square#1/);
   get('clear-inspection').click();
   assert.equal(get('inspection-panel').hidden, true);
+  assert.equal(get('diagram').querySelector('.pointer-trace'), null);
   get('play').click();
   assert.equal(timers.size, 1);
   assert.equal(playbackDelay, 900);
@@ -82,6 +90,20 @@ const seekEnd = () => { get('position').value = get('position').max; get('positi
   assert.equal(w.getComputedStyle(fn).outline, 'none');
   fn.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
   assert.match(get('inspection').textContent, /#1/);
+  fn.dispatchEvent(new w.MouseEvent('dblclick', { bubbles: true }));
+  assert.notEqual(get('zoom-fit').textContent, 'Fit');
+  fn.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(get('inspection-panel').hidden, true);
+  const canvas = get('diagram');
+  canvas.scrollLeft = 80; canvas.scrollTop = 60;
+  canvas.dispatchEvent(new w.MouseEvent('pointerdown', { button: 0, clientX: 100, clientY: 100, bubbles: true }));
+  canvas.dispatchEvent(new w.MouseEvent('pointermove', { clientX: 70, clientY: 80, bubbles: true }));
+  canvas.dispatchEvent(new w.MouseEvent('pointerup', { bubbles: true }));
+  assert.equal(canvas.scrollLeft, 110); assert.equal(canvas.scrollTop, 80);
+  canvas.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  const widthBeforeWheel = parseFloat(canvas.querySelector('svg').style.width);
+  canvas.dispatchEvent(new w.WheelEvent('wheel', { ctrlKey: true, deltaY: -100, bubbles: true, cancelable: true }));
+  assert.ok(parseFloat(canvas.querySelector('svg').style.width) > widthBeforeWheel);
   const position = get('position').value;
   get('code').dispatchEvent(new w.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
   assert.equal(get('position').value, position); // editing arrows never step

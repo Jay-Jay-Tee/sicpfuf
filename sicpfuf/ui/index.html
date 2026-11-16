@@ -48,8 +48,9 @@
       <div class="step-event"><span id="event-kind">START</span><p id="message" role="status">Loading…</p></div>
       <div class="model-workspace">
         <div class="visualization">
-          <div id="diagram-toolbar"><div class="view-switch" role="group" aria-label="Execution view"><button id="view-diagram" type="button" aria-pressed="true">Diagram</button><button id="view-program" type="button" aria-pressed="false">Program</button></div><small class="model-legend">Grey = unreachable</small><div id="zoom-controls"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button" title="Fit diagram to view">Fit</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div></div>
+          <div id="diagram-toolbar"><div class="view-switch" role="group" aria-label="Execution view"><button id="view-diagram" type="button" aria-pressed="true">Diagram</button><button id="view-program" type="button" aria-pressed="false">Program</button></div><small class="model-legend">Grey = unreachable</small><div id="zoom-controls"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button" title="Fit the whole diagram to view">Fit</button><button id="zoom-actual" type="button" title="Show diagram at actual size">1:1</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div></div>
           <div id="diagram" aria-label="Environment diagram"></div>
+          <p id="diagram-help">Drag to pan · Select to trace pointers · Double-click to focus</p>
           <div id="program-view" hidden><div class="section-title">Remaining program <span id="program-phase"></span></div><pre id="remaining-program"></pre><p class="hint"># labels refer to shared objects. E ⟦ … ⟧ runs in that environment.</p></div>
           <div id="reduction" hidden>
             <div class="section-title">Before</div><pre id="before"></pre>

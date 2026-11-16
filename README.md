@@ -56,6 +56,8 @@ The browser UI includes syntax colours, a current-frame binding inspector, diagr
 and adjustable playback speed. Arrow keys step and Space plays when the editor is not focused.
 In the E-stepper, **Program** shows the remaining code before and after each reduction;
 **Diagram** shows frames, function objects and shared/cyclic lists.
+Select a node to trace its pointers, double-click to focus it, and drag the background to pan.
+**Fit** fits the entire graph; **1:1** restores readable actual size. Unreachable objects stay grey.
 Edits in the UI do not overwrite your file. Each run starts fresh and is bounded to 400 steps
 (adjust with `--max-steps 1000`, up to 5000; press + in the terminal to increase and retrace),
 15,000 interpreter operations, and 10 seconds. Python §4 Typed is available with `--typed` in

@@ -282,13 +282,18 @@ def reduction_environment(store, calls, functions):
     Every reference has one destination. Frames and heap cards have separate
     columns, so adding code text cannot enlarge a selection over another frame.
     """
-    parts, edges, positions = [], [], {}
-    frame_x, frame_w, heap_x, heap_w = 80, 260, 540, 340
-    frame_y = heap_y = 184
+    from .heap_layout import (place_lists, PointerRouter, CELL_WIDTH, CELL_HEIGHT,
+                              ROW_HEIGHT, LABEL_HEIGHT)
 
-    def group(attribute, key, dead, label):
+    parts, edges, positions = [], [], {}
+    frame_x, frame_w, heap_left = 80, 260, 460
+    frame_y = 184
+
+    def group(attribute, key, dead, label, node_id=None):
         state = ' class="unreachable" data-reachable="false"' if dead else ' data-reachable="true"'
-        parts.append(f'<g {attribute}="{key}"{state} tabindex="0" role="button" aria-label="{esc(label).replace(chr(34), "&quot;")}">')
+        bounds = positions.get(node_id or key)
+        geometry = (' data-bounds="' + ','.join(str(v) for v in bounds) + '"') if bounds else ''
+        parts.append(f'<g {attribute}="{key}" data-node-id="{node_id or key}"{geometry}{state} tabindex="0" role="button" aria-label="{esc(label).replace(chr(34), "&quot;")}">')
 
     def value_text(value):
         return value.get('display', value.get('name', '(unassigned)'))
@@ -296,7 +301,7 @@ def reduction_environment(store, calls, functions):
     # The protocol omits library internals. Show their enclosing environment
     # as a collapsed presentation frame, keeping it separate from user frames.
     positions['Builtins'] = (frame_x, 49, 440, 80)
-    group('data-builtins', 'true', False, 'Inspect built-in and pre-declared names')
+    group('data-builtins', 'true', False, 'Inspect built-in and pre-declared names', 'Builtins')
     parts.append(f'<text class="small" x="{frame_x}" y="38">Built-ins</text>')
     parts.append(f'<rect class="frame" x="{frame_x}" y="49" width="440" height="80" rx="5"/>')
     parts.append(f'<text class="small" x="{frame_x + 24}" y="94">:::pre-declared names:::</text>')
@@ -308,7 +313,7 @@ def reduction_environment(store, calls, functions):
         width = 160 if not bindings else frame_w
         height = max(1, len(bindings)) * 25 + (59 if not bindings else 26)
         positions[frame['id']] = (frame_x, frame_y + 25, width, height)
-        group('data-frame', key, frame['isGarbage'], 'Inspect ' + key)
+        group('data-frame', key, frame['isGarbage'], 'Inspect ' + key, frame['id'])
         title = 'Global' if frame['id'] == 'Global' else key
         parts.append(f'<text x="{frame_x}" y="{frame_y + 14}" font-weight="bold">{esc(title)}</text>')
         if frame['id'] in calls and frame['id'] != 'Global':
@@ -323,7 +328,7 @@ def reduction_environment(store, calls, functions):
             label = binding['name'] + ': '
             if value['kind'] == 'ref':
                 x = frame_x + frame_w - 20
-                edges.append((x, y - 5, value['objectId'], frame['isGarbage'], None))
+                edges.append((x, y - 5, value['objectId'], frame['isGarbage'], frame['id'], None))
                 parts.append(f'<circle class="dot" cx="{x}" cy="{y - 5}" r="3.5"/>')
             else:
                 label += value_text(value)
@@ -331,17 +336,23 @@ def reduction_environment(store, calls, functions):
         parts.append('</g>')
         frame_y += height + 58
 
+    function_y = 184
+    for item in store['heap']:
+        if item['kind'] == 'function':
+            positions[item['id']] = (heap_left, function_y, 340, 92)
+            function_y += 116
+    positions.update(place_lists(store, heap_left, function_y + (16 if function_y > 184 else 0)))
+
     for item in store['heap']:
         function = item['kind'] == 'function'
         elements = item.get('elements', [])
-        height = 108 if function else 48 + max(1, (len(elements) + 3) // 4) * 40
-        positions[item['id']] = (heap_x, heap_y, heap_w, height)
+        heap_x, heap_y, heap_w, height = positions[item['id']]
         info = functions.get(item['id'])
         group('data-function' if function else 'data-object', info['id'] if function else item['id'],
-              item['isGarbage'], 'Inspect ' + item['id'])
-        label_x, label_y = (heap_x + 65, heap_y + 41) if function else (heap_x, heap_y + 13)
-        parts.append(f'<text class="small" x="{label_x}" y="{label_y}">{esc(item["id"] + " · " + (item.get("name", "lambda") if function else "list"))}</text>')
+              item['isGarbage'], 'Inspect ' + item['id'], item['id'])
+        parts.append(f'<title>{esc(item["id"] + (" · function" if function else " · list, " + str(len(elements)) + " items"))}</title>')
         if function:
+            parts.append(f'<text class="small" x="{heap_x + 65}" y="{heap_y + 41}">{esc(item["id"] + " · " + item.get("name", "lambda"))}</text>')
             cy = heap_y + 36
             for cx in (heap_x + 12, heap_x + 35):
                 parts.append(f'<circle class="box" cx="{cx}" cy="{cy}" r="11"/><circle class="dot" cx="{cx}" cy="{cy}" r="3"/>')
@@ -350,50 +361,81 @@ def reduction_environment(store, calls, functions):
             code_lines = info['source'].splitlines()
             code = (code_lines[1].strip() if len(code_lines) > 1 else code_lines[0]) if code_lines else ''
             parts.append(f'<text class="small" x="{heap_x}" y="{cy + 51}">{esc(short_text(code, 42))}</text>')
-            edges.append((heap_x + 35, cy, item['envId'], item['isGarbage'], None))
+            edges.append((heap_x + 35, cy, item['envId'], item['isGarbage'], item['id'], None))
         else:
+            parts.append(f'<text class="small" x="{heap_x}" y="{heap_y + 12}">{"pair" if len(elements) == 2 else "list"}</text>')
+            parts.append(f'<text class="small" x="{heap_x + heap_w}" y="{heap_y + 12}" text-anchor="end">{esc(item["id"])}</text>')
             if not elements:
-                parts.append(f'<rect class="box" x="{heap_x}" y="{heap_y + 27}" width="40" height="32"/>')
-                parts.append(f'<text class="small" x="{heap_x + 10}" y="{heap_y + 45}">[ ]</text>')
+                parts.append(f'<rect class="box" x="{heap_x}" y="{heap_y + LABEL_HEIGHT}" width="{CELL_WIDTH}" height="32"/>')
+                parts.append(f'<text class="small" x="{heap_x + 10}" y="{heap_y + LABEL_HEIGHT + 21}">[ ]</text>')
             for index, value in enumerate(elements):
-                x, y = heap_x + index % 4 * 83, heap_y + 27 + index // 4 * 40
-                parts.append(f'<rect class="box" x="{x}" y="{y}" width="83" height="32"/>')
+                x, y = heap_x + index % 4 * CELL_WIDTH, heap_y + LABEL_HEIGHT + index // 4 * ROW_HEIGHT
+                parts.append(f'<rect class="box" data-slot="{index}" x="{x}" y="{y}" width="{CELL_WIDTH}" height="{CELL_HEIGHT}"/>')
                 if value['kind'] == 'ref':
-                    parts.append(f'<circle class="dot" cx="{x + 41}" cy="{y + 16}" r="3.5"/>')
-                    edges.append((x + 41, y + 16, value['objectId'], item['isGarbage'], y + 36))
+                    parts.append(f'<circle class="dot" cx="{x + CELL_WIDTH / 2}" cy="{y + 16}" r="3.5"/>')
+                    edges.append((x + CELL_WIDTH / 2, y + 16, value['objectId'], item['isGarbage'], item['id'], index))
                 elif len(elements) == 2 and value.get('display') == 'None':
-                    parts.append(f'<path class="line" d="M{x},{y + 32} L{x + 83},{y}"/>')
+                    parts.append(f'<path class="line" d="M{x},{y + 32} L{x + CELL_WIDTH},{y}"/>')
                 else:
-                    parts.append(f'<text x="{x + 8}" y="{y + 21}">{esc(short_text(value_text(value), 8))}</text>')
+                    parts.append(f'<text x="{x + 8}" y="{y + 21}">{esc(short_text(value_text(value), 7))}</text>')
         parts.append('</g>')
-        heap_y += height + 26
 
     arrows = []
     for index, frame in enumerate(store['frames']):
         if frame['id'] == 'Global':
             x, y, width, _ = positions['Global']
-            arrows.append(f'<path class="line" data-parent="Builtins" d="M{x + width / 2},{y} V129" marker-end="url(#arrow)" pointer-events="none"/>')
+            arrows.append(f'<path class="line" data-source="Global" data-target="Builtins" data-parent="Builtins" d="M{x + width / 2},{y} V129" marker-end="url(#arrow)" pointer-events="none"/>')
             continue
         if frame['parentId'] not in positions:
             continue
         x, y, _, _ = positions[frame['id']]
         px, py, _, ph = positions[frame['parentId']]
         lane = 64 - index % 5 * 10
-        arrows.append(f'<path class="line{" unreachable" if frame["isGarbage"] else ""}" d="M{x},{y + 12} H{lane} V{py + ph - 10} H{px}" marker-end="url(#arrow)"/>')
+        arrows.append(f'<path class="line{" unreachable" if frame["isGarbage"] else ""}" data-source="{frame["id"]}" data-target="{frame["parentId"]}" d="M{x},{y + 12} H{lane} V{py + ph - 10} H{px}" marker-end="url(#arrow)"/>')
     heap_kinds = {item['id']: item['kind'] for item in store['heap']}
+    heap_items = {item['id']: item for item in store['heap']}
+    routes, ports = {}, []
+    for index, (x, y, target, dead, source, slot) in enumerate(edges):
+        if target not in heap_kinds:
+            continue
+        sx, sy, sw, sh = positions[source]
+        tx, ty, tw, th = positions[target]
+        pair = slot is not None and len(heap_items[source]['elements']) == 2
+        if slot is None:
+            prefix = [(x, y), (sx + sw + 18 + index % 6 * 8, y)]
+        elif pair and slot == 1:
+            prefix = [(x, y), (sx + sw + 18, y)]
+        elif pair:
+            prefix = [(x, y), (x, sy + sh + 14)]
+        else:
+            gutter = sy + LABEL_HEIGHT + slot // 4 * ROW_HEIGHT + CELL_HEIGHT + 6
+            prefix = [(x, y), (x, gutter), (sx + sw + 18, gutter)]
+        if heap_kinds.get(target) == 'function':
+            entry, destination = (tx - 14, ty + 36), (tx + 1, ty + 36)
+        elif pair and slot == 0 and len(heap_items.get(target, {}).get('elements', [])) >= 2:
+            entry, destination = (tx + CELL_WIDTH / 2, ty - 14), (tx + CELL_WIDTH / 2, ty + LABEL_HEIGHT)
+        else:
+            entry, destination = (tx - 14, ty + LABEL_HEIGHT + 16), (tx, ty + LABEL_HEIGHT + 16)
+        routes[index] = (prefix, entry, destination)
+        ports.extend((prefix[-1], entry))
+    router = PointerRouter([positions[key] for key in heap_kinds], ports) if ports else None
+    routed_paths = {}
+    # Give the conventional head/tail links the direct corridors first, then
+    # separate the incoming frame aliases into the remaining free lanes.
+    for index in sorted(routes, key=lambda i: edges[i][-1] is None):
+        prefix, entry, destination = routes[index]
+        routed_paths[index] = prefix + router.route(prefix[-1], entry)[1:] + [destination]
     environment_arrivals = {}
-    for index, (x, y, target, dead, departure) in enumerate(edges):
+    for index, (x, y, target, dead, source, slot) in enumerate(edges):
         if target not in positions:
             continue
         tx, ty, tw, th = positions[target]
         if target in heap_kinds:
             target_x = tx + (1 if heap_kinds[target] == 'function' else 0)
-            destination_y = ty + (36 if heap_kinds[target] == 'function' else 43)
-            if departure is not None:
-                # Leave a list cell through its own bottom, cross the row gap,
-                # then enter the actual first cell/circle of the target.
-                lane = heap_x - 30 - index % 5 * 9
-                path = f'M{x},{y} V{departure} H{lane} V{destination_y} H{target_x}'
+            destination_y = ty + (36 if heap_kinds[target] == 'function' else LABEL_HEIGHT + 16)
+            if index in routes:
+                points = routed_paths[index]
+                path = 'M' + ' L'.join(f'{px},{py}' for px, py in points)
             else:
                 bend = (x + target_x) / 2
                 path = f'M{x},{y} C{bend},{y} {bend},{destination_y} {target_x},{destination_y}'
@@ -405,6 +447,8 @@ def reduction_environment(store, calls, functions):
             lift = y - 52
             path = f'M{x},{y} C{x},{lift} {target_x + 70},{destination_y} {target_x},{destination_y}'
         kind = 'environment' if target not in heap_kinds else 'reference'
-        arrows.append(f'<path class="line{" unreachable" if dead else ""}" data-edge-kind="{kind}" data-target="{target}" d="{path}" marker-end="url(#arrow)" pointer-events="none"/>')
-    width = heap_x + heap_w + 80 if store['heap'] else frame_x + 440 + 40
-    return document(width, max(frame_y, heap_y) + 12, parts + arrows)
+        slot_attribute = '' if slot is None else f' data-source-slot="{slot}"'
+        arrows.append(f'<path class="line pointer-link{" unreachable" if dead else ""}" data-edge-kind="{kind}" data-source="{source}" data-target="{target}"{slot_attribute} d="{path}" marker-end="url(#arrow)" pointer-events="none"/>')
+    width = max(x + w for x, y, w, h in positions.values()) + 56
+    height = max(y + h for x, y, w, h in positions.values()) + 48
+    return document(width, max(frame_y, height), parts + arrows)

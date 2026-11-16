@@ -56,6 +56,17 @@ remaining code, with the changed part highlighted; **Diagram** shows frames, fun
 and shared lists. Grey objects are unreachable and remain available for inspection.
 Select a function to inspect its parameters, body and creation environment.
 
+Tail chains run horizontally and nested heads hang below them. Shared objects have one
+box; cycles point back to that box. Selecting a node highlights outgoing pointers and
+uses a second colour for incoming references. Unrelated pointers fade until the selection
+is cleared, while unreachable objects remain visible in grey.
+
+**Fit** shows the whole diagram, **1:1** restores its actual size, and **− / +** zoom.
+Drag the background to pan, double-click an object to focus it, or use Ctrl/⌘ + the
+mouse wheel to zoom around the pointer. Escape or the selection's × clears inspection.
+In VS Code, choose **sicpfuf: Visual stepper beside code** in Run and Debug and press F5
+to open the local UI in the integrated browser beside your editor.
+
 The default is 400 states. `--max-steps` accepts 2–5000; histories and execution time
 are bounded too. Typed checking requires §4 and prevents execution on a type error.
 These interactive histories differ from the compact `--estep` event log below.
