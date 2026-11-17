@@ -8,6 +8,17 @@
 
 [Open the visual stepper →](playground.md){ .md-button .md-button--primary }
 
+## What's in the name?
+
+Think of **sicpfuf** as **SICP + pfuf**, sharing the **p**:
+
+- **SICP** stands for *Structure and Interpretation of Computer Programs*. This project follows its Python adaptation, **SICPy**.
+- **pfuf** stands for *Python For Understanding Fundamentals*. It is the [earlier Python learning project](https://github.com/Jay-Jay-Tee/pfuf) that sicpfuf grew from.
+
+The name carries that aim forward: understand how programs work, now through SICP's ideas and Python §1–§4.
+
+## See how a program runs
+
 ```python title="§1 · --subst"
 def factorial(n):
     return 1 if n == 1 else n * factorial(n - 1)

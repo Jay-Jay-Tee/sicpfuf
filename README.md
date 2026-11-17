@@ -31,6 +31,18 @@ It has three parts:
   | `--typed` | the type checker of Python §4 Typed |
   | `from rune / curve / sound import ...` | pictures (SVG) and sounds (WAV) |
 
+## What's in the name?
+
+Think of **sicpfuf** as **SICP + pfuf**, sharing the **p**:
+
+- **SICP** stands for *Structure and Interpretation of Computer Programs*. This project follows
+  its Python adaptation, **SICPy**.
+- **pfuf** stands for *Python For Understanding Fundamentals*. It is the
+  [earlier Python learning project](https://github.com/Jay-Jay-Tee/pfuf) that sicpfuf grew from.
+
+The name carries that aim forward: understand how programs work, now through SICP's ideas
+and Python §1–§4.
+
 ## Try it
 
 You need Python 3.9 or newer, nothing else.
